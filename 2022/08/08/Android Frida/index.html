@@ -1,0 +1,1091 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.3.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.3.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.3.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.3.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.3.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '6.3.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="Android FridaFrida实在太常用了，所以结合网上的资料以及自己平时的使用总结一份Frida文档，也方便自己查，主要参考Sakura的这篇文章，后面有新的再总结 Frida Android hook | Sakuraのblog (eternalsakura13com) frida环境直接下载r0Pan /r0env R0env，里面有配置好的pyenv以及预装的frida pyenv1">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android Frida">
+<meta property="og:url" content="http://yoursite.com/2022/08/08/Android Frida/index.html">
+<meta property="og:site_name" content="zzrR0">
+<meta property="og:description" content="Android FridaFrida实在太常用了，所以结合网上的资料以及自己平时的使用总结一份Frida文档，也方便自己查，主要参考Sakura的这篇文章，后面有新的再总结 Frida Android hook | Sakuraのblog (eternalsakura13com) frida环境直接下载r0Pan /r0env R0env，里面有配置好的pyenv以及预装的frida pyenv1">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://yoursite.com/2022/08/08/Android%20Frida/image-20220531161329831png">
+<meta property="og:image" content="http://yoursite.com/2022/08/08/Android%20Frida/image-20220531161924152png">
+<meta property="og:image" content="http://yoursite.com/2022/08/08/Android%20Frida/image-20220531175401090png">
+<meta property="og:image" content="http://yoursite.com/2022/08/08/Android%20Frida/image-20220718223514178png">
+<meta property="og:image" content="http://yoursite.com/2022/08/08/Android%20Frida/image-20220531171626939png">
+<meta property="og:updated_time" content="2022-08-08T10:57:17.836Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Android Frida">
+<meta name="twitter:description" content="Android FridaFrida实在太常用了，所以结合网上的资料以及自己平时的使用总结一份Frida文档，也方便自己查，主要参考Sakura的这篇文章，后面有新的再总结 Frida Android hook | Sakuraのblog (eternalsakura13com) frida环境直接下载r0Pan /r0env R0env，里面有配置好的pyenv以及预装的frida pyenv1">
+<meta name="twitter:image" content="http://yoursite.com/2022/08/08/Android%20Frida/image-20220531161329831png">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2022/08/08/Android Frida/">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Android Frida | zzrR0</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">zzrR0</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+    <a href="/about/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2022/08/08/Android Frida/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="zzrR0">
+      <meta itemprop="description" content="Why am i so cai.">
+      <meta itemprop="image" content="/images/head.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="zzrR0">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Android Frida
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2022-08-08 18:56:09 / 修改时间：18:57:17" itemprop="dateCreated datePublished" datetime="2022-08-08T18:56:09+08:00">2022-08-08</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2022/08/08/Android Frida/#comments" itemprop="discussionUrl">
+                
+                  <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2022/08/08/Android Frida/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2022/08/08/Android Frida/" class="leancloud_visitors" data-flag-title="Android Frida">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数：</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="Android-Frida"><a href="#Android-Frida" class="headerlink" title="Android Frida"></a>Android Frida</h1><p>Frida实在太常用了，所以结合网上的资料以及自己平时的使用总结一份Frida文档，也方便自己查，主要参考Sakura的这篇文章，后面有新的再总结</p>
+<p><a href="https://eternalsakura13com/2020/07/04/frida/" target="_blank" rel="noopener">Frida Android hook | Sakuraのblog (eternalsakura13com)</a></p>
+<h2 id="frida环境"><a href="#frida环境" class="headerlink" title="frida环境"></a>frida环境</h2><p>直接下载<a href="http://4923584125:8080/r0env" target="_blank" rel="noopener">r0Pan /r0env</a></p>
+<p>R0env，里面有配置好的pyenv以及预装的frida</p>
+<h3 id="pyenv"><a href="#pyenv" class="headerlink" title="pyenv"></a>pyenv</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">下载一个382，下载真的很慢，要慢慢等</span><br><span class="line">pyenv install 382</span><br><span class="line"></span><br><span class="line">pyenv versions</span><br><span class="line">sakura@sakuradeMacBook-Pro:~$ pyenv versions</span><br><span class="line">  system</span><br><span class="line">* 382 (set by /Users/sakura/python-version)</span><br><span class="line">切换到我们装的</span><br><span class="line">pyenv local 382</span><br><span class="line">python -V</span><br><span class="line">pip -V</span><br><span class="line">原本系统自带的</span><br><span class="line">python local system</span><br><span class="line">python -V</span><br><span class="line"></span><br><span class="line">把整个系统的python切换</span><br><span class="line">python global XXXX</span><br></pre></td></tr></table></figure>
+<p>临时禁用pyenv</p>
+<p><img src="/2022/08/08/Android Frida/image-20220531161329831png" alt="image-20220531161329831"></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">if command -v pyenv 1&gt;/dev/null 2&gt;&amp;1; then</span><br><span class="line">  eval &quot;$(pyenv init -)&quot;</span><br><span class="line">fi</span><br></pre></td></tr></table></figure>
+<h3 id="Frida安装"><a href="#Frida安装" class="headerlink" title="Frida安装"></a>Frida安装</h3><p>自己手动安装frida,如果直接按下述安装则会直接安装frida和frida-tools的最新版本。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">pip install frida-tools</span><br><span class="line">frida --version</span><br><span class="line">frida-ps --version</span><br></pre></td></tr></table></figure>
+<p>指定frida的版本去安装</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">pyenv install 377</span><br><span class="line">pyenv local 377</span><br><span class="line">pip install frida==1280</span><br><span class="line">pip install frida-tools==530</span><br></pre></td></tr></table></figure>
+<p>老版本frida和对应关系<br>对应关系很好找</p>
+<p><img src="/2022/08/08/Android Frida/image-20220531161924152png" alt="image-20220531161924152"></p>
+<h3 id="objection"><a href="#objection" class="headerlink" title="objection"></a>objection</h3><p>objection是基于frida的，所以objection的版本要跟frida对应上，找版本间的对应关系是去objection的release处，根据发布时间找最接近的</p>
+<p><a href="https://githubcom/sensepost/objection" target="_blank" rel="noopener">sensepost/objection: 📱 objection - runtime mobile exploration (githubcom)</a></p>
+<h3 id="frida-server"><a href="#frida-server" class="headerlink" title="frida-server"></a>frida-server</h3><p>下载frida-server并解压，在这里下载<a href="https://githubcom/frida/frida/releases/download/1280/frida-server-1280-android-arm64xz" target="_blank" rel="noopener">frida-server-1280</a></p>
+<p>先adb shell，然后切换到root权限,把之前push进来的frida server改个名字叫fs<br>然后运行frida</p>
+<p>Android手机一般push的通用目录就是/data/local/tmp</p>
+<p>如果要监听端口（因为app可能反frida会检测默认端口），就</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/fs -l 0000:8888</span><br></pre></td></tr></table></figure>
+<h3 id="frida开发环境"><a href="#frida开发环境" class="headerlink" title="frida开发环境"></a>frida开发环境</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">git clone https://githubcom/oleavr/frida-agent-examplegit</span><br><span class="line">cd frida-agent-example/</span><br><span class="line">npm install</span><br></pre></td></tr></table></figure>
+<p>下载上面整个项目，使用vscode打开此工程，在agent文件夹下编写js，会有智能提示。</p>
+<p><code>npm run watch</code>会监控代码修改自动编译生成js文件</p>
+<p>python脚本形式的frida脚本注入</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> time</span><br><span class="line"><span class="keyword">import</span> frida</span><br><span class="line"></span><br><span class="line">device8 = fridaget_device_manager()add_remote_device(<span class="string">"19216809:8888"</span>)</span><br><span class="line">pid = device8spawn(<span class="string">"comandroidsettings"</span>)</span><br><span class="line">device8resume(pid)</span><br><span class="line">timesleep(<span class="number">1</span>)</span><br><span class="line">session = device8attach(pid)</span><br><span class="line"><span class="keyword">with</span> open(<span class="string">"sijs"</span>) <span class="keyword">as</span> f:</span><br><span class="line">    script = sessioncreate_script(fread())</span><br><span class="line">scriptload()</span><br><span class="line">input() <span class="comment">#等待输入</span></span><br></pre></td></tr></table></figure>
+<h2 id="Objection操作"><a href="#Objection操作" class="headerlink" title="Objection操作"></a>Objection操作</h2><p>Objection也很常用</p>
+<p>Objection有个缺陷就是 watch class 的时候回watch很多 但是唯独漏掉了构造函数</p>
+<p>手动watch构造函数</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">android hooking watch class_method javaioFile$init  --dump-args  --dump-return</span><br></pre></td></tr></table></figure>
+<h2 id="Frida-Java-Hook"><a href="#Frida-Java-Hook" class="headerlink" title="Frida Java Hook"></a>Frida Java Hook</h2><h3 id="打印参数、返回值-设置返回值-主动调用"><a href="#打印参数、返回值-设置返回值-主动调用" class="headerlink" title="打印参数、返回值/设置返回值/主动调用"></a>打印参数、返回值/设置返回值/主动调用</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">LoginActivity</span> <span class="keyword">extends</span> <span class="title">AppCompatActivity</span> </span>&#123;</span><br><span class="line">    <span class="comment">/* access modifiers changed from: private */</span></span><br><span class="line">    <span class="keyword">public</span> Context mContext;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onCreate</span><span class="params">(Bundle bundle)</span> </span>&#123;</span><br><span class="line">        superonCreate(bundle);</span><br><span class="line">        thismContext = <span class="keyword">this</span>;</span><br><span class="line">        setContentView((<span class="keyword">int</span>) Rlayoutactivity_login);</span><br><span class="line">        <span class="keyword">final</span> EditText editText = (EditText) findViewById(Ridusername);</span><br><span class="line">        <span class="keyword">final</span> EditText editText2 = (EditText) findViewById(Ridpassword);</span><br><span class="line">        ((Button) findViewById(Ridlogin))setOnClickListener(<span class="keyword">new</span> ViewOnClickListener() &#123;</span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onClick</span><span class="params">(View view)</span> </span>&#123;</span><br><span class="line">                String obj = editTextgetText()toString();</span><br><span class="line">                String obj2 = editText2getText()toString();</span><br><span class="line">                <span class="keyword">if</span> (TextUtilsisEmpty(obj) || TextUtilsisEmpty(obj2)) &#123;</span><br><span class="line">                    ToastmakeText(LoginActivitythismContext, <span class="string">"username or password is empty"</span>, <span class="number">1</span>)show();</span><br><span class="line">                &#125; <span class="keyword">else</span> <span class="keyword">if</span> (LoginActivitya(obj, obj)equals(obj2)) &#123;</span><br><span class="line">                    LoginActivitythisstartActivity(<span class="keyword">new</span> Intent(LoginActivitythismContext, FridaActivity1class));</span><br><span class="line">                    LoginActivitythisfinishActivity(<span class="number">0</span>);</span><br><span class="line">                &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                    ToastmakeText(LoginActivitythismContext, <span class="string">"Login failed"</span>, <span class="number">1</span>)show();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p><code>LoginActivitya(obj, obj)equals(obj2)</code>分析之后可得obj2来自password，由从username得来的obj，经过a函数运算之后得到一个值，这两个值相等则登录成功。<br>所以这里关键是hook a函数的参数，脚本如下。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">//打印参数、返回值</span><br><span class="line">function Login()&#123;</span><br><span class="line">    Javaperform(function()&#123;</span><br><span class="line">        Javause(&quot;comexampleandroiddemoActivityLoginActivity&quot;)aoverload(&apos;javalangString&apos;, &apos;javalangString&apos;)implementation = function (str, str2)&#123;</span><br><span class="line">            var result = thisa(str, str2);</span><br><span class="line">            consolelog(&quot;args0:&quot;+str+&quot; args1:&quot;+str2+&quot; result:&quot;+result);</span><br><span class="line">            return result;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;)</span><br><span class="line">&#125;</span><br><span class="line">setImmediate(Login)</span><br></pre></td></tr></table></figure>
+<p>观察输入和输出,这里也可以直接主动调用。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">function login() &#123;</span><br><span class="line">    Javaperform(function () &#123;</span><br><span class="line">        consolelog(&quot;start&quot;)</span><br><span class="line">        var login = Javause(&quot;comexampleandroiddemoActivityLoginActivity&quot;)</span><br><span class="line">        var result = logina(&quot;1234&quot;,&quot;1234&quot;)</span><br><span class="line">        consolelog(result)</span><br><span class="line">    &#125;)</span><br><span class="line">&#125;</span><br><span class="line">setImmediate(login)</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">start</span><br><span class="line">4e4feaea959d426155a480dc07ef92f4754ee93edbe56d993d74f131497e66fb</span><br><span class="line">然后</span><br><span class="line">adb shell input text &quot;4e4feaea959d426155a480dc07ef92f4754ee93edbe56d993d74f131497e66fb&quot;</span><br></pre></td></tr></table></figure>
+<h3 id="主动调用静态-非静态函数-以及-设置静态-非静态成员变量的值"><a href="#主动调用静态-非静态函数-以及-设置静态-非静态成员变量的值" class="headerlink" title="主动调用静态/非静态函数 以及 设置静态/非静态成员变量的值"></a>主动调用静态/非静态函数 以及 设置静态/非静态成员变量的值</h3><p>主要就是下面三点</p>
+<ul>
+<li>静态函数直接use class然后调用方法，非静态函数需要先choose实例然后调用</li>
+<li>设置成员变量的值，写法是<code>xxvalue = yy</code>，其他方面和函数一样。</li>
+<li>如果有一个成员变量和成员函数的名字相同，则在其前面加一个<code>_</code>，如<code>_xxvalue = yy</code></li>
+</ul>
+<h3 id="Hook内部类，枚举类的函数并Hook"><a href="#Hook内部类，枚举类的函数并Hook" class="headerlink" title="Hook内部类，枚举类的函数并Hook"></a>Hook内部类，枚举类的函数并Hook</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">FridaActivity4</span> <span class="keyword">extends</span> <span class="title">BaseFridaActivity</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">getNextCheckTitle</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">"当前第4关"</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">InnerClasses</span> </span>&#123;</span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">boolean</span> <span class="title">check1</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">boolean</span> <span class="title">check2</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">boolean</span> <span class="title">check3</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">boolean</span> <span class="title">check4</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">boolean</span> <span class="title">check5</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">boolean</span> <span class="title">check6</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">private</span> <span class="title">InnerClasses</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onCheck</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (!InnerClassescheck1() || !InnerClassescheck2() || !InnerClassescheck3() || !InnerClassescheck4() || !InnerClassescheck5() || !InnerClassescheck6()) &#123;</span><br><span class="line">            superCheckFailed();</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        CheckSuccess();</span><br><span class="line">        startActivity(<span class="keyword">new</span> Intent(<span class="keyword">this</span>, FridaActivity5class));</span><br><span class="line">        finishActivity(<span class="number">0</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这一关的关键是让<code>if (!InnerClassescheck1() || !InnerClassescheck2() || !InnerClassescheck3() || !InnerClassescheck4() || !InnerClassescheck5() || !InnerClassescheck6())</code>中的所有check全部返回true。</p>
+<p>其实这里唯一的问题就是寻找内部类<code>InnerClasses</code>，对于内部类的hook，通过<code>类名$内部类名</code>去use。</p>
+<p>手动Hook所有的函数</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">function <span class="title">ch4</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    Javaperform(function () &#123;</span><br><span class="line">        <span class="keyword">var</span> InnerClasses = Javause(<span class="string">"comexampleandroiddemoActivityFridaActivity4$InnerClasses"</span>)</span><br><span class="line">        consolelog(<span class="string">"start"</span>)</span><br><span class="line">        InnerClassescheck1implementation = function () &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">true</span></span><br><span class="line">        &#125;</span><br><span class="line">        InnerClassescheck2implementation = function () &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">true</span></span><br><span class="line">        &#125;</span><br><span class="line">        InnerClassescheck3implementation = function () &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">true</span></span><br><span class="line">        &#125;</span><br><span class="line">        InnerClassescheck4implementation = function () &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">true</span></span><br><span class="line">        &#125;</span><br><span class="line">        InnerClassescheck5implementation = function () &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">true</span></span><br><span class="line">        &#125;</span><br><span class="line">        InnerClassescheck6implementation = function () &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">true</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>批量HOOK用getDeclareMethods</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> inner_classes = Javause(<span class="string">"comexampleandroiddemoActivityFridaActivity4$InnerClasses"</span>)</span><br><span class="line"><span class="keyword">var</span> all_methods = inner_classesclassgetDeclaredMethods();</span><br></pre></td></tr></table></figure>
+<h3 id="Hook构造函数"><a href="#Hook构造函数" class="headerlink" title="Hook构造函数"></a>Hook构造函数</h3><p>用<code>$init</code>来hook构造函数</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Javause(<span class="string">"comtlamb96kgbmessengerba"</span>)$initimplementation = <span class="function"><span class="keyword">function</span> (<span class="params">i, str1, str2, z</span>) </span>&#123;</span><br><span class="line">            <span class="keyword">this</span>$init(i, str1, str2, z)</span><br><span class="line">            consolelog(i, str1, str2, z)</span><br><span class="line">            printStack(<span class="string">"comtlamb96kgbmessengerba"</span>)</span><br><span class="line">        &#125;</span><br></pre></td></tr></table></figure>
+<h3 id="打印栈回溯"><a href="#打印栈回溯" class="headerlink" title="打印栈回溯"></a>打印栈回溯</h3><p>用的就是Java的Exception类的getStackTrace方法</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">printStack</span>(<span class="params">name</span>) </span>&#123;</span><br><span class="line">    Javaperform(<span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">        <span class="keyword">var</span> Exception = Javause(<span class="string">"javalangException"</span>);</span><br><span class="line">        <span class="keyword">var</span> ins = Exception$<span class="keyword">new</span>(<span class="string">"Exception"</span>);</span><br><span class="line">        <span class="keyword">var</span> straces = insgetStackTrace();</span><br><span class="line">        <span class="keyword">if</span> (straces != <span class="literal">undefined</span> &amp;&amp; straces != <span class="literal">null</span>) &#123;</span><br><span class="line">            <span class="keyword">var</span> strace = stracestoString();</span><br><span class="line">            <span class="keyword">var</span> replaceStr = stracereplace(<span class="regexp">/,/g</span>, <span class="string">"\\n"</span>);</span><br><span class="line">            consolelog(<span class="string">"============================="</span> + name + <span class="string">" Stack strat======================="</span>);</span><br><span class="line">            consolelog(replaceStr);</span><br><span class="line">            consolelog(<span class="string">"============================="</span> + name + <span class="string">" Stack end=======================\r\n"</span>);</span><br><span class="line">            Exception$dispose();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="Spwan-Attach"><a href="#Spwan-Attach" class="headerlink" title="Spwan/Attach"></a>Spwan/Attach</h3><p>frida注入时-f参数代表spawn启动，spawn适用于一些APP在刚启动时就进行的一些操作</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">    <span class="comment">/* access modifiers changed from: protected */</span></span><br><span class="line">    public <span class="keyword">void</span> onCreate(Bundle bundle) &#123;</span><br><span class="line">        superonCreate(bundle);</span><br><span class="line">        setContentView((int) Rlayoutactivity_main);</span><br><span class="line">        <span class="built_in">String</span> property = SystemgetProperty(<span class="string">"userhome"</span>);</span><br><span class="line">        <span class="built_in">String</span> str = Systemgetenv(<span class="string">"USER"</span>);</span><br><span class="line">        <span class="keyword">if</span> (property == <span class="literal">null</span> || propertyisEmpty() || !propertyequals(<span class="string">"Russia"</span>)) &#123;</span><br><span class="line">            a(<span class="string">"Integrity Error"</span>, <span class="string">"This app can only run on Russian devices"</span>);</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (str == <span class="literal">null</span> || strisEmpty() || !strequals(getResources()getString(RstringUser))) &#123;</span><br><span class="line">            a(<span class="string">"Integrity Error"</span>, <span class="string">"Must be on the user whitelist"</span>);</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            aa(<span class="keyword">this</span>);</span><br><span class="line">            startActivity(<span class="keyword">new</span> Intent(<span class="keyword">this</span>, LoginActivityclass));</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>因为这个check是在<code>onCreate</code>里，所以app刚启动就自动检查，所以这里需要用spawn的方式去启动frida脚本hook，而不是attach。</p>
+<p>这里有两个检查，一个是检查property的值，一个是检查str的值。<br>分别从<code>SystemgetProperty</code>和<code>Systemgetenv</code>里获取，hook住这两个函数就行。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">main</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    Javaperform(<span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">        Javause(<span class="string">"javalangSystem"</span>)getPropertyoverload(<span class="string">'javalangString'</span>)implementation = <span class="function"><span class="keyword">function</span> (<span class="params">str</span>) </span>&#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="string">"Russia"</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        Javause(<span class="string">"javalangSystem"</span>)getenvoverload(<span class="string">'javalangString'</span>)implementation = <span class="function"><span class="keyword">function</span>(<span class="params">str</span>)</span>&#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="string">"RkxBR3s1N0VSTDFOR180UkNIM1J9Cg=="</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;)</span><br><span class="line">&#125;</span><br><span class="line">setImmediate(main)</span><br></pre></td></tr></table></figure>
+<h3 id="获取类名"><a href="#获取类名" class="headerlink" title="获取类名"></a>获取类名</h3><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">getRealClassName</span>(<span class="params">对象</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">const</span> objClass = Javause(<span class="string">"javalangObject"</span>)getClassapply(对象);</span><br><span class="line">    <span class="keyword">return</span> Javause(<span class="string">"javalangClass"</span>)getNameapply(objClass)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>逻辑就是先用getClass获取类，再用getName获取类名，只不过这里写法是apply来反向绑定对象</p>
+<h3 id="注入dex"><a href="#注入dex" class="headerlink" title="注入dex"></a>注入dex</h3><p>实例可以参考gson</p>
+<p>总结：<br>编译出dex之后，通过<code>JavaopenClassFile(&quot;xxxdex&quot;)load()</code>加载，这样我们就可以正常通过<code>Javause</code>调用里面的方法了。</p>
+<p>制作dex的话，一个是可以直接把class文件转成dex，比较懒就是直接写成apk，然后解压提取classesdex</p>
+<h3 id="枚举activity"><a href="#枚举activity" class="headerlink" title="枚举activity"></a>枚举activity</h3><p><img src="/2022/08/08/Android Frida/image-20220531175401090png" alt="image-20220531175401090"></p>
+<p>从objection中得到的灵感</p>
+<h3 id="Hook所有的event-按钮事件"><a href="#Hook所有的event-按钮事件" class="headerlink" title="Hook所有的event(按钮事件)"></a>Hook所有的event(按钮事件)</h3><p><a href="https://githubcom/hluwa/objection-plugins/blob/master/watch_events/agentjs" target="_blank" rel="noopener">objection-plugins/agentjs at master · hluwa/objection-plugins (githubcom)</a></p>
+<p>葫芦娃大佬的脚本，这个脚本非常显功底，hook event首先就得找到要监控的Onclick函数所处的类 ，一般我们都是传一个new的对象给注册的按钮事件</p>
+<p><img src="/2022/08/08/Android Frida/image-20220718223514178png" alt="image-20220718223514178"></p>
+<p>这里脚本中首先截获setOnclickListener得到注册的对象，然后再用getobjClassName获取对象的类名，再监控器OnClick事件，我们平时要用的话，这里可以加上打印调用栈相关的信息</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">* Author: hluwa &lt;hluwa888@gmailcom&gt;</span></span><br><span class="line"><span class="comment">* HomePage: https://githubcom/hluwa</span></span><br><span class="line"><span class="comment">* CreatedTime: 2020/3/8 22:42</span></span><br><span class="line"><span class="comment">* */</span></span><br><span class="line"><span class="keyword">var</span> jclazz = <span class="literal">null</span>;</span><br><span class="line"><span class="keyword">var</span> jobj = <span class="literal">null</span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">getObjClassName</span>(<span class="params">obj</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (!jclazz) &#123;</span><br><span class="line">        <span class="keyword">var</span> jclazz = Javause(<span class="string">"javalangClass"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (!jobj) &#123;</span><br><span class="line">        <span class="keyword">var</span> jobj = Javause(<span class="string">"javalangObject"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> jclazzgetNamecall(jobjgetClasscall(obj));</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">watch</span>(<span class="params">obj, mtdName</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> listener_name = getObjClassName(obj);</span><br><span class="line">    <span class="keyword">var</span> target = Javause(listener_name);</span><br><span class="line">    <span class="keyword">if</span> (!target || !mtdName <span class="keyword">in</span> target) &#123;</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// send("[WatchEvent] hooking " + mtdName + ": " + listener_name);</span></span><br><span class="line">    target[mtdName]overloadsforEach(<span class="function"><span class="keyword">function</span> (<span class="params">overload</span>) </span>&#123;</span><br><span class="line">        overloadimplementation = <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">            send(<span class="string">"[WatchEvent] "</span> + mtdName + <span class="string">": "</span> + getObjClassName(<span class="keyword">this</span>));</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">this</span>[mtdName]apply(<span class="keyword">this</span>, <span class="built_in">arguments</span>);</span><br><span class="line">        &#125;;</span><br><span class="line">    &#125;)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">rpcexports = &#123;</span><br><span class="line">    onclick: <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">        Javaperform(<span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">            Javause(<span class="string">"androidviewView"</span>)setOnClickListenerimplementation = <span class="function"><span class="keyword">function</span> (<span class="params">listener</span>) </span>&#123;</span><br><span class="line">                <span class="keyword">if</span> (listener != <span class="literal">null</span>) &#123;</span><br><span class="line">                    watch(listener, <span class="string">'onClick'</span>);</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">return</span> thissetOnClickListener(listener);</span><br><span class="line">            &#125;;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">            Javachoose(<span class="string">"androidviewView$ListenerInfo"</span>, &#123;</span><br><span class="line">                onMatch: <span class="function"><span class="keyword">function</span> (<span class="params">instance</span>) </span>&#123;</span><br><span class="line">                    instance = instancemOnClickListenervalue;</span><br><span class="line">                    <span class="keyword">if</span> (instance) &#123;</span><br><span class="line">                        watch(instance, <span class="string">'onClick'</span>);</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;,</span><br><span class="line">                onComplete: <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;)</span><br><span class="line">        &#125;)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<h3 id="打印和参数构造"><a href="#打印和参数构造" class="headerlink" title="打印和参数构造"></a>打印和参数构造</h3><p>frida本来就是置于Java虚拟机的，所以各种复杂的打印只要取食于Java本身就行</p>
+<ul>
+<li>数组/(字符串)对象数组/gson/Javaarray</li>
+<li>对象/多态、强转Javacast/接口Javaregister</li>
+<li>泛型、List、Map、Set、迭代打印</li>
+<li>non-ascii 、 child-gating、rpc 上传到PC上打印</li>
+</ul>
+<h4 id="frida-对object、-object-object-的打印"><a href="#frida-对object、-object-object-的打印" class="headerlink" title="frida 对object、[object,object]的打印"></a>frida 对object、[object,object]的打印</h4><ul>
+<li><p>碰运气</p>
+<ul>
+<li>对象toString()</li>
+<li>JSONstringify(对象)</li>
+<li>gson$new()toJson(对象)   <a href="https://bbspediycom/thread-259186htm" target="_blank" rel="noopener"><code>Frida</code>打印[object]解决<code>gson</code>包重名的问题-Android安全-看雪论坛-安全社区|安全招聘|bbspediycom</a></li>
+</ul>
+</li>
+<li><p>靠实力</p>
+<ul>
+<li><p>先获取类名</p>
+</li>
+<li><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">getRealClassName</span>(<span class="params">对象</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">const</span> objClass = Javause(<span class="string">"javalangObject"</span>)getClassapply(对象);</span><br><span class="line">    <span class="keyword">return</span> Javause(<span class="string">"javalangClass"</span>)getNameapply(objClass)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>用wallBreaker查看该类的输出函数 <a href="https://githubcom/hluwa/Wallbreaker" target="_blank" rel="noopener">hluwa/Wallbreaker: 🔨 Break Java Reverse Engineering form Memory World! (githubcom)</a></p>
+</li>
+<li><p>主动调用该类的输出函数进行输出</p>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="gson"><a href="#gson" class="headerlink" title="gson"></a>gson</h4><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">JavaopenClassFile(<span class="string">"/data/local/tmp/r0gsondex"</span>)load();</span><br><span class="line"><span class="keyword">const</span> gson = Javause(<span class="string">'comr0ysuegsonGson'</span>);</span><br><span class="line">consolelog(gson$<span class="keyword">new</span>()toJson(xxx));</span><br></pre></td></tr></table></figure>
+<p>gson的用法也是用frida注入自己的dex的案例</p>
+<h4 id="java-Array构造"><a href="#java-Array构造" class="headerlink" title="java Array构造"></a>java Array构造</h4><h4 id="打印hashmap"><a href="#打印hashmap" class="headerlink" title="打印hashmap"></a>打印hashmap</h4><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">Javaperform(<span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">        Javachoose(<span class="string">"javautilHashMap"</span>,&#123;</span><br><span class="line">            onMatch:<span class="function"><span class="keyword">function</span>(<span class="params">instance</span>)</span>&#123;</span><br><span class="line">                <span class="keyword">if</span>(instancetoString()indexOf(<span class="string">"ISBN"</span>)!= <span class="number">-1</span>)&#123;</span><br><span class="line">                    consolelog(<span class="string">"instancetoString:"</span>,instancetoString());</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;,<span class="attr">onComplete</span>:<span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">                consolelog(<span class="string">"search complete!"</span>)</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;)</span><br><span class="line">    &#125;)</span><br></pre></td></tr></table></figure>
+<p>去内存里遍历HashMap，toString之后再过滤关键字</p>
+<p>更细的操作</p>
+<p><img src="/2022/08/08/Android Frida/image-20220531171626939png" alt="image-20220531171626939"></p>
+<h2 id="Frida-Native-Hook"><a href="#Frida-Native-Hook" class="headerlink" title="Frida Native Hook"></a>Frida Native Hook</h2><h4 id="Java层的Native函数的hook和主动调用"><a href="#Java层的Native函数的hook和主动调用" class="headerlink" title="Java层的Native函数的hook和主动调用"></a>Java层的Native函数的hook和主动调用</h4><p>跟普通Java函数没什么区别,因为Native的函数要在Java层使用，是会首先声明在java层中，只不过加了个native</p>
+<h4 id="Hook导出函数"><a href="#Hook导出函数" class="headerlink" title="Hook导出函数"></a>Hook导出函数</h4><p>除了Hook直接在Java层注册的Native函数，SO中导出的函数也可以Hook</p>
+<ul>
+<li><p>首先是找到是否so被加载，通过<code>ProcessenumerateModules()</code>,这个API可以枚举被加载到内存的modules。</p>
+</li>
+<li><p>然后通过<code>ModulefindBaseAddress(module name)</code>来查找要hook的函数所在的so的基地址，如果找不到就返回null。</p>
+</li>
+<li><p>然后可以通过<code>findExportByName(moduleName: string, exportName: string): NativePointer</code>来查找导出函数的绝对地址。如果不知道moduleName是什么，可以传入一个null进入，但是会花费一些时间遍历所有的module。如果找不到就返回null。</p>
+</li>
+<li><p>找到地址之后，就可以拦截function/instruction的执行。通过<code>Interceptorattach</code>。使用方法见下代码。</p>
+</li>
+<li>另外为了将jstring的值打印出来，可以使用jenv的函数getStringUtfChars，就像正常的写native程序一样。<br><code>JavavmgetEnv()getStringUtfChars(args[2], null)readCString()</code></li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">extern</span> <span class="string">"C"</span></span><br><span class="line">JNIEXPORT jstring JNICALL</span><br><span class="line">Java_myapplication_example_com_ndk_1demo_MainActivity_stringWithJNI(JNIEnv *env, jobject instance,</span><br><span class="line">                                                                    jstring context_) &#123;</span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">char</span> *context = env-&gt;GetStringUTFChars(context_, <span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">int</span> context_size = env-&gt;GetStringUTFLength(context_);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (context_size &gt; <span class="number">0</span>) &#123;</span><br><span class="line">        LOGD(<span class="string">"%s\n"</span>, context);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    env-&gt;ReleaseStringUTFChars(context_, context);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> env-&gt;NewStringUTF(<span class="string">"sakura1328"</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>hook脚本</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">hook_native</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="comment">// consolelog(JSONstringify(ProcessenumerateModules()));</span></span><br><span class="line">    <span class="keyword">var</span> libnative_addr = ModulefindBaseAddress(<span class="string">"libnative-libso"</span>)</span><br><span class="line">    consolelog(<span class="string">"libnative_addr is: "</span> + libnative_addr)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (libnative_addr) &#123;</span><br><span class="line">        <span class="keyword">var</span> string_with_jni_addr = ModulefindExportByName(<span class="string">"libnative-libso"</span>, </span><br><span class="line">        <span class="string">"Java_myapplication_example_com_ndk_1demo_MainActivity_stringWithJNI"</span>)</span><br><span class="line">        consolelog(<span class="string">"string_with_jni_addr is: "</span> + string_with_jni_addr)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    Interceptorattach(string_with_jni_addr, &#123;</span><br><span class="line">        onEnter: <span class="function"><span class="keyword">function</span> (<span class="params">args</span>) </span>&#123;</span><br><span class="line">            consolelog(<span class="string">"string_with_jni args: "</span> + args[<span class="number">0</span>], args[<span class="number">1</span>], args[<span class="number">2</span>])</span><br><span class="line">            consolelog(JavavmgetEnv()getStringUtfChars(args[<span class="number">2</span>], <span class="literal">null</span>)readCString())</span><br><span class="line">        &#125;,</span><br><span class="line">        onLeave: <span class="function"><span class="keyword">function</span> (<span class="params">retval</span>) </span>&#123;</span><br><span class="line">            consolelog(<span class="string">"retval:"</span>, retval)</span><br><span class="line">            consolelog(JavavmgetEnv()getStringUtfChars(retval, <span class="literal">null</span>)readCString())</span><br><span class="line">            <span class="keyword">var</span> newRetval = JavavmgetEnv()newStringUtf(<span class="string">"new retval from hook_native"</span>);</span><br><span class="line">            retvalreplace(ptr(newRetval));</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>getStringUtfChars是得到jstring的c指针，c指针里是字符串的内容，readCString是从一个NativePointer中读取字符串内容</p>
+<blockquote>
+<ul>
+<li><p><code>readCString([size = -1])</code>, <code>readUtf8String([size = -1])</code>, <code>readUtf16String([length = -1])</code>, <code>readAnsiString([size = -1])</code>: reads the bytes at this memory location as an ASCII, UTF-8, UTF-16, or ANSI string Supply the optional <code>size</code> argument if you know the size of the string in bytes, or omit it or specify <em>-1</em> if the string is NUL-terminated Likewise you may supply the optional <code>length</code> argument if you know the length of the string in characters</p>
+<p>A JavaScript exception will be thrown if any of the <code>size</code> / <code>length</code> bytes read from the address isn’t readable</p>
+<p>Note that <code>readAnsiString()</code> is only available (and relevant) on Windows</p>
+</li>
+</ul>
+</blockquote>
+<h4 id="Hook-Libc"><a href="#Hook-Libc" class="headerlink" title="Hook Libc"></a>Hook Libc</h4><p>方法是一样的，找到libcso的模块，再枚举符号就行了</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">hook_libc</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">    <span class="keyword">var</span> pthread_create_addr = <span class="literal">null</span>;</span><br><span class="line">    <span class="keyword">var</span> symbols = ProcessfindModuleByName(<span class="string">"libcso"</span>)enumerateSymbols();</span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">var</span> i = <span class="number">0</span>;i&lt;symbolslength;i++)&#123;</span><br><span class="line">        <span class="keyword">var</span> symbol = symbols[i]name;</span><br><span class="line">    </span><br><span class="line">        <span class="keyword">if</span>(symbolindexOf(<span class="string">"pthread_create"</span>)&gt;=<span class="number">0</span>)&#123;</span><br><span class="line">            <span class="comment">//consolelog(symbols[i]name);</span></span><br><span class="line">            <span class="comment">//consolelog(symbols[i]address);</span></span><br><span class="line">            pthread_create_addr = symbols[i]address;</span><br><span class="line">        &#125;</span><br><span class="line">    </span><br><span class="line">    &#125;</span><br><span class="line">    consolelog(<span class="string">"pthread_create_addr,"</span>,pthread_create_addr);</span><br><span class="line">    Interceptorattach(pthread_create_addr,&#123;</span><br><span class="line">        onEnter:<span class="function"><span class="keyword">function</span>(<span class="params">args</span>)</span>&#123;</span><br><span class="line">            consolelog(<span class="string">"pthread_create_addr args[0],args[1],args[2],args[3]:"</span>,args[<span class="number">0</span>],args[<span class="number">1</span>],args[<span class="number">2</span>],args[<span class="number">3</span>]);</span><br><span class="line"></span><br><span class="line">        &#125;,<span class="attr">onLeave</span>:<span class="function"><span class="keyword">function</span>(<span class="params">retval</span>)</span>&#123;</span><br><span class="line">            consolelog(<span class="string">"retval is:"</span>,retval)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id><a href="#" class="headerlink" title=" "></a> </h4><h4 id="Native-调用栈打印"><a href="#Native-调用栈打印" class="headerlink" title="Native 调用栈打印"></a>Native 调用栈打印</h4><p>frida提供了接口</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Interceptorattach(f, &#123;</span><br><span class="line">  onEnter: <span class="function"><span class="keyword">function</span> (<span class="params">args</span>) </span>&#123;</span><br><span class="line">    consolelog(<span class="string">'RegisterNatives called from:\n'</span> +</span><br><span class="line">        Threadbacktrace(thiscontext, BacktracerACCURATE)</span><br><span class="line">        map(DebugSymbolfromAddress)join(<span class="string">'\n'</span>) + <span class="string">'\n'</span>);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>打印的效果</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">[Google Pixel::myapplicationexamplecomndk_demo]-&gt; RegisterNatives called from:</span><br><span class="line">0x7a100be03c libartso!0xe103c</span><br><span class="line">0x7a100be038 libartso!0xe1038</span><br><span class="line">0x79f85699a0 libnative-libso!_ZN7_JNIEnv15RegisterNativesEP7_jclassPK15JNINativeMethodi+0x44</span><br><span class="line">0x79f85698e0 libnative-libso!JNI_OnLoad+0x90</span><br><span class="line">0x7a102b9fd4 libartso!_ZN3art9JavaVMExt17LoadNativeLibraryEP7_JNIEnvRKNSt3__112basic_stringIcNS3_11char_traitsIcEENS3_9allocatorIcEEEEP8_jobjectP8_jstringPS9_+0x638</span><br><span class="line">0x7a08e3820c libopenjdkjvmso!JVM_NativeLoad+0x110</span><br><span class="line">0x70b921c4 bootoat!oatexec+0xa81c4</span><br></pre></td></tr></table></figure>
+<p>这是官方文档就这样写的</p>
+<blockquote>
+<ul>
+<li><p><code>Threadbacktrace([context, backtracer])</code>: generate a backtrace for the current thread, returned as an array of <a href="https://fridare/docs/javascript-api/#nativepointer" target="_blank" rel="noopener"><code>NativePointer</code></a> objects</p>
+<p>If you call this from Interceptor’s <a href="https://fridare/docs/javascript-api/#interceptor-onenter" target="_blank" rel="noopener"><code>onEnter</code></a> or <a href="https://fridare/docs/javascript-api/#interceptor-onleave" target="_blank" rel="noopener"><code>onLeave</code></a> callbacks you should provide <code>thiscontext</code> for the optional <code>context</code> argument, as it will give you a more accurate backtrace Omitting <code>context</code> means the backtrace will be generated from the current stack location, which may not give you a very good backtrace due to the JavaScript VM’s stack frames The optional <code>backtracer</code> argument specifies the kind of backtracer to use, and must be either <code>BacktracerFUZZY</code> or <code>BacktracerACCURATE</code>, where the latter is the default if not specified The accurate kind of backtracers rely on debugger-friendly binaries or presence of debug information to do a good job, whereas the fuzzy backtracers perform forensics on the stack in order to guess the return addresses, which means you will get false positives, but it will work on any binary</p>
+</li>
+</ul>
+</blockquote>
+<h4 id="Native-方法替换"><a href="#Native-方法替换" class="headerlink" title="Native 方法替换"></a>Native 方法替换</h4><p>直接替换掉整个Native方法的话，用的是Interceptor的replace，而不是attach</p>
+<p>也是在文档里有对标的</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> openPtr = ModulegetExportByName(<span class="string">'libcso'</span>, <span class="string">'open'</span>);</span><br><span class="line"><span class="keyword">const</span> open = <span class="keyword">new</span> NativeFunction(openPtr, <span class="string">'int'</span>, [<span class="string">'pointer'</span>, <span class="string">'int'</span>]);</span><br><span class="line">Interceptorreplace(openPtr, <span class="keyword">new</span> NativeCallback(<span class="function">(<span class="params">pathPtr, flags</span>) =&gt;</span> &#123;</span><br><span class="line">  <span class="keyword">const</span> path = pathPtrreadUtf8String();</span><br><span class="line">  log(<span class="string">'Opening "'</span> + path + <span class="string">'"'</span>);</span><br><span class="line">  <span class="keyword">const</span> fd = open(pathPtr, flags);</span><br><span class="line">  log(<span class="string">'Got fd: '</span> + fd);</span><br><span class="line">  <span class="keyword">return</span> fd;</span><br><span class="line">&#125;, <span class="string">'int'</span>, [<span class="string">'pointer'</span>, <span class="string">'int'</span>]));</span><br></pre></td></tr></table></figure>
+<h4 id="inline-Hook"><a href="#inline-Hook" class="headerlink" title="inline Hook"></a>inline Hook</h4><p>inline hook就是任意地址hook，前面介绍的interceptor的常规方法都是函数头hook</p>
+<p>一下面ARM64代码为例</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">text:000000000000772C ; __unwind &#123;</span><br><span class="line">text:000000000000772C                 SUB             SP, SP, #0x40</span><br><span class="line">text:0000000000007730                 STP             X29, X30, [SP,#0x30+var_s0]</span><br><span class="line">text:0000000000007734                 ADD             X29, SP, #0x30</span><br><span class="line">text:0000000000007738 ; 6:   v6 = a1;</span><br><span class="line">text:0000000000007738                 MOV             X8, XZR</span><br><span class="line">text:000000000000773C                 STUR            X0, [X29,#var_8]</span><br><span class="line">text:0000000000007740 ; 7:   v5 = a3;</span><br><span class="line">text:0000000000007740                 STUR            X1, [X29,#var_10]</span><br><span class="line">text:0000000000007744                 STR             X2, [SP,#0x30+var_18]</span><br><span class="line">text:0000000000007748 ; 8:   v4 = (const char *)_JNIEnv::GetStringUTFChars(a1, a3, 0LL);</span><br><span class="line">text:0000000000007748                 LDUR            X0, [X29,#var_8]</span><br><span class="line">text:000000000000774C                 LDR             X1, [SP,#0x30+var_18]</span><br><span class="line">text:0000000000007750                 MOV             X2, X8</span><br><span class="line">text:0000000000007754                 BL              _ZN7_JNIEnv17GetStringUTFCharsEP8_jstringPh ; _JNIEnv::GetStringUTFChars(_jstring *,uchar *)</span><br><span class="line">text:0000000000007758                 STR             X0, [SP,#0x30+var_20]</span><br><span class="line">text:000000000000775C ; 9:   if ( (signed int)_JNIEnv::GetStringUTFLength(v6, v5) &gt; 0 )</span><br><span class="line">text:000000000000775C                 LDUR            X0, [X29,#var_8]</span><br><span class="line">text:0000000000007760                 LDR             X1, [SP,#0x30+var_18]</span><br></pre></td></tr></table></figure>
+<p>在775C时，x0里保存的是一个指向一个字符串的指针。hook这个指令，然后<code>MemoryreadCString(thiscontextx0);</code>打印出来，hook脚本如下</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">inline_hook</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> libnative_lib_addr = ModulefindBaseAddress(<span class="string">"libnative-libso"</span>);</span><br><span class="line">    <span class="keyword">if</span> (libnative_lib_addr) &#123;</span><br><span class="line">        consolelog(<span class="string">"libnative_lib_addr:"</span>, libnative_lib_addr);</span><br><span class="line">        <span class="keyword">var</span> addr_775C = libnative_lib_addradd(<span class="number">0x775C</span>);</span><br><span class="line">        consolelog(<span class="string">"addr_775C:"</span>, addr_775C);</span><br><span class="line"></span><br><span class="line">        Javaperform(<span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">            Interceptorattach(addr_775C, &#123;</span><br><span class="line">                onEnter: <span class="function"><span class="keyword">function</span> (<span class="params">args</span>) </span>&#123;</span><br><span class="line">                    <span class="keyword">var</span> name = thiscontextx0readCString()</span><br><span class="line">                    consolelog(<span class="string">"addr_775C OnEnter :"</span>, thisreturnAddress, name);</span><br><span class="line">                &#125;,</span><br><span class="line">                onLeave: <span class="function"><span class="keyword">function</span> (<span class="params">retval</span>) </span>&#123;</span><br><span class="line">                     consolelog(<span class="string">"retval is :"</span>, retval) </span><br><span class="line">                &#125;</span><br><span class="line">            &#125;)</span><br><span class="line">        &#125;)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">setImmediate(inline_hook())</span><br></pre></td></tr></table></figure>
+<p>其实看这里就知道，Interceptorattach是可以用任意地址的，target只要是个NativePointer就行</p>
+<p>这里进去之后可以用context获取上下文寄存器，this对象及context如下</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Callback to invoke when an instruction is about to be executed</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">type</span> InstructionProbeCallback = <span class="function">(<span class="params"><span class="keyword">this</span>: InvocationContext, args: InvocationArguments</span>) =&gt;</span> <span class="built_in">void</span>;</span><br><span class="line"><span class="keyword">type</span> InvocationContext = PortableInvocationContext | WindowsInvocationContext | UnixInvocationContext;</span><br><span class="line"></span><br><span class="line"><span class="keyword">interface</span> PortableInvocationContext &#123;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * Return address</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    returnAddress: NativePointer;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * CPU registers You may also update register values by assigning to these keys</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    context: CpuContext;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * OS thread ID</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    threadId: ThreadId;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * Call depth of relative to other invocations</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    depth: <span class="built_in">number</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * User-defined invocation data Useful if you want to read an argument in `onEnter` and act on it in `onLeave`</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    [x: <span class="built_in">string</span>]: <span class="built_in">any</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">interface</span> Arm64CpuContext <span class="keyword">extends</span> PortableCpuContext &#123;</span><br><span class="line">    x0: NativePointer;</span><br><span class="line">    x1: NativePointer;</span><br><span class="line">    x2: NativePointer;</span><br><span class="line">    x3: NativePointer;</span><br><span class="line">    x4: NativePointer;</span><br><span class="line">    x5: NativePointer;</span><br><span class="line">    x6: NativePointer;</span><br><span class="line">    x7: NativePointer;</span><br><span class="line">    x8: NativePointer;</span><br><span class="line">    x9: NativePointer;</span><br><span class="line">    x10: NativePointer;</span><br><span class="line">    x11: NativePointer;</span><br><span class="line">    x12: NativePointer;</span><br><span class="line">    x13: NativePointer;</span><br><span class="line">    x14: NativePointer;</span><br><span class="line">    x15: NativePointer;</span><br><span class="line">    x16: NativePointer;</span><br><span class="line">    x17: NativePointer;</span><br><span class="line">    x18: NativePointer;</span><br><span class="line">    x19: NativePointer;</span><br><span class="line">    x20: NativePointer;</span><br><span class="line">    x21: NativePointer;</span><br><span class="line">    x22: NativePointer;</span><br><span class="line">    x23: NativePointer;</span><br><span class="line">    x24: NativePointer;</span><br><span class="line">    x25: NativePointer;</span><br><span class="line">    x26: NativePointer;</span><br><span class="line">    x27: NativePointer;</span><br><span class="line">    x28: NativePointer;</span><br><span class="line"></span><br><span class="line">    fp: NativePointer;</span><br><span class="line">    lr: NativePointer;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="Native主动调用未导出函数"><a href="#Native主动调用未导出函数" class="headerlink" title="Native主动调用未导出函数"></a>Native主动调用未导出函数</h4><p>例子如下</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">extern</span> <span class="string">"C"</span></span><br><span class="line">JNIEXPORT jint JNICALL</span><br><span class="line">Java_com_example_ndk_1demo_MainActivity_sakuraWithInt(JNIEnv *env, jobject thiz, jint a, jint b) &#123;</span><br><span class="line">    <span class="comment">// <span class="doctag">TODO:</span> implement sakuraWithInt()</span></span><br><span class="line">    <span class="keyword">return</span> sakura_add(a,b);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">sakura_add</span><span class="params">(<span class="keyword">int</span> a, <span class="keyword">int</span> b)</span></span>&#123;</span><br><span class="line">    <span class="keyword">int</span> sum = a+b;</span><br><span class="line">    LOGD(<span class="string">"sakura add a+b:"</span>,sum);</span><br><span class="line">    <span class="keyword">return</span> sum;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>根据NativePointer创建一个NativeFunction就可以直接调用</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">main</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> libnative_lib_addr = ModulefindBaseAddress(<span class="string">"libnative-libso"</span>);</span><br><span class="line">    consolelog(<span class="string">"libnative_lib_addr is :"</span>, libnative_lib_addr);</span><br><span class="line">    <span class="keyword">if</span> (libnative_lib_addr) &#123;</span><br><span class="line">        <span class="keyword">var</span> sakura_add_addr1 = ModulefindExportByName(<span class="string">"libnative-libso"</span>, <span class="string">"_Z10sakura_addii"</span>);</span><br><span class="line">        <span class="keyword">var</span> sakura_add_addr2 = libnative_lib_addradd(<span class="number">0x0F56C</span>) ;</span><br><span class="line">        consolelog(<span class="string">"sakura_add_addr1 "</span>, sakura_add_addr1);</span><br><span class="line">        consolelog(<span class="string">"sakura_add_addr2 "</span>, sakura_add_addr2)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">var</span> sakura_add1 = <span class="keyword">new</span> NativeFunction(sakura_add_addr1, <span class="string">"int"</span>, [<span class="string">"int"</span>, <span class="string">"int"</span>]);</span><br><span class="line">    <span class="keyword">var</span> sakura_add2 = <span class="keyword">new</span> NativeFunction(sakura_add_addr2, <span class="string">"int"</span>, [<span class="string">"int"</span>, <span class="string">"int"</span>]);</span><br><span class="line"></span><br><span class="line">    consolelog(<span class="string">"sakura_add1 result is :"</span>, sakura_add1(<span class="number">200</span>, <span class="number">33</span>));</span><br><span class="line">    consolelog(<span class="string">"sakura_add2 result is :"</span>, sakura_add2(<span class="number">100</span>, <span class="number">133</span>));</span><br><span class="line">&#125;</span><br><span class="line">setImmediate(main())</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">libnative_lib_addr is : <span class="number">0x79fa1c5000</span></span><br><span class="line">sakura_add_addr1  <span class="number">0x79fa1d456c</span></span><br><span class="line">sakura_add_addr2  <span class="number">0x79fa1d456c</span></span><br><span class="line">sakura_add1 result is : <span class="number">233</span></span><br><span class="line">sakura_add2 result is : <span class="number">233</span></span><br></pre></td></tr></table></figure>
+<h4 id="主动加载so并调用函数-SO注入"><a href="#主动加载so并调用函数-SO注入" class="headerlink" title="主动加载so并调用函数(SO注入)"></a>主动加载so并调用函数(SO注入)</h4><h2 id="Frida反调试"><a href="#Frida反调试" class="headerlink" title="Frida反调试"></a>Frida反调试</h2><p>这一节的主要内容就是关于反调试的原理和如何破解反调试，重要内容还是看文章理解即可。<br>因为我并不需要做反调试相关的工作，所以部分内容略过。</p>
+<ul>
+<li><p>Frida反调试与反反调试基本思路</p>
+<p>（Java层API、Native层API、Syscall)</p>
+<ul>
+<li><a href="https://githubcom/qtfreet00/AntiFrida" target="_blank" rel="noopener">AntiFrida</a></li>
+<li><a href="https://githubcom/b-mueller/frida-detection-demo" target="_blank" rel="noopener">frida-detection-demo</a></li>
+<li><a href="https://bbspediycom/thread-217482htm" target="_blank" rel="noopener">多种特征检测Frida</a></li>
+<li><a href="https://yqaliyuncom/articles/71120" target="_blank" rel="noopener">来自高维的对抗 - 逆向TinyTool自制</a></li>
+<li><a href="https://bbspediycom/thread-253868htm" target="_blank" rel="noopener">Unicorn 在 Android 的应用</a></li>
+</ul>
+</li>
+</ul>
+<p>#### </p>
+<h2 id="Refs"><a href="#Refs" class="headerlink" title="Refs"></a>Refs</h2><p><a href="https://eternalsakura13com/2020/07/04/frida/" target="_blank" rel="noopener">Frida Android hook | Sakuraのblog (eternalsakura13com)</a></p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2022/06/12/Android重打包/" rel="next" title="Android重打包">
+                <i class="fa fa-chevron-left"></i> Android重打包
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/head.jpg" alt="zzrR0">
+            
+              <p class="site-author-name" itemprop="name">zzrR0</p>
+              <p class="site-description motion-element" itemprop="description">Why am i so cai.</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">17</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">5</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://xmzyshypnc.github.io/" title="xmzyshypnc" target="_blank">xmzyshypnc</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://wood1314.github.io/" title="Wood" target="_blank">Wood</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://blog.zeddyu.info/" title="Zedd" target="_blank">Zedd</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://kestudy.top/" title="Ke" target="_blank">Ke</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Android-Frida"><span class="nav-number">1.</span> <span class="nav-text">Android Frida</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#frida环境"><span class="nav-number">1.1.</span> <span class="nav-text">frida环境</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#pyenv"><span class="nav-number">1.1.1.</span> <span class="nav-text">pyenv</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Frida安装"><span class="nav-number">1.1.2.</span> <span class="nav-text">Frida安装</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#objection"><span class="nav-number">1.1.3.</span> <span class="nav-text">objection</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#frida-server"><span class="nav-number">1.1.4.</span> <span class="nav-text">frida-server</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#frida开发环境"><span class="nav-number">1.1.5.</span> <span class="nav-text">frida开发环境</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Objection操作"><span class="nav-number">1.2.</span> <span class="nav-text">Objection操作</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Frida-Java-Hook"><span class="nav-number">1.3.</span> <span class="nav-text">Frida Java Hook</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#打印参数、返回值-设置返回值-主动调用"><span class="nav-number">1.3.1.</span> <span class="nav-text">打印参数、返回值/设置返回值/主动调用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#主动调用静态-非静态函数-以及-设置静态-非静态成员变量的值"><span class="nav-number">1.3.2.</span> <span class="nav-text">主动调用静态/非静态函数 以及 设置静态/非静态成员变量的值</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Hook内部类，枚举类的函数并Hook"><span class="nav-number">1.3.3.</span> <span class="nav-text">Hook内部类，枚举类的函数并Hook</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Hook构造函数"><span class="nav-number">1.3.4.</span> <span class="nav-text">Hook构造函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#打印栈回溯"><span class="nav-number">1.3.5.</span> <span class="nav-text">打印栈回溯</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Spwan-Attach"><span class="nav-number">1.3.6.</span> <span class="nav-text">Spwan/Attach</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#获取类名"><span class="nav-number">1.3.7.</span> <span class="nav-text">获取类名</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#注入dex"><span class="nav-number">1.3.8.</span> <span class="nav-text">注入dex</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#枚举activity"><span class="nav-number">1.3.9.</span> <span class="nav-text">枚举activity</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Hook所有的event-按钮事件"><span class="nav-number">1.3.10.</span> <span class="nav-text">Hook所有的event(按钮事件)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#打印和参数构造"><span class="nav-number">1.3.11.</span> <span class="nav-text">打印和参数构造</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#frida-对object、-object-object-的打印"><span class="nav-number">1.3.11.1.</span> <span class="nav-text">frida 对object、[object,object]的打印</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#gson"><span class="nav-number">1.3.11.2.</span> <span class="nav-text">gson</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#java-Array构造"><span class="nav-number">1.3.11.3.</span> <span class="nav-text">java Array构造</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#打印hashmap"><span class="nav-number">1.3.11.4.</span> <span class="nav-text">打印hashmap</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Frida-Native-Hook"><span class="nav-number">1.4.</span> <span class="nav-text">Frida Native Hook</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Java层的Native函数的hook和主动调用"><span class="nav-number">1.4.0.1.</span> <span class="nav-text">Java层的Native函数的hook和主动调用</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Hook导出函数"><span class="nav-number">1.4.0.2.</span> <span class="nav-text">Hook导出函数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Hook-Libc"><span class="nav-number">1.4.0.3.</span> <span class="nav-text">Hook Libc</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#null"><span class="nav-number">1.4.0.4.</span> <span class="nav-text"> </span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Native-调用栈打印"><span class="nav-number">1.4.0.5.</span> <span class="nav-text">Native 调用栈打印</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Native-方法替换"><span class="nav-number">1.4.0.6.</span> <span class="nav-text">Native 方法替换</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#inline-Hook"><span class="nav-number">1.4.0.7.</span> <span class="nav-text">inline Hook</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Native主动调用未导出函数"><span class="nav-number">1.4.0.8.</span> <span class="nav-text">Native主动调用未导出函数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#主动加载so并调用函数-SO注入"><span class="nav-number">1.4.0.9.</span> <span class="nav-text">主动加载so并调用函数(SO注入)</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Frida反调试"><span class="nav-number">1.5.</span> <span class="nav-text">Frida反调试</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Refs"><span class="nav-number">1.6.</span> <span class="nav-text">Refs</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2022</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">zzrR0</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动 v3.9.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 – <a class="theme-link" target="_blank" href="https://theme-next.org">NexT.Pisces</a> v6.3.0</div>
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv" title="总访客量">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+    </span>
+  
+
+  
+    <span class="site-pv" title="总访问量">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.3.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.3.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.3.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.3.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.3.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.3.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.3.0"></script>
+
+
+
+  
+
+  
+    <script id="dsq-count-scr" src="https://xmzyshypnc.disqus.com/count.js" async></script>
+  
+
+  
+    <script type="text/javascript">
+      var disqus_config = function () {
+        this.page.url = 'http://yoursite.com/2022/08/08/Android Frida/';
+        this.page.identifier = '2022/08/08/Android Frida/';
+        this.page.title = 'Android Frida';
+        };
+      function loadComments () {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://xmzyshypnc.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      }
+      
+        loadComments();
+      
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  
+  
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(function (item) {
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: true,
+        notify: true,
+        appId: 'YbpHIa6XHNsKv4wX2wGjnrK7-gzGzoHsz',
+        appKey: '1fjf9mQl90nKdRPfq1zhDyIE',
+        placeholder: '',
+        avatar:'mm',
+        meta:guest,
+        pageSize:'10' || 10,
+        visitor: true
+    });
+  </script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+<script type="text/javascript" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","model":{"scale":1,"hHeadPos":0.5,"vHeadPos":0.618,"jsonPath":"live2d-widget-model-hijiki"},"display":{"superSample":2,"width":150,"height":300,"position":"right","hOffset":0,"vOffset":-50},"mobile":{"show":true,"scale":0.5},"react":{"opacityDefault":0.7,"opacityOnHover":0.2},"log":false,"tagMode":false});</script></body>
+</html>
