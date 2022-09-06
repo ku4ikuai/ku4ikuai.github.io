@@ -115,16 +115,16 @@
 <meta property="og:site_name" content="zzrR0">
 <meta property="og:description" content="Android FridaFrida实在太常用了，所以结合网上的资料以及自己平时的使用总结一份Frida文档，也方便自己查，主要参考Sakura的这篇文章，后面有新的再总结 Frida Android hook | Sakuraのblog (eternalsakura13com) frida环境直接下载r0Pan /r0env R0env，里面有配置好的pyenv以及预装的frida pyenv1">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:image" content="http://yoursite.com/2022/08/08/Android%20Frida/image-20220531161329831png">
-<meta property="og:image" content="http://yoursite.com/2022/08/08/Android%20Frida/image-20220531161924152png">
-<meta property="og:image" content="http://yoursite.com/2022/08/08/Android%20Frida/image-20220531175401090png">
-<meta property="og:image" content="http://yoursite.com/2022/08/08/Android%20Frida/image-20220718223514178png">
-<meta property="og:image" content="http://yoursite.com/2022/08/08/Android%20Frida/image-20220531171626939png">
-<meta property="og:updated_time" content="2022-08-08T10:57:17.836Z">
+<meta property="og:image" content="http://yoursite.com/2022/08/08/Android%20Frida/image-20220531161329831.png">
+<meta property="og:image" content="http://yoursite.com/2022/08/08/Android%20Frida/image-20220531161924152.png">
+<meta property="og:image" content="http://yoursite.com/2022/08/08/Android%20Frida/image-20220531175401090.png">
+<meta property="og:image" content="http://yoursite.com/2022/08/08/Android%20Frida/image-20220718223514178.png">
+<meta property="og:image" content="http://yoursite.com/2022/08/08/Android%20Frida/image-20220531171626939.png">
+<meta property="og:updated_time" content="2022-09-06T03:56:26.001Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Android Frida">
 <meta name="twitter:description" content="Android FridaFrida实在太常用了，所以结合网上的资料以及自己平时的使用总结一份Frida文档，也方便自己查，主要参考Sakura的这篇文章，后面有新的再总结 Frida Android hook | Sakuraのblog (eternalsakura13com) frida环境直接下载r0Pan /r0env R0env，里面有配置好的pyenv以及预装的frida pyenv1">
-<meta name="twitter:image" content="http://yoursite.com/2022/08/08/Android%20Frida/image-20220531161329831png">
+<meta name="twitter:image" content="http://yoursite.com/2022/08/08/Android%20Frida/image-20220531161329831.png">
 
 
 
@@ -352,12 +352,24 @@
                 
               
 
-              <time title="创建时间：2022-08-08 18:56:09 / 修改时间：18:57:17" itemprop="dateCreated datePublished" datetime="2022-08-08T18:56:09+08:00">2022-08-08</time>
+              <time title="创建时间：2022-08-08 18:56:09" itemprop="dateCreated datePublished" datetime="2022-08-08T18:56:09+08:00">2022-08-08</time>
             
 
             
               
 
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2022-09-06 11:56:26" itemprop="dateModified" datetime="2022-09-06T11:56:26+08:00">2022-09-06</time>
               
             
           </span>
@@ -443,14 +455,14 @@
 <p>R0env，里面有配置好的pyenv以及预装的frida</p>
 <h3 id="pyenv"><a href="#pyenv" class="headerlink" title="pyenv"></a>pyenv</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">下载一个382，下载真的很慢，要慢慢等</span><br><span class="line">pyenv install 382</span><br><span class="line"></span><br><span class="line">pyenv versions</span><br><span class="line">sakura@sakuradeMacBook-Pro:~$ pyenv versions</span><br><span class="line">  system</span><br><span class="line">* 382 (set by /Users/sakura/python-version)</span><br><span class="line">切换到我们装的</span><br><span class="line">pyenv local 382</span><br><span class="line">python -V</span><br><span class="line">pip -V</span><br><span class="line">原本系统自带的</span><br><span class="line">python local system</span><br><span class="line">python -V</span><br><span class="line"></span><br><span class="line">把整个系统的python切换</span><br><span class="line">python global XXXX</span><br></pre></td></tr></table></figure>
 <p>临时禁用pyenv</p>
-<p><img src="/2022/08/08/Android Frida/image-20220531161329831png" alt="image-20220531161329831"></p>
+<p><img src="/2022/08/08/Android Frida/image-20220531161329831.png" alt="image-20220531161329831"></p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">if command -v pyenv 1&gt;/dev/null 2&gt;&amp;1; then</span><br><span class="line">  eval &quot;$(pyenv init -)&quot;</span><br><span class="line">fi</span><br></pre></td></tr></table></figure>
 <h3 id="Frida安装"><a href="#Frida安装" class="headerlink" title="Frida安装"></a>Frida安装</h3><p>自己手动安装frida,如果直接按下述安装则会直接安装frida和frida-tools的最新版本。</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">pip install frida-tools</span><br><span class="line">frida --version</span><br><span class="line">frida-ps --version</span><br></pre></td></tr></table></figure>
 <p>指定frida的版本去安装</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">pyenv install 377</span><br><span class="line">pyenv local 377</span><br><span class="line">pip install frida==1280</span><br><span class="line">pip install frida-tools==530</span><br></pre></td></tr></table></figure>
 <p>老版本frida和对应关系<br>对应关系很好找</p>
-<p><img src="/2022/08/08/Android Frida/image-20220531161924152png" alt="image-20220531161924152"></p>
+<p><img src="/2022/08/08/Android Frida/image-20220531161924152.png" alt="image-20220531161924152"></p>
 <h3 id="objection"><a href="#objection" class="headerlink" title="objection"></a>objection</h3><p>objection是基于frida的，所以objection的版本要跟frida对应上，找版本间的对应关系是去objection的release处，根据发布时间找最接近的</p>
 <p><a href="https://githubcom/sensepost/objection" target="_blank" rel="noopener">sensepost/objection: 📱 objection - runtime mobile exploration (githubcom)</a></p>
 <h3 id="frida-server"><a href="#frida-server" class="headerlink" title="frida-server"></a>frida-server</h3><p>下载frida-server并解压，在这里下载<a href="https://githubcom/frida/frida/releases/download/1280/frida-server-1280-android-arm64xz" target="_blank" rel="noopener">frida-server-1280</a></p>
@@ -500,11 +512,11 @@
 <h3 id="注入dex"><a href="#注入dex" class="headerlink" title="注入dex"></a>注入dex</h3><p>实例可以参考gson</p>
 <p>总结：<br>编译出dex之后，通过<code>JavaopenClassFile(&quot;xxxdex&quot;)load()</code>加载，这样我们就可以正常通过<code>Javause</code>调用里面的方法了。</p>
 <p>制作dex的话，一个是可以直接把class文件转成dex，比较懒就是直接写成apk，然后解压提取classesdex</p>
-<h3 id="枚举activity"><a href="#枚举activity" class="headerlink" title="枚举activity"></a>枚举activity</h3><p><img src="/2022/08/08/Android Frida/image-20220531175401090png" alt="image-20220531175401090"></p>
+<h3 id="枚举activity"><a href="#枚举activity" class="headerlink" title="枚举activity"></a>枚举activity</h3><p><img src="/2022/08/08/Android Frida/image-20220531175401090.png" alt="image-20220531175401090"></p>
 <p>从objection中得到的灵感</p>
 <h3 id="Hook所有的event-按钮事件"><a href="#Hook所有的event-按钮事件" class="headerlink" title="Hook所有的event(按钮事件)"></a>Hook所有的event(按钮事件)</h3><p><a href="https://githubcom/hluwa/objection-plugins/blob/master/watch_events/agentjs" target="_blank" rel="noopener">objection-plugins/agentjs at master · hluwa/objection-plugins (githubcom)</a></p>
 <p>葫芦娃大佬的脚本，这个脚本非常显功底，hook event首先就得找到要监控的Onclick函数所处的类 ，一般我们都是传一个new的对象给注册的按钮事件</p>
-<p><img src="/2022/08/08/Android Frida/image-20220718223514178png" alt="image-20220718223514178"></p>
+<p><img src="/2022/08/08/Android Frida/image-20220718223514178.png" alt="image-20220718223514178"></p>
 <p>这里脚本中首先截获setOnclickListener得到注册的对象，然后再用getobjClassName获取对象的类名，再监控器OnClick事件，我们平时要用的话，这里可以加上打印调用栈相关的信息</p>
 <figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">* Author: hluwa &lt;hluwa888@gmailcom&gt;</span></span><br><span class="line"><span class="comment">* HomePage: https://githubcom/hluwa</span></span><br><span class="line"><span class="comment">* CreatedTime: 2020/3/8 22:42</span></span><br><span class="line"><span class="comment">* */</span></span><br><span class="line"><span class="keyword">var</span> jclazz = <span class="literal">null</span>;</span><br><span class="line"><span class="keyword">var</span> jobj = <span class="literal">null</span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">getObjClassName</span>(<span class="params">obj</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (!jclazz) &#123;</span><br><span class="line">        <span class="keyword">var</span> jclazz = Javause(<span class="string">"javalangClass"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (!jobj) &#123;</span><br><span class="line">        <span class="keyword">var</span> jobj = Javause(<span class="string">"javalangObject"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> jclazzgetNamecall(jobjgetClasscall(obj));</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">watch</span>(<span class="params">obj, mtdName</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> listener_name = getObjClassName(obj);</span><br><span class="line">    <span class="keyword">var</span> target = Javause(listener_name);</span><br><span class="line">    <span class="keyword">if</span> (!target || !mtdName <span class="keyword">in</span> target) &#123;</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// send("[WatchEvent] hooking " + mtdName + ": " + listener_name);</span></span><br><span class="line">    target[mtdName]overloadsforEach(<span class="function"><span class="keyword">function</span> (<span class="params">overload</span>) </span>&#123;</span><br><span class="line">        overloadimplementation = <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">            send(<span class="string">"[WatchEvent] "</span> + mtdName + <span class="string">": "</span> + getObjClassName(<span class="keyword">this</span>));</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">this</span>[mtdName]apply(<span class="keyword">this</span>, <span class="built_in">arguments</span>);</span><br><span class="line">        &#125;;</span><br><span class="line">    &#125;)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">rpcexports = &#123;</span><br><span class="line">    onclick: <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">        Javaperform(<span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">            Javause(<span class="string">"androidviewView"</span>)setOnClickListenerimplementation = <span class="function"><span class="keyword">function</span> (<span class="params">listener</span>) </span>&#123;</span><br><span class="line">                <span class="keyword">if</span> (listener != <span class="literal">null</span>) &#123;</span><br><span class="line">                    watch(listener, <span class="string">'onClick'</span>);</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">return</span> thissetOnClickListener(listener);</span><br><span class="line">            &#125;;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">            Javachoose(<span class="string">"androidviewView$ListenerInfo"</span>, &#123;</span><br><span class="line">                onMatch: <span class="function"><span class="keyword">function</span> (<span class="params">instance</span>) </span>&#123;</span><br><span class="line">                    instance = instancemOnClickListenervalue;</span><br><span class="line">                    <span class="keyword">if</span> (instance) &#123;</span><br><span class="line">                        watch(instance, <span class="string">'onClick'</span>);</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;,</span><br><span class="line">                onComplete: <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;)</span><br><span class="line">        &#125;)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
 <h3 id="打印和参数构造"><a href="#打印和参数构造" class="headerlink" title="打印和参数构造"></a>打印和参数构造</h3><p>frida本来就是置于Java虚拟机的，所以各种复杂的打印只要取食于Java本身就行</p>
@@ -540,7 +552,7 @@
 <h4 id="java-Array构造"><a href="#java-Array构造" class="headerlink" title="java Array构造"></a>java Array构造</h4><h4 id="打印hashmap"><a href="#打印hashmap" class="headerlink" title="打印hashmap"></a>打印hashmap</h4><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">Javaperform(<span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">        Javachoose(<span class="string">"javautilHashMap"</span>,&#123;</span><br><span class="line">            onMatch:<span class="function"><span class="keyword">function</span>(<span class="params">instance</span>)</span>&#123;</span><br><span class="line">                <span class="keyword">if</span>(instancetoString()indexOf(<span class="string">"ISBN"</span>)!= <span class="number">-1</span>)&#123;</span><br><span class="line">                    consolelog(<span class="string">"instancetoString:"</span>,instancetoString());</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;,<span class="attr">onComplete</span>:<span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">                consolelog(<span class="string">"search complete!"</span>)</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;)</span><br><span class="line">    &#125;)</span><br></pre></td></tr></table></figure>
 <p>去内存里遍历HashMap，toString之后再过滤关键字</p>
 <p>更细的操作</p>
-<p><img src="/2022/08/08/Android Frida/image-20220531171626939png" alt="image-20220531171626939"></p>
+<p><img src="/2022/08/08/Android Frida/image-20220531171626939.png" alt="image-20220531171626939"></p>
 <h2 id="Frida-Native-Hook"><a href="#Frida-Native-Hook" class="headerlink" title="Frida Native Hook"></a>Frida Native Hook</h2><h4 id="Java层的Native函数的hook和主动调用"><a href="#Java层的Native函数的hook和主动调用" class="headerlink" title="Java层的Native函数的hook和主动调用"></a>Java层的Native函数的hook和主动调用</h4><p>跟普通Java函数没什么区别,因为Native的函数要在Java层使用，是会首先声明在java层中，只不过加了个native</p>
 <h4 id="Hook导出函数"><a href="#Hook导出函数" class="headerlink" title="Hook导出函数"></a>Hook导出函数</h4><p>除了Hook直接在Java层注册的Native函数，SO中导出的函数也可以Hook</p>
 <ul>
@@ -647,6 +659,10 @@
 
           <div class="post-nav-prev post-nav-item">
             
+              <a href="/2022/09/06/Android Kernel Build/" rel="prev" title="Android Kernel Build">
+                Android Kernel Build <i class="fa fa-chevron-right"></i>
+              </a>
+            
           </div>
         </div>
       
@@ -727,7 +743,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">17</span>
+                    <span class="site-state-item-count">18</span>
                     <span class="site-state-item-name">日志</span>
                   </a>
                 </div>

