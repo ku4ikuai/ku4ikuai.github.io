@@ -110,7 +110,7 @@
 
   <meta name="description" content="Android消息处理机制概览Android应用程序的每一个线程在启动时，都可以在内部创建一个消息队列，当然也有不存在消息队列的纯任务型线程 一般是根据是否有界面操作，把线程分为三种：  应用程序的主线程，Android把UI界面操作都放在这里 ActivityThread 与界面无关的纯任务线程 HandlerThread 与界面相关的子线程，AsyncTask  Android的消息机制主要是">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Android一代壳详解">
+<meta property="og:title" content="Android消息处理机制">
 <meta property="og:url" content="http://yoursite.com/2022/09/18/Android消息处理机制/index.html">
 <meta property="og:site_name" content="zzrR0">
 <meta property="og:description" content="Android消息处理机制概览Android应用程序的每一个线程在启动时，都可以在内部创建一个消息队列，当然也有不存在消息队列的纯任务型线程 一般是根据是否有界面操作，把线程分为三种：  应用程序的主线程，Android把UI界面操作都放在这里 ActivityThread 与界面无关的纯任务线程 HandlerThread 与界面相关的子线程，AsyncTask  Android的消息机制主要是">
@@ -125,9 +125,9 @@
 <meta property="og:image" content="http://yoursite.com/2022/09/18/Android消息处理机制/image-20220918181512415.png">
 <meta property="og:image" content="http://yoursite.com/2022/09/18/Android消息处理机制/image-20220918181642726.png">
 <meta property="og:image" content="http://yoursite.com/2022/09/18/Android消息处理机制/image-20220918182148169.png">
-<meta property="og:updated_time" content="2022-09-18T14:07:56.651Z">
+<meta property="og:updated_time" content="2022-09-19T00:45:32.478Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Android一代壳详解">
+<meta name="twitter:title" content="Android消息处理机制">
 <meta name="twitter:description" content="Android消息处理机制概览Android应用程序的每一个线程在启动时，都可以在内部创建一个消息队列，当然也有不存在消息队列的纯任务型线程 一般是根据是否有界面操作，把线程分为三种：  应用程序的主线程，Android把UI界面操作都放在这里 ActivityThread 与界面无关的纯任务线程 HandlerThread 与界面相关的子线程，AsyncTask  Android的消息机制主要是">
 <meta name="twitter:image" content="http://yoursite.com/2022/09/18/Android消息处理机制/image-20220917162544730.png">
 
@@ -146,7 +146,7 @@
   };
 </script>
 
-  <title>Android一代壳详解 | zzrR0</title>
+  <title>Android消息处理机制 | zzrR0</title>
   
 
 
@@ -332,7 +332,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">Android一代壳详解
+          <h1 class="post-title" itemprop="name headline">Android消息处理机制
               
             
           </h1>
@@ -357,12 +357,24 @@
                 
               
 
-              <time title="创建时间：2022-09-18 22:07:20 / 修改时间：22:07:56" itemprop="dateCreated datePublished" datetime="2022-09-18T22:07:20+08:00">2022-09-18</time>
+              <time title="创建时间：2022-09-18 22:07:20" itemprop="dateCreated datePublished" datetime="2022-09-18T22:07:20+08:00">2022-09-18</time>
             
 
             
               
 
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2022-09-19 08:45:32" itemprop="dateModified" datetime="2022-09-19T08:45:32+08:00">2022-09-19</time>
               
             
           </span>
@@ -404,7 +416,7 @@
 
           
           
-             <span id="/2022/09/18/Android消息处理机制/" class="leancloud_visitors" data-flag-title="Android一代壳详解">
+             <span id="/2022/09/18/Android消息处理机制/" class="leancloud_visitors" data-flag-title="Android消息处理机制">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -626,8 +638,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2022/09/06/Android Frida/" rel="next" title>
-                <i class="fa fa-chevron-left"></i> 
+              <a href="/2022/09/06/Android Frida/" rel="next" title="Android Frida">
+                <i class="fa fa-chevron-left"></i> Android Frida
               </a>
             
           </div>
@@ -996,7 +1008,7 @@
       var disqus_config = function () {
         this.page.url = 'http://yoursite.com/2022/09/18/Android消息处理机制/';
         this.page.identifier = '2022/09/18/Android消息处理机制/';
-        this.page.title = 'Android一代壳详解';
+        this.page.title = 'Android消息处理机制';
         };
       function loadComments () {
         var d = document, s = d.createElement('script');
