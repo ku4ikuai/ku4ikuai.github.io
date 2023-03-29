@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.3.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.3.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.3.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.3.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.3.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '6.3.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="Android重打包Android重打包还是挺常用的，因为更为细致的修改可以直接用frida去hook，如果用修改APK，重打包的方式，还需要涉及到smali代码的修改，所以重打包比较适用于对资源的替换，或者一些常量的替换，比较方便 流程刨析objection Patcher重打包这种比较常见的需求，肯定有不少开源的项目，Objection里就有重打包的工具 Patching Android Ap">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android重打包">
+<meta property="og:url" content="http://yoursite.com/2022/06/12/Android重打包/index.html">
+<meta property="og:site_name" content="zzrR0">
+<meta property="og:description" content="Android重打包Android重打包还是挺常用的，因为更为细致的修改可以直接用frida去hook，如果用修改APK，重打包的方式，还需要涉及到smali代码的修改，所以重打包比较适用于对资源的替换，或者一些常量的替换，比较方便 流程刨析objection Patcher重打包这种比较常见的需求，肯定有不少开源的项目，Objection里就有重打包的工具 Patching Android Ap">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://yoursite.com/2022/06/12/Android重打包/image-20220610092223657.png">
+<meta property="og:updated_time" content="2022-06-12T12:05:14.946Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Android重打包">
+<meta name="twitter:description" content="Android重打包Android重打包还是挺常用的，因为更为细致的修改可以直接用frida去hook，如果用修改APK，重打包的方式，还需要涉及到smali代码的修改，所以重打包比较适用于对资源的替换，或者一些常量的替换，比较方便 流程刨析objection Patcher重打包这种比较常见的需求，肯定有不少开源的项目，Objection里就有重打包的工具 Patching Android Ap">
+<meta name="twitter:image" content="http://yoursite.com/2022/06/12/Android重打包/image-20220610092223657.png">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2022/06/12/Android重打包/">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Android重打包 | zzrR0</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">zzrR0</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+    <a href="/about/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2022/06/12/Android重打包/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="zzrR0">
+      <meta itemprop="description" content="Why am i so cai.">
+      <meta itemprop="image" content="/images/head.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="zzrR0">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Android重打包
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2022-06-12 20:04:44 / 修改时间：20:05:14" itemprop="dateCreated datePublished" datetime="2022-06-12T20:04:44+08:00">2022-06-12</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2022/06/12/Android重打包/#comments" itemprop="discussionUrl">
+                
+                  <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2022/06/12/Android重打包/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2022/06/12/Android重打包/" class="leancloud_visitors" data-flag-title="Android重打包">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数：</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="Android重打包"><a href="#Android重打包" class="headerlink" title="Android重打包"></a>Android重打包</h1><p>Android重打包还是挺常用的，因为更为细致的修改可以直接用frida去hook，如果用修改APK，重打包的方式，还需要涉及到smali代码的修改，所以重打包比较适用于对资源的替换，或者一些常量的替换，比较方便</p>
+<h2 id="流程刨析"><a href="#流程刨析" class="headerlink" title="流程刨析"></a>流程刨析</h2><h3 id="objection-Patcher"><a href="#objection-Patcher" class="headerlink" title="objection Patcher"></a>objection Patcher</h3><p>重打包这种比较常见的需求，肯定有不少开源的项目，Objection里就有重打包的工具</p>
+<p><a href="https://github.com/sensepost/objection/wiki/Patching-Android-Applications" target="_blank" rel="noopener">Patching Android Applications · sensepost/objection Wiki (github.com)</a></p>
+<p>其重打包的目的把frida-gadget.so重打包进去，好让objection在免root的手机上也能使用，其代码在</p>
+<p><a href="https://github.com/sensepost/objection/blob/master/objection/utils/patchers/android.py" target="_blank" rel="noopener">objection/android.py at master · sensepost/objection (github.com)</a></p>
+<p>这里分析一些其中的比较重要的函数</p>
+<h4 id="init"><a href="#init" class="headerlink" title="_init"></a>_init</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, skip_cleanup: bool = False, skip_resources: bool = False)</span>:</span></span><br><span class="line">    super(AndroidPatcher, self).__init__()</span><br><span class="line"></span><br><span class="line">    self.apk_source = <span class="literal">None</span></span><br><span class="line">    self.apk_temp_directory = tempfile.mkdtemp(suffix=<span class="string">'.apktemp'</span>)</span><br><span class="line">    self.apk_temp_frida_patched = self.apk_temp_directory + <span class="string">'.objection.apk'</span></span><br><span class="line">    self.apk_temp_frida_patched_aligned = self.apk_temp_directory + <span class="string">'.aligned.objection.apk'</span></span><br><span class="line">    self.aapt = <span class="literal">None</span></span><br><span class="line">    self.skip_cleanup = skip_cleanup</span><br><span class="line">    self.skip_resources = skip_resources</span><br><span class="line"></span><br><span class="line">    self.keystore = os.path.join(os.path.abspath(os.path.dirname(__file__)), <span class="string">'../assets'</span>, <span class="string">'objection.jks'</span>)</span><br><span class="line">    self.netsec_config = os.path.join(os.path.abspath(os.path.dirname(__file__)), <span class="string">'../assets'</span>,</span><br><span class="line">                                      <span class="string">'network_security_config.xml'</span>)</span><br></pre></td></tr></table></figure>
+<p>初始化操作过程中的路径，这里是用的tempfile，其是在tmp路径生成对应的temp文件夹，这里我们可以修改成我们常用的目录</p>
+<h4 id="unpack-apk"><a href="#unpack-apk" class="headerlink" title="unpack_apk"></a>unpack_apk</h4><p>用的是apktool，decode是解包，-f清空解压目录，-r如果指定的话就是不解压资源，apk_temp_directory是解压目录，apk_source是apk</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">unpack_apk</span><span class="params">(self)</span>:</span></span><br><span class="line">    <span class="string">"""</span></span><br><span class="line"><span class="string">        Unpack an APK with apktool.</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        :return:</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line"></span><br><span class="line">    click.secho(<span class="string">'Unpacking &#123;0&#125;'</span>.format(self.apk_source), dim=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line">    o = delegator.run(self.list2cmdline([</span><br><span class="line">        self.required_commands[<span class="string">'apktool'</span>][<span class="string">'location'</span>],</span><br><span class="line">        <span class="string">'decode'</span>,</span><br><span class="line">        <span class="string">'-f'</span>,</span><br><span class="line">        <span class="string">'-r'</span> <span class="keyword">if</span> self.skip_resources <span class="keyword">else</span> <span class="string">''</span>,</span><br><span class="line">        <span class="string">'-o'</span>,</span><br><span class="line">        self.apk_temp_directory,</span><br><span class="line">        self.apk_source</span><br><span class="line">    ]), timeout=self.command_run_timeout)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> len(o.err) &gt; <span class="number">0</span>:</span><br><span class="line">        click.secho(<span class="string">'An error may have occurred while extracting the APK.'</span>, fg=<span class="string">'red'</span>)</span><br><span class="line">        click.secho(o.err, fg=<span class="string">'red'</span>)</span><br></pre></td></tr></table></figure>
+<h4 id="get-appt-output"><a href="#get-appt-output" class="headerlink" title="_get_appt_output"></a>_get_appt_output</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">_get_appt_output</span><span class="params">(self)</span>:</span></span><br><span class="line">    <span class="string">"""</span></span><br><span class="line"><span class="string">        Get the output of `aapt dump badging`.</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        :return:</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> self.aapt:</span><br><span class="line">        o = delegator.run(self.list2cmdline([</span><br><span class="line">            self.required_commands[<span class="string">'aapt'</span>][<span class="string">'location'</span>],</span><br><span class="line">            <span class="string">'dump'</span>,</span><br><span class="line">            <span class="string">'badging'</span>,</span><br><span class="line">            self.apk_source</span><br><span class="line">        ]), timeout=self.command_run_timeout)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> len(o.err) &gt; <span class="number">0</span>:</span><br><span class="line">            click.secho(<span class="string">'An error may have occurred while running aapt.'</span>, fg=<span class="string">'red'</span>)</span><br><span class="line">            click.secho(o.err, fg=<span class="string">'red'</span>)</span><br><span class="line"></span><br><span class="line">        self.aapt = o.out</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> self.aapt</span><br></pre></td></tr></table></figure>
+<p><img src="/2022/06/12/Android重打包/image-20220610092223657.png" alt="image-20220610092223657"></p>
+<p>badging是获得label和icon</p>
+<h4 id="get-launchable-activity"><a href="#get-launchable-activity" class="headerlink" title="_get_launchable_activity"></a>_get_launchable_activity</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">_get_launchable_activity</span><span class="params">(self)</span> -&gt; str:</span></span><br><span class="line">    <span class="string">"""</span></span><br><span class="line"><span class="string">        Determines the class name for the activity that is</span></span><br><span class="line"><span class="string">        launched on application startup.</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        This is done by first trying to parse the output of</span></span><br><span class="line"><span class="string">        aapt dump badging, then falling back to manually</span></span><br><span class="line"><span class="string">        parsing the AndroidManifest for activity-alias tags.</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        :return:</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line"></span><br><span class="line">    activities = (match.groups()[<span class="number">0</span>] <span class="keyword">for</span> match <span class="keyword">in</span></span><br><span class="line">                  re.finditer(<span class="string">r"^launchable-activity: name='([^']+)'"</span>, self._get_appt_output(), re.MULTILINE))</span><br><span class="line">    activity = next(activities, <span class="literal">None</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># If we got the activity using aapt, great, return that</span></span><br><span class="line">    <span class="keyword">if</span> activity <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span>:</span><br><span class="line">        <span class="keyword">return</span> activity</span><br><span class="line"></span><br><span class="line">    <span class="comment"># if we dont have the activity yet, check out activity aliases</span></span><br><span class="line">    click.secho((<span class="string">'Unable to determine the launchable activity using aapt, trying '</span></span><br><span class="line">                 <span class="string">'to manually parse the AndroidManifest for activity aliases...'</span>), dim=<span class="literal">True</span>, fg=<span class="string">'yellow'</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># Try and parse the manifest manually</span></span><br><span class="line">    manifest = self._get_android_manifest()</span><br><span class="line">    root = manifest.getroot()</span><br><span class="line"></span><br><span class="line">    <span class="comment"># grab all of the activity-alias tags</span></span><br><span class="line">    <span class="keyword">for</span> alias <span class="keyword">in</span> root.findall(<span class="string">'./application/activity-alias'</span>):</span><br><span class="line"></span><br><span class="line">        <span class="comment"># Take not of the current activity</span></span><br><span class="line">        current_activity = alias.get(<span class="string">'&#123;http://schemas.android.com/apk/res/android&#125;targetActivity'</span>)</span><br><span class="line">        categories = alias.findall(<span class="string">'./intent-filter/category'</span>)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># make sure we have categories for this alias</span></span><br><span class="line">        <span class="keyword">if</span> categories <span class="keyword">is</span> <span class="literal">None</span>:</span><br><span class="line">            <span class="keyword">continue</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> category <span class="keyword">in</span> categories:</span><br><span class="line"></span><br><span class="line">            <span class="comment"># check if the name of this category is that of LAUNCHER</span></span><br><span class="line">            <span class="comment"># its possible to have multiples, but once we determine one</span></span><br><span class="line">            <span class="comment"># that fits we can just return and move on</span></span><br><span class="line">            category_name = category.get(<span class="string">'&#123;http://schemas.android.com/apk/res/android&#125;name'</span>)</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> category_name == <span class="string">'android.intent.category.LAUNCHER'</span>:</span><br><span class="line">                <span class="keyword">return</span> current_activity</span><br><span class="line"></span><br><span class="line">    <span class="comment"># getting here means we were unable to determine what the launchable</span></span><br><span class="line">    <span class="comment"># activity is</span></span><br><span class="line">    click.secho(<span class="string">'Unable to determine the launchable activity for this app.'</span>, fg=<span class="string">'red'</span>)</span><br><span class="line">    <span class="keyword">raise</span> Exception(<span class="string">'Unable to determine launchable activity'</span>)</span><br></pre></td></tr></table></figure>
+<p>方法是先尝试从aapt的output中获取,aapt获取app信息用的是</p>
+<p>_get_appt_output，如果这里找不到，可能APP用的是别名的写法，所以这里手动解析AndroidMenifest，判断是不是launch activity是看有没有这个’android.intent.category.LAUNCHER’</p>
+<h4 id="determine-smali-path-for-class"><a href="#determine-smali-path-for-class" class="headerlink" title="_determine_smali_path_for_class"></a>_determine_smali_path_for_class</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">_determine_smali_path_for_class</span><span class="params">(self, target_class)</span> -&gt; str:</span></span><br><span class="line">    <span class="string">"""</span></span><br><span class="line"><span class="string">        Attempts to determine the local path for a target class' smali</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        :param target_class:</span></span><br><span class="line"><span class="string">        :return:</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># convert to a filesystem path, just like how it would be on disk</span></span><br><span class="line">    <span class="comment"># from the apktool dump</span></span><br><span class="line">    target_class = target_class.replace(<span class="string">'.'</span>, <span class="string">'/'</span>)</span><br><span class="line"></span><br><span class="line">    activity_path = os.path.join(self.apk_temp_directory, <span class="string">'smali'</span>, target_class) + <span class="string">'.smali'</span></span><br></pre></td></tr></table></figure>
+<p>首先是拼装目录，一般正常情况下，就存在于这个目录里面，但是如果multiDex的情形，apktool的命名是smali_classes2  smali_classes3这种方式</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># check if the activity path exists. If not, try and see if this may have been</span></span><br><span class="line"><span class="comment"># a multidex setup</span></span><br><span class="line"><span class="keyword">if</span> <span class="keyword">not</span> os.path.exists(activity_path):</span><br><span class="line"></span><br><span class="line">    click.secho(<span class="string">'Smali not found in smali directory. This might be a multidex APK. Searching...'</span>, dim=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># apk tool will dump the dex classes to a smali directory. in multidex setups</span></span><br><span class="line">    <span class="comment"># we have folders such as smali_classes2, smali_classes3 etc. we will search</span></span><br><span class="line">    <span class="comment"># those paths for the launch activity we detected.</span></span><br><span class="line">    <span class="keyword">for</span> x <span class="keyword">in</span> range(<span class="number">2</span>, <span class="number">100</span>):</span><br><span class="line">        smali_path = os.path.join(self.apk_temp_directory, <span class="string">'smali_classes&#123;0&#125;'</span>.format(x))</span><br><span class="line"></span><br><span class="line">        <span class="comment"># stop if the smali_classes directory does not exist.</span></span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> os.path.exists(smali_path):</span><br><span class="line">            <span class="keyword">break</span></span><br><span class="line"></span><br><span class="line">        <span class="comment"># determine the path to the launchable activity again</span></span><br><span class="line">        activity_path = os.path.join(smali_path, target_class) + <span class="string">'.smali'</span></span><br><span class="line"></span><br><span class="line">        <span class="comment"># if we found the activity, stop the loop</span></span><br><span class="line">        <span class="keyword">if</span> os.path.exists(activity_path):</span><br><span class="line">            click.secho(<span class="string">'Found smali at: &#123;0&#125;'</span>.format(activity_path), dim=<span class="literal">True</span>)</span><br><span class="line">            <span class="keyword">break</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># one final check to ensure we have the target .smali file</span></span><br><span class="line"><span class="keyword">if</span> <span class="keyword">not</span> os.path.exists(activity_path):</span><br><span class="line">    <span class="keyword">raise</span> Exception(<span class="string">'Unable to find smali to patch!'</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">return</span> activity_path</span><br></pre></td></tr></table></figure>
+<p>所以下面就是从smali_classes中遍历，去寻找目标activity的smali</p>
+<h4 id="inject-load-library"><a href="#inject-load-library" class="headerlink" title="inject_load_library"></a>inject_load_library</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">inject_load_library</span><span class="params">(self, target_class: str = None)</span>:</span></span><br><span class="line">    <span class="string">"""</span></span><br><span class="line"><span class="string">        Injects a loadLibrary call into a class.</span></span><br><span class="line"><span class="string">        If a target class is not specified, we will make an attempt</span></span><br><span class="line"><span class="string">        at searching for a launchable activity in the target APK.</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        Most of the idea for this comes from:</span></span><br><span class="line"><span class="string">            https://koz.io/using-frida-on-android-without-root/</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        :return:</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># determine the path to the smali we should inject the load_library</span></span><br><span class="line">    <span class="comment"># call into. a user may specify a specific class to target, otherwise</span></span><br><span class="line">    <span class="comment"># we get a class name from the internal launchable activity method</span></span><br><span class="line">    <span class="comment"># of this class.</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> target_class:</span><br><span class="line">        click.secho(<span class="string">'Using target class: &#123;0&#125; for patch'</span>.format(target_class), fg=<span class="string">'green'</span>, bold=<span class="literal">True</span>)</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        click.secho(<span class="string">'Target class not specified, searching for launchable activity instead...'</span>, fg=<span class="string">'green'</span>,</span><br><span class="line">                    bold=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line">    activity_path = self._determine_smali_path_for_class(</span><br><span class="line">        target_class <span class="keyword">if</span> target_class <span class="keyword">else</span> self._get_launchable_activity())</span><br><span class="line"></span><br><span class="line">    click.secho(<span class="string">'Reading smali from: &#123;0&#125;'</span>.format(activity_path), dim=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># apktool d smali will have a comment line line: '# direct methods'</span></span><br><span class="line">    <span class="keyword">with</span> open(activity_path, <span class="string">'r'</span>) <span class="keyword">as</span> f:</span><br><span class="line">        smali_lines = f.readlines()</span><br><span class="line"></span><br><span class="line">    <span class="comment"># search for the line starting with '# direct methods' in it</span></span><br><span class="line">    inject_marker = [i <span class="keyword">for</span> i, x <span class="keyword">in</span> enumerate(smali_lines) <span class="keyword">if</span> <span class="string">'# direct methods'</span> <span class="keyword">in</span> x]</span><br><span class="line"></span><br><span class="line">    <span class="comment"># ensure we got a marker</span></span><br><span class="line">    <span class="keyword">if</span> len(inject_marker) &lt;= <span class="number">0</span>:</span><br><span class="line">        <span class="keyword">raise</span> Exception(<span class="string">'Unable to determine position to inject a loadLibrary call'</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># pick the first position for the inject. add one line as we</span></span><br><span class="line">    <span class="comment"># want to inject right below the comment we matched</span></span><br><span class="line">    inject_marker = inject_marker[<span class="number">0</span>] + <span class="number">1</span></span><br><span class="line"></span><br><span class="line">    patched_smali = self._patch_smali_with_load_library(smali_lines, inject_marker)</span><br><span class="line">    patched_smali = self._revalue_locals_count(patched_smali, inject_marker)</span><br><span class="line"></span><br><span class="line">    click.secho(<span class="string">'Writing patched smali back to: &#123;0&#125;'</span>.format(activity_path), dim=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">with</span> open(activity_path, <span class="string">'w'</span>) <span class="keyword">as</span> f:</span><br><span class="line">        f.write(<span class="string">''</span>.join(patched_smali))</span><br></pre></td></tr></table></figure>
+<p>首先是利用前面几个函数找到对应的smail，然后是确定插桩函数</p>
+<p>，最后就是写入load library</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># search for the line starting with '# direct methods' in it</span></span><br><span class="line">inject_marker = [i <span class="keyword">for</span> i, x <span class="keyword">in</span> enumerate(smali_lines) <span class="keyword">if</span> <span class="string">'# direct methods'</span> <span class="keyword">in</span> x]</span><br><span class="line"></span><br><span class="line"><span class="comment"># ensure we got a marker</span></span><br><span class="line"><span class="keyword">if</span> len(inject_marker) &lt;= <span class="number">0</span>:</span><br><span class="line">    <span class="keyword">raise</span> Exception(<span class="string">'Unable to determine position to inject a loadLibrary call'</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># pick the first position for the inject. add one line as we</span></span><br><span class="line"><span class="comment"># want to inject right below the comment we matched</span></span><br><span class="line">inject_marker = inject_marker[<span class="number">0</span>] + <span class="number">1</span></span><br><span class="line"></span><br><span class="line">patched_smali = self._patch_smali_with_load_library(smali_lines, inject_marker)</span><br><span class="line">patched_smali = self._revalue_locals_count(patched_smali, inject_marker)</span><br><span class="line"></span><br><span class="line">click.secho(<span class="string">'Writing patched smali back to: &#123;0&#125;'</span>.format(activity_path), dim=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">with</span> open(activity_path, <span class="string">'w'</span>) <span class="keyword">as</span> f:</span><br><span class="line">    f.write(<span class="string">''</span>.join(patched_smali))</span><br></pre></td></tr></table></figure>
+<h4 id="Patch-smali-with-load-library"><a href="#Patch-smali-with-load-library" class="headerlink" title="Patch_smali_with_load_library"></a>Patch_smali_with_load_library</h4><p>这个函数插桩分两种情况，如果smali里面有clinit即构造函数存在，就部分插入，即插入一个invoke就行</p>
+<p>否则就要插入一个完整的构造函数clinit</p>
+<h4 id="revalue-locals-count"><a href="#revalue-locals-count" class="headerlink" title="_revalue_locals_count"></a>_revalue_locals_count</h4><p>负责修复local指令</p>
+<h4 id="add-gadget-to-apk"><a href="#add-gadget-to-apk" class="headerlink" title="add_gadget_to_apk"></a>add_gadget_to_apk</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">add_gadget_to_apk</span><span class="params">(self, architecture: str, gadget_source: str, gadget_config: str)</span>:</span></span><br><span class="line">    <span class="string">"""</span></span><br><span class="line"><span class="string">        Copies a frida gadget for a specific architecture to</span></span><br><span class="line"><span class="string">        an extracted APK's lib path.</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        :param architecture:</span></span><br><span class="line"><span class="string">        :param gadget_source:</span></span><br><span class="line"><span class="string">        :param gadget_config:</span></span><br><span class="line"><span class="string">        :return:</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line"></span><br><span class="line">    libs_path = os.path.join(self.apk_temp_directory, <span class="string">'lib'</span>, architecture)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># check if the libs path exists</span></span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> os.path.exists(libs_path):</span><br><span class="line">        click.secho(<span class="string">'Creating library path: &#123;0&#125;'</span>.format(libs_path), dim=<span class="literal">True</span>)</span><br><span class="line">        os.makedirs(libs_path)</span><br><span class="line"></span><br><span class="line">    click.secho(<span class="string">'Copying Frida gadget to libs path...'</span>, fg=<span class="string">'green'</span>, dim=<span class="literal">True</span>)</span><br><span class="line">    shutil.copyfile(gadget_source, os.path.join(libs_path, <span class="string">'libfrida-gadget.so'</span>))</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> gadget_config:</span><br><span class="line">        click.secho(<span class="string">'Adding a gadget configuration file...'</span>, fg=<span class="string">'green'</span>)</span><br><span class="line">        shutil.copyfile(gadget_config, os.path.join(libs_path, <span class="string">'libfrida-gadget.config.so'</span>))</span><br></pre></td></tr></table></figure>
+<p>把gadget.so拷贝到lib下面</p>
+<p>上述都是解包的过程，下面是重打包的函数</p>
+<h4 id="build-new-apk"><a href="#build-new-apk" class="headerlink" title="build_new_apk"></a>build_new_apk</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">build_new_apk</span><span class="params">(self, use_aapt2: bool = False)</span>:</span></span><br><span class="line">    <span class="string">"""</span></span><br><span class="line"><span class="string">        Build a new .apk with the frida-gadget patched in.</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        :return:</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line"></span><br><span class="line">    click.secho(<span class="string">'Rebuilding the APK with the frida-gadget loaded...'</span>, fg=<span class="string">'green'</span>, dim=<span class="literal">True</span>)</span><br><span class="line">    o = delegator.run(</span><br><span class="line">        self.list2cmdline([self.required_commands[<span class="string">'apktool'</span>][<span class="string">'location'</span>],</span><br><span class="line">                           <span class="string">'build'</span>,</span><br><span class="line">                           self.apk_temp_directory,</span><br><span class="line">                           ] + ([<span class="string">'--use-aapt2'</span>] <span class="keyword">if</span> use_aapt2 <span class="keyword">else</span> []) + [</span><br><span class="line">                              <span class="string">'-o'</span>,</span><br><span class="line">                              self.apk_temp_frida_patched</span><br><span class="line">                          ]), timeout=self.command_run_timeout)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> len(o.err) &gt; <span class="number">0</span>:</span><br><span class="line">        click.secho((<span class="string">'Rebuilding the APK may have failed. Read the following '</span></span><br><span class="line">                     <span class="string">'output to determine if apktool actually had an error: \n'</span>), fg=<span class="string">'red'</span>)</span><br><span class="line">        click.secho(o.err, fg=<span class="string">'red'</span>)</span><br><span class="line"></span><br><span class="line">    click.secho(<span class="string">'Built new APK with injected loadLibrary and frida-gadget'</span>, fg=<span class="string">'green'</span>)</span><br></pre></td></tr></table></figure>
+<p>build后面跟的就是要打包apk的目录，-o就是打包的生成文件名</p>
+<p>下一步是对齐apk</p>
+<h4 id="zipalign-apk"><a href="#zipalign-apk" class="headerlink" title="zipalign_apk"></a>zipalign_apk</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">zipalign_apk</span><span class="params">(self)</span>:</span></span><br><span class="line">    <span class="string">"""</span></span><br><span class="line"><span class="string">        Performs the zipalign command on an APK.</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        :return:</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line"></span><br><span class="line">    click.secho(<span class="string">'Performing zipalign'</span>, dim=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line">    o = delegator.run(self.list2cmdline([</span><br><span class="line">        self.required_commands[<span class="string">'zipalign'</span>][<span class="string">'location'</span>],</span><br><span class="line">        <span class="string">'-p'</span>,</span><br><span class="line">        <span class="string">'4'</span>,</span><br><span class="line">        self.apk_temp_frida_patched,</span><br><span class="line">        self.apk_temp_frida_patched_aligned</span><br><span class="line">    ]))</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> len(o.err) &gt; <span class="number">0</span>:</span><br><span class="line">        click.secho((<span class="string">'Zipaligning the APK may have failed. Read the following '</span></span><br><span class="line">                     <span class="string">'output to determine if zipalign actually had an error: \n'</span>), fg=<span class="string">'red'</span>)</span><br><span class="line">        click.secho(o.err, fg=<span class="string">'red'</span>)</span><br><span class="line"></span><br><span class="line">    click.secho(<span class="string">'Zipalign completed'</span>, fg=<span class="string">'green'</span>)</span><br></pre></td></tr></table></figure>
+<p>用的是zipalign，没什么好说的</p>
+<p>最后是sign_apk</p>
+<h4 id="sign-apk"><a href="#sign-apk" class="headerlink" title="sign_apk"></a>sign_apk</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">sign_apk</span><span class="params">(self)</span>:</span></span><br><span class="line">    <span class="string">"""</span></span><br><span class="line"><span class="string">        Signs an APK with the objection key.</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        The keystore itself was created with:</span></span><br><span class="line"><span class="string">            keytool -genkey -v -keystore objection.jks -alias objection -keyalg RSA -keysize 2048 -validity 3650</span></span><br><span class="line"><span class="string">            pass: basil-joule-bug</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        :return:</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line"></span><br><span class="line">    click.secho(<span class="string">'Signing new APK.'</span>, dim=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line">    o = delegator.run(self.list2cmdline([</span><br><span class="line">        self.required_commands[<span class="string">'jarsigner'</span>][<span class="string">'location'</span>],</span><br><span class="line">        <span class="string">'-sigalg'</span>,</span><br><span class="line">        <span class="string">'SHA1withRSA'</span>,</span><br><span class="line">        <span class="string">'-digestalg'</span>,</span><br><span class="line">        <span class="string">'SHA1'</span>,</span><br><span class="line">        <span class="string">'-tsa'</span>,</span><br><span class="line">        <span class="string">'http://timestamp.digicert.com'</span>,</span><br><span class="line">        <span class="string">'-storepass'</span>,</span><br><span class="line">        <span class="string">'basil-joule-bug'</span>,</span><br><span class="line">        <span class="string">'-keystore'</span>,</span><br><span class="line">        self.keystore,</span><br><span class="line">        self.apk_temp_frida_patched,</span><br><span class="line">        <span class="string">'objection'</span></span><br><span class="line">    ]))</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> len(o.err) &gt; <span class="number">0</span> <span class="keyword">or</span> <span class="string">'jar signed'</span> <span class="keyword">not</span> <span class="keyword">in</span> o.out:</span><br><span class="line">        click.secho(<span class="string">'Signing the new APK may have failed.'</span>, fg=<span class="string">'red'</span>)</span><br><span class="line">        click.secho(o.out, fg=<span class="string">'yellow'</span>)</span><br><span class="line">        click.secho(o.err, fg=<span class="string">'red'</span>)</span><br><span class="line"></span><br><span class="line">    click.secho(<span class="string">'Signed the new APK'</span>, fg=<span class="string">'green'</span>)</span><br></pre></td></tr></table></figure>
+<p>签名需要先生成一个keystore，命令如下</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">The keystore itself was created with:</span><br><span class="line">    keytool -genkey -v -keystore objection.jks -alias objection -keyalg RSA -keysize 2048 -validity 3650</span><br><span class="line">    pass: basil-joule-bug</span><br></pre></td></tr></table></figure>
+<p>这里可以直接用objection的key</p>
+<p><a href="https://github.com/sensepost/objection/tree/master/objection/utils/assets" target="_blank" rel="noopener">objection/objection/utils/assets at master · sensepost/objection (github.com)</a></p>
+<p>签名命令具体什么意思 可以看这里</p>
+<p><a href="https://developer.android.com/studio/publish/app-signing?hl=zh-cn" target="_blank" rel="noopener">为应用签名  | Android 开发者  | Android Developers</a></p>
+<h3 id="抽取代码-MyRepackAPP-py"><a href="#抽取代码-MyRepackAPP-py" class="headerlink" title="抽取代码 MyRepackAPP.py"></a>抽取代码 MyRepackAPP.py</h3><p>这里先只扣取objection里面的基本的解包打包流程，</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> __name__ == <span class="string">'__main__'</span>:</span><br><span class="line">    <span class="keyword">if</span> len(sys.argv) &lt; <span class="number">2</span>:</span><br><span class="line">        print(<span class="string">"command sample: unpack x.apk"</span>)</span><br><span class="line">        print(<span class="string">"command sample: pack x.apk.dir"</span>)</span><br><span class="line">        exit(<span class="number">0</span>)</span><br><span class="line">    apkrePacker = AndroidPatcher()</span><br><span class="line">    <span class="comment"># set target apk</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment">#print(sys.argv[0] + sys.argv[1] + sys.argv[2])</span></span><br><span class="line">    <span class="keyword">if</span> sys.argv[<span class="number">1</span>] == <span class="string">"unpack"</span>:</span><br><span class="line">        apkrePacker.set_apk_source(sys.argv[<span class="number">2</span>])</span><br><span class="line">        <span class="comment"># use apktool to unpack target apk</span></span><br><span class="line">        apkrePacker.unpack_apk()</span><br><span class="line">    <span class="keyword">elif</span> sys.argv[<span class="number">1</span>] == <span class="string">"pack"</span>:</span><br><span class="line">        apkrePacker.build_new_apk()</span><br><span class="line">        apkrePacker.zipalign_apk()</span><br><span class="line">        apkrePacker.sign_apk()</span><br></pre></td></tr></table></figure>
+<p>所以只涉及到这几条命令</p>
+<p>执行下面命令对 my.apk进行解包，解包结果会存放在同级目录下的apk_unpack里</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python3 MyRepackAPP.py unpack my.apk</span><br></pre></td></tr></table></figure>
+<p>修改完毕后，执行下面命令重打包,最终生成的apk为apk_unpack.aligned.objection.apk</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python3 MyRepackAPP.py pack</span><br></pre></td></tr></table></figure>
+<h2 id="环境依赖"><a href="#环境依赖" class="headerlink" title="环境依赖"></a>环境依赖</h2><p>主要会用到下面工具</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"># required tools</span><br><span class="line">required_commands = &#123;</span><br><span class="line">    &apos;aapt&apos;: &#123;</span><br><span class="line">        &apos;installation&apos;: &apos;apt install aapt (Kali Linux)&apos;</span><br><span class="line">    &#125;,</span><br><span class="line">    &apos;adb&apos;: &#123;</span><br><span class="line">        &apos;installation&apos;: &apos;apt install adb (Kali Linux); brew install adb (macOS)&apos;</span><br><span class="line">    &#125;,</span><br><span class="line">    &apos;jarsigner&apos;: &#123;</span><br><span class="line">        &apos;installation&apos;: &apos;apt install default-jdk (Linux); brew cask install java (macOS)&apos;</span><br><span class="line">    &#125;,</span><br><span class="line">    &apos;apktool&apos;: &#123;</span><br><span class="line">        &apos;installation&apos;: &apos;apt install apktool (Kali Linux)&apos;</span><br><span class="line">    &#125;,</span><br><span class="line">    &apos;zipalign&apos;: &#123;</span><br><span class="line">        &apos;installation&apos;: &apos;apt install zipalign&apos;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>其中apktool，最好不要直接用apt去安装，这样安装的版本不是最新的，可能会有些问题</p>
+<p><a href="https://ibotpeaches.github.io/Apktool/install/" target="_blank" rel="noopener">Apktool - How to Install (ibotpeaches.github.io)</a></p>
+<p><a href="https://github.com/iBotPeaches/Apktool/releases/tag/v2.6.1" target="_blank" rel="noopener">Release Apktool v2.6.1 · iBotPeaches/Apktool (github.com)</a></p>
+<p>先把下面的wrapper脚本创建出来</p>
+<p><a href="https://raw.githubusercontent.com/iBotPeaches/Apktool/master/scripts/linux/apktool" target="_blank" rel="noopener">https://raw.githubusercontent.com/iBotPeaches/Apktool/master/scripts/linux/apktool</a></p>
+<p>然后再下载最新版本jar</p>
+<p>最后再把两个都放在 /usr/local/bin里</p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2022/06/12/Android一代壳详解/" rel="next" title="Android一代壳详解">
+                <i class="fa fa-chevron-left"></i> Android一代壳详解
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2022/09/06/Android Kernel Build/" rel="prev" title="Android Kernel Build">
+                Android Kernel Build <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/head.jpg" alt="zzrR0">
+            
+              <p class="site-author-name" itemprop="name">zzrR0</p>
+              <p class="site-description motion-element" itemprop="description">Why am i so cai.</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">21</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">5</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://xmzyshypnc.github.io/" title="xmzyshypnc" target="_blank">xmzyshypnc</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://wood1314.github.io/" title="Wood" target="_blank">Wood</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://blog.zeddyu.info/" title="Zedd" target="_blank">Zedd</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://kestudy.top/" title="Ke" target="_blank">Ke</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Android重打包"><span class="nav-number">1.</span> <span class="nav-text">Android重打包</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#流程刨析"><span class="nav-number">1.1.</span> <span class="nav-text">流程刨析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#objection-Patcher"><span class="nav-number">1.1.1.</span> <span class="nav-text">objection Patcher</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#init"><span class="nav-number">1.1.1.1.</span> <span class="nav-text">_init</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#unpack-apk"><span class="nav-number">1.1.1.2.</span> <span class="nav-text">unpack_apk</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#get-appt-output"><span class="nav-number">1.1.1.3.</span> <span class="nav-text">_get_appt_output</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#get-launchable-activity"><span class="nav-number">1.1.1.4.</span> <span class="nav-text">_get_launchable_activity</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#determine-smali-path-for-class"><span class="nav-number">1.1.1.5.</span> <span class="nav-text">_determine_smali_path_for_class</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#inject-load-library"><span class="nav-number">1.1.1.6.</span> <span class="nav-text">inject_load_library</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Patch-smali-with-load-library"><span class="nav-number">1.1.1.7.</span> <span class="nav-text">Patch_smali_with_load_library</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#revalue-locals-count"><span class="nav-number">1.1.1.8.</span> <span class="nav-text">_revalue_locals_count</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#add-gadget-to-apk"><span class="nav-number">1.1.1.9.</span> <span class="nav-text">add_gadget_to_apk</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#build-new-apk"><span class="nav-number">1.1.1.10.</span> <span class="nav-text">build_new_apk</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#zipalign-apk"><span class="nav-number">1.1.1.11.</span> <span class="nav-text">zipalign_apk</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#sign-apk"><span class="nav-number">1.1.1.12.</span> <span class="nav-text">sign_apk</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#抽取代码-MyRepackAPP-py"><span class="nav-number">1.1.2.</span> <span class="nav-text">抽取代码 MyRepackAPP.py</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#环境依赖"><span class="nav-number">1.2.</span> <span class="nav-text">环境依赖</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2023</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">zzrR0</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动 v3.9.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 – <a class="theme-link" target="_blank" href="https://theme-next.org">NexT.Pisces</a> v6.3.0</div>
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv" title="总访客量">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+    </span>
+  
+
+  
+    <span class="site-pv" title="总访问量">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.3.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.3.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.3.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.3.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.3.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.3.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.3.0"></script>
+
+
+
+  
+
+  
+    <script id="dsq-count-scr" src="https://xmzyshypnc.disqus.com/count.js" async></script>
+  
+
+  
+    <script type="text/javascript">
+      var disqus_config = function () {
+        this.page.url = 'http://yoursite.com/2022/06/12/Android重打包/';
+        this.page.identifier = '2022/06/12/Android重打包/';
+        this.page.title = 'Android重打包';
+        };
+      function loadComments () {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://xmzyshypnc.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      }
+      
+        loadComments();
+      
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  
+  
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(function (item) {
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: true,
+        notify: true,
+        appId: 'YbpHIa6XHNsKv4wX2wGjnrK7-gzGzoHsz',
+        appKey: '1fjf9mQl90nKdRPfq1zhDyIE',
+        placeholder: '',
+        avatar:'mm',
+        meta:guest,
+        pageSize:'10' || 10,
+        visitor: true
+    });
+  </script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+<script type="text/javascript" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","model":{"scale":1,"hHeadPos":0.5,"vHeadPos":0.618,"jsonPath":"live2d-widget-model-hijiki"},"display":{"superSample":2,"width":150,"height":300,"position":"right","hOffset":0,"vOffset":-50},"mobile":{"show":true,"scale":0.5},"react":{"opacityDefault":0.7,"opacityOnHover":0.2},"log":false,"tagMode":false});</script></body>
+</html>

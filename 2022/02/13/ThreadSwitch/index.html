@@ -1,0 +1,1014 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.3.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.3.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.3.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.3.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.3.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '6.3.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="Windows线程切换本来是想直接研究Win10 X64的内核，但是资料还是XP的最多，所以还是以Xp的为基础吧，毕竟win10仍然是NT架构 Vmware高版本(16)对XP的支持已经不行了(装不上VmwareTools)，同时微软关闭了Xp的符号下载，windbg也没办法带符号调试，搭环境实在过于不理想，所以这里仅是对一些大佬的书面资料梳理一下 ntoskrnl.exentoskrnl是win">
+<meta property="og:type" content="article">
+<meta property="og:title" content="线程切换小结">
+<meta property="og:url" content="http://yoursite.com/2022/02/13/ThreadSwitch/index.html">
+<meta property="og:site_name" content="zzrR0">
+<meta property="og:description" content="Windows线程切换本来是想直接研究Win10 X64的内核，但是资料还是XP的最多，所以还是以Xp的为基础吧，毕竟win10仍然是NT架构 Vmware高版本(16)对XP的支持已经不行了(装不上VmwareTools)，同时微软关闭了Xp的符号下载，windbg也没办法带符号调试，搭环境实在过于不理想，所以这里仅是对一些大佬的书面资料梳理一下 ntoskrnl.exentoskrnl是win">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://yoursite.com/2022/02/13/ThreadSwitch/image-20220212100020593.png">
+<meta property="og:image" content="http://yoursite.com/2022/02/13/ThreadSwitch/image-20220212110803080.png">
+<meta property="og:image" content="http://yoursite.com/2022/02/13/ThreadSwitch/image-20220213115329705.png">
+<meta property="og:image" content="https://bbs.pediy.com/upload/attach/202112/867232_99MMP7ZRN9H3JR2.jpg">
+<meta property="og:image" content="https://bbs.pediy.com/upload/attach/202112/867232_9HSHFG7SVAGK97J.jpg">
+<meta property="og:updated_time" content="2022-02-13T13:48:32.371Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="线程切换小结">
+<meta name="twitter:description" content="Windows线程切换本来是想直接研究Win10 X64的内核，但是资料还是XP的最多，所以还是以Xp的为基础吧，毕竟win10仍然是NT架构 Vmware高版本(16)对XP的支持已经不行了(装不上VmwareTools)，同时微软关闭了Xp的符号下载，windbg也没办法带符号调试，搭环境实在过于不理想，所以这里仅是对一些大佬的书面资料梳理一下 ntoskrnl.exentoskrnl是win">
+<meta name="twitter:image" content="http://yoursite.com/2022/02/13/ThreadSwitch/image-20220212100020593.png">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2022/02/13/ThreadSwitch/">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>线程切换小结 | zzrR0</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">zzrR0</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+    <a href="/about/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2022/02/13/ThreadSwitch/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="zzrR0">
+      <meta itemprop="description" content="Why am i so cai.">
+      <meta itemprop="image" content="/images/head.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="zzrR0">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">线程切换小结
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2022-02-13 21:47:01 / 修改时间：21:48:32" itemprop="dateCreated datePublished" datetime="2022-02-13T21:47:01+08:00">2022-02-13</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Windows/" itemprop="url" rel="index"><span itemprop="name">Windows</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2022/02/13/ThreadSwitch/#comments" itemprop="discussionUrl">
+                
+                  <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2022/02/13/ThreadSwitch/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2022/02/13/ThreadSwitch/" class="leancloud_visitors" data-flag-title="线程切换小结">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数：</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="Windows线程切换"><a href="#Windows线程切换" class="headerlink" title="Windows线程切换"></a>Windows线程切换</h1><p>本来是想直接研究Win10 X64的内核，但是资料还是XP的最多，所以还是以Xp的为基础吧，毕竟win10仍然是NT架构</p>
+<p>Vmware高版本(16)对XP的支持已经不行了(装不上VmwareTools)，同时微软关闭了Xp的符号下载，windbg也没办法带符号调试，搭环境实在过于不理想，所以这里仅是对一些大佬的书面资料梳理一下</p>
+<h2 id="ntoskrnl-exe"><a href="#ntoskrnl-exe" class="headerlink" title="ntoskrnl.exe"></a>ntoskrnl.exe</h2><p>ntoskrnl是windows的核心内核文件，在这里可以下载到所有Windows版本的内核文件</p>
+<p><a href="https://www.exefiles.com/en/exe/ntoskrnl-exe/" target="_blank" rel="noopener">Download Ntoskrnl.exe and Fix Runtime Errors (exefiles.com)</a></p>
+<p><img src="/2022/02/13/ThreadSwitch/image-20220212100020593.png" alt="image-20220212100020593"></p>
+<h2 id="线程切换"><a href="#线程切换" class="headerlink" title="线程切换"></a>线程切换</h2><p><img src="/2022/02/13/ThreadSwitch/image-20220212110803080.png" alt="image-20220212110803080"></p>
+<p>线程发生切换一般有两种情况:主动切换和被动切换，主动切换是调调用一些系统API时，里面调用的KiSwapThread导致的切换，被动切换发生于线程时间片用完，或者被抢占的时候，但是两种路径最后都会调用SwapContext来完成线程切换</p>
+<p>会用相当多的系统调用调用到KiSwapThread，所以线程切换还是很频繁的</p>
+<p>从KiSwapThread开始分析</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">.text:004050BF ; _DWORD __cdecl KiSwapThread()</span><br><span class="line">.text:004050BF @KiSwapThread@0 proc near</span><br><span class="line">.text:004050BF</span><br><span class="line">.text:004050BF ; FUNCTION CHUNK AT .text:0040EA85 SIZE 00000015 BYTES</span><br><span class="line">.text:004050BF ; FUNCTION CHUNK AT .text:004109AF SIZE 00000009 BYTES</span><br><span class="line">.text:004050BF</span><br><span class="line">.text:004050BF mov     edi, edi</span><br><span class="line">.text:004050C1 push    esi</span><br><span class="line">.text:004050C2 push    edi</span><br><span class="line">.text:004050C3 db      3Eh             ; KPRCB给eax</span><br><span class="line">.text:004050C3 mov     eax, ds:0FFDFF020h</span><br><span class="line">.text:004050C9 mov     esi, eax</span><br><span class="line">.text:004050CB mov     eax, [esi+_KPRCB.NextThread]</span><br><span class="line">.text:004050CE test    eax, eax</span><br><span class="line">.text:004050D0 mov     edi, [esi+_KPRCB.CurrentThread]</span><br><span class="line">.text:004050D3 jnz     loc_4109AF      ; 判断是否有下一个线程</span><br></pre></td></tr></table></figure>
+<p>如果有下一个函数，就直接调用把NextThread作为参数，调用KiSwapContext进行切换</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">.text:004109AF ; START OF FUNCTION CHUNK FOR KiSwapThread()</span><br><span class="line">.text:004109AF</span><br><span class="line">.text:004109AF loc_4109AF:</span><br><span class="line">.text:004109AF and     [esi+_KPRCB.NextThread], 0</span><br><span class="line">.text:004109B3 jmp     loc_4050F0</span><br><span class="line">.text:004109B3 ; END OF FUNCTION CHUNK FOR KiSwapThread()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">.text:004050F0 loc_4050F0:</span><br><span class="line">.text:004050F0 mov     ecx, eax</span><br><span class="line">.text:004050F2 call    @KiSwapContext@4 ; KiSwapContext(x)</span><br><span class="line">.text:004050F7 test    al, al</span><br><span class="line">.text:004050F9 mov     cl, [edi+58h]   ; NewIrql</span><br><span class="line">.text:004050FC mov     edi, [edi+54h]</span><br><span class="line">.text:004050FF mov     esi, ds:__imp_@KfLowerIrql@4 ; KfLowerIrql(x)</span><br><span class="line">.text:00405105 jnz     loc_415ADB</span><br></pre></td></tr></table></figure>
+<p>如果没有NextThread，就调用KiFindReadyThread寻找要切换的线程</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">.text:004050D9 push    ebx</span><br><span class="line">.text:004050DA movsx   ebx, [esi+_KPRCB.Number]</span><br><span class="line">.text:004050DE xor     edx, edx</span><br><span class="line">.text:004050E0 mov     ecx, ebx</span><br><span class="line">.text:004050E2 call    @KiFindReadyThread@8 ; KiFindReadyThread(x,x)</span><br><span class="line">.text:004050E7 test    eax, eax</span><br><span class="line">.text:004050E9 jz      loc_40EA85</span><br></pre></td></tr></table></figure>
+<p>还找不到线程就是用IdleThread</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">.text:0040EA85 ; START OF FUNCTION CHUNK FOR KiSwapThread()</span><br><span class="line">.text:0040EA85</span><br><span class="line">.text:0040EA85 loc_40EA85:</span><br><span class="line">.text:0040EA85 mov     eax, [esi+_KPRCB.IdleThread]</span><br><span class="line">.text:0040EA88 xor     edx, edx</span><br><span class="line">.text:0040EA8A inc     edx</span><br><span class="line">.text:0040EA8B mov     ecx, ebx</span><br><span class="line">.text:0040EA8D shl     edx, cl</span><br><span class="line">.text:0040EA8F or      ds:_KiIdleSummary, edx</span><br><span class="line">.text:0040EA95 jmp     loc_4050EF</span><br><span class="line">.text:0040EA95 ; END OF FUNCTION CHUNK FOR KiSwapThread()</span><br></pre></td></tr></table></figure>
+<p>最终都是到004050F0调用KiSwapContext进一步操作,KiSwapContext就是调用SwapContext</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">.text:00404828 ; __fastcall KiSwapContext(x)</span><br><span class="line">.text:00404828 @KiSwapContext@4 proc near</span><br><span class="line">.text:00404828</span><br><span class="line">.text:00404828 var_10= dword ptr -10h</span><br><span class="line">.text:00404828 var_C= dword ptr -0Ch</span><br><span class="line">.text:00404828 var_8= dword ptr -8</span><br><span class="line">.text:00404828 var_4= dword ptr -4</span><br><span class="line">.text:00404828</span><br><span class="line">.text:00404828 sub     esp, 10h</span><br><span class="line">.text:0040482B mov     [esp+10h+var_4], ebx</span><br><span class="line">.text:0040482F mov     [esp+10h+var_8], esi</span><br><span class="line">.text:00404833 mov     [esp+10h+var_C], edi</span><br><span class="line">.text:00404837 mov     [esp+10h+var_10], ebp</span><br><span class="line">.text:0040483A mov     ebx, ds:0FFDFF01Ch</span><br><span class="line">.text:00404840 mov     esi, ecx</span><br><span class="line">.text:00404842 mov     edi, [ebx+_KPCR.PrcbData.CurrentThread]</span><br><span class="line">.text:00404848 mov     [ebx+_KPCR.PrcbData.CurrentThread], esi</span><br><span class="line">.text:0040484E mov     cl, [edi+_ETHREAD.Tcb.WaitIrql]</span><br><span class="line">.text:00404851 call    SwapContext</span><br><span class="line">.text:00404856 mov     ebp, [esp+10h+var_10]</span><br><span class="line">.text:00404859 mov     edi, [esp+10h+var_C]</span><br><span class="line">.text:0040485D mov     esi, [esp+10h+var_8]</span><br><span class="line">.text:00404861 mov     ebx, [esp+10h+var_4]</span><br><span class="line">.text:00404865 add     esp, 10h</span><br><span class="line">.text:00404868 retn</span><br></pre></td></tr></table></figure>
+<p>分析SwapContext,首先修改要切换到的线程的状态为Running</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">.text:00404924 SwapContext proc near</span><br><span class="line">.text:00404924 or      cl, cl</span><br><span class="line">.text:00404926 mov     es:[esi+_ETHREAD.Tcb.State], 2 ; 修改线程状态为Running</span><br><span class="line">.text:0040492B pushf</span><br></pre></td></tr></table></figure>
+<p>保存下异常链表</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">.text:0040492C</span><br><span class="line">.text:0040492C loc_40492C:</span><br><span class="line">.text:0040492C mov     ecx, [ebx+_KPCR.NtTib.ExceptionList]</span><br><span class="line">.text:0040492E cmp     [ebx+_KPCR.PrcbData.DpcRoutineActive], 0</span><br><span class="line">.text:00404935 push    ecx             ; 保存异常链表</span><br><span class="line">.text:00404936 jnz     loc_404A70</span><br></pre></td></tr></table></figure>
+<p>最重要的保存当前线程的esp到KernelStack</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">.text:00404949</span><br><span class="line">.text:00404949 loc_404949:</span><br><span class="line">.text:00404949 mov     ebp, cr0</span><br><span class="line">.text:0040494C mov     edx, ebp        ; edx赋值为CR0</span><br><span class="line">.text:0040494E mov     cl, [esi+_ETHREAD.Tcb.DebugActive]</span><br><span class="line">.text:00404951 mov     [ebx+_KPCR.DebugActive], cl</span><br><span class="line">.text:00404954 cli</span><br><span class="line">.text:00404955 mov     [edi+_KTHREAD.KernelStack], esp ; 保存当前的esp到KernelStack</span><br><span class="line">.text:00404958 mov     eax, [esi+_ETHREAD.Tcb.InitialStack]</span><br><span class="line">.text:0040495B mov     ecx, [esi+_ETHREAD.Tcb.StackLimit]</span><br><span class="line">.text:0040495E sub     eax, 210h       ; stack_base 减到trapframe</span><br><span class="line">.text:00404963 mov     [ebx+_KPCR.NtTib.StackLimit], ecx</span><br><span class="line">.text:00404966 mov     [ebx+_KPCR.NtTib.StackBase], eax</span><br><span class="line">.text:00404969 xor     ecx, ecx</span><br><span class="line">.text:0040496B mov     cl, [esi+_KTHREAD.NpxState]</span><br><span class="line">.text:0040496E and     edx, 0FFFFFFF1h</span><br><span class="line">.text:00404971 or      ecx, edx</span><br><span class="line">.text:00404973 or      ecx, [eax+20Ch]</span><br><span class="line">.text:00404979 cmp     ebp, ecx</span><br><span class="line">.text:0040497B jnz     loc_404A3F</span><br></pre></td></tr></table></figure>
+<p>把esp恢复成新线程的堆栈</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">.text:0040498F loc_40498F:</span><br><span class="line">.text:0040498F mov     ecx, [ebx+_KPCR.TSS]</span><br><span class="line">.text:00404992 mov     [ecx+4], eax    ; 将eax赋值给TSS里的esp0</span><br><span class="line">.text:00404995 mov     esp, [esi+_KTHREAD.KernelStack] ; 恢复到新线程的堆栈</span><br><span class="line">.text:00404998 mov     eax, [esi+_KTHREAD.Teb]</span><br><span class="line">.text:0040499B mov     [ebx+_KPCR.NtTib.Self], eax</span><br><span class="line">.text:0040499E sti</span><br><span class="line">.text:0040499F mov     eax, [edi+_KTHREAD.ApcState.Process]</span><br><span class="line">.text:004049A2 cmp     eax, [esi+_KTHREAD.ApcState.Process] ; 判断要切换到的线程和当前线程是否是在同一个进程</span><br><span class="line">.text:004049A5 mov     [edi+_KTHREAD.IdleSwapBlock], 0</span><br><span class="line">.text:004049A9 jz      short loc_4049D7 ; KPCR的地址赋值给eax</span><br></pre></td></tr></table></figure>
+<p>把gs寄存器清零,确保fs:[0]指向KPCR</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">.text:004049B8 loc_4049B8:</span><br><span class="line">.text:004049B8 lldt    ax</span><br><span class="line">.text:004049BB xor     eax, eax</span><br><span class="line">.text:004049BD mov     gs, eax         ; gs寄存器清零</span><br><span class="line">.text:004049BF assume gs:GAP</span><br><span class="line">.text:004049BF mov     eax, [edi+_KPROCESS.DirectoryTableBase]</span><br><span class="line">.text:004049C2 mov     ebp, [ebx+40h]</span><br><span class="line">.text:004049C5 mov     ecx, [edi+30h]</span><br><span class="line">.text:004049C8 mov     [ebp+1Ch], eax</span><br><span class="line">.text:004049CB mov     cr3, eax        ; 把目标进程的页目录换到CR3上</span><br><span class="line">.text:004049CE mov     [ebp+66h], cx</span><br><span class="line">.text:004049D2 jmp     short loc_4049D7 ; KPCR的地址赋值给eax</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">.text:004049D7</span><br><span class="line">.text:004049D7 loc_4049D7:             ; KPCR的地址赋值给eax</span><br><span class="line">.text:004049D7 mov     eax, [ebx+_KPCR.NtTib.Self]</span><br><span class="line">.text:004049DA mov     ecx, [ebx+_KPCR.GDT]</span><br><span class="line">.text:004049DD mov     [ecx+3Ah], ax   ; 修改GDT中的段描述符，确保fs:&#123;0&#125;指向正确的KPCR地址</span><br><span class="line">.text:004049E1 shr     eax, 10h</span><br><span class="line">.text:004049E4 mov     [ecx+3Ch], al</span><br><span class="line">.text:004049E7 mov     [ecx+3Fh], ah</span><br><span class="line">.text:004049EA inc     [esi+_ETHREAD.Tcb.ContextSwitches] ; 增加线程的切换次数计数</span><br><span class="line">.text:004049ED inc     [ebx+_KPCR.PrcbData.KeContextSwitches]</span><br><span class="line">.text:004049F3 pop     ecx</span><br><span class="line">.text:004049F4 mov     [ebx], ecx</span><br><span class="line">.text:004049F6 cmp     byte ptr [esi+49h], 0</span><br><span class="line">.text:004049FA jnz     short loc_404A00</span><br></pre></td></tr></table></figure>
+<p>总结：</p>
+<ul>
+<li>线程的切换本质上就是堆栈的切换</li>
+<li>在切换线程时会清空GS寄存器</li>
+<li>本质上不会进行进程切换，只不过如果切换的线程不在同一个进程，就顺带切换CR3</li>
+</ul>
+<h3 id="被动切换-时钟中断"><a href="#被动切换-时钟中断" class="headerlink" title="被动切换 时钟中断"></a>被动切换 时钟中断</h3><p>触发流程，时钟中断注册的中断处理函数是HalpHpetClockInterrupt，其最终会调用到KiDispatchInterrupt来实施SwapContext的调用</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">hal!HalpHpetClockInterrupt</span><br><span class="line">-&gt;nt!KeUpdateSystemTime</span><br><span class="line">-&gt;nt!KeUpdateRunTime</span><br><span class="line">-&gt;hal!HalRequestSoftwareInterrupt</span><br><span class="line">-&gt;hal!KfLowerIrql</span><br><span class="line">-&gt;hal!HalpCheckForSoftwareInterrupt</span><br><span class="line">-&gt;hal!HalpDispatchSoftwareInterrupt</span><br><span class="line">-&gt;nt!KiDispatchInterrupt</span><br><span class="line">-&gt;SwapContext</span><br></pre></td></tr></table></figure>
+<p>KeUpdateRunTime，把线程的Quantum-3，如果小于0了，且当前线程不是IdleThread（IdleThread当然随便运行），就给QuantumEnd赋值一个非0值标记时间片已经用完了</p>
+<p><img src="/2022/02/13/ThreadSwitch/image-20220213115329705.png" alt="image-20220213115329705"></p>
+<p>KiDispatchInterrupt和其派发中断的名称不是很相符(派发中断)，这个函数首先就会判断时间片有没有用完</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">.text:004048A2</span><br><span class="line">.text:004048A2 loc_4048A2:</span><br><span class="line">.text:004048A2 sti</span><br><span class="line">.text:004048A3 cmp     [ebx+_KPCR.PrcbData.QuantumEnd], 0 ; 判断时间片有没有用完</span><br><span class="line">.text:004048AA jnz     short loc_404902 ; 线程时间片用完</span><br></pre></td></tr></table></figure>
+<p>如果时间片已经用完,重新分配时间片</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">.text:00404902</span><br><span class="line">.text:00404902 loc_404902:             ; 线程时间片用完</span><br><span class="line">.text:00404902 mov     [ebx+_KPCR.PrcbData.QuantumEnd], 0</span><br><span class="line">.text:0040490C call    _KiQuantumEnd@0 ; 重新分配时间片</span><br><span class="line">.text:00404911 or      eax, eax</span><br><span class="line">.text:00404913 jnz     short loc_4048BB</span><br></pre></td></tr></table></figure>
+<p>然后下面会切换线程</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">.text:004048B5 mov     eax, [ebx+_KPCR.PrcbData.NextThread] ; 有下一个线程，就将其赋值给eax</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">.text:004048BB loc_4048BB:</span><br><span class="line">.text:004048BB sub     esp, 0Ch</span><br><span class="line">.text:004048BE mov     [esp+0Ch+var_4], esi</span><br><span class="line">.text:004048C2 mov     [esp+0Ch+var_8], edi</span><br><span class="line">.text:004048C6 mov     [esp+0Ch+var_C], ebp</span><br><span class="line">.text:004048C9 mov     esi, eax</span><br><span class="line">.text:004048CB mov     edi, [ebx+_KPCR.PrcbData.CurrentThread]</span><br><span class="line">.text:004048D1 mov     [ebx+_KPCR.PrcbData.NextThread], 0</span><br><span class="line">.text:004048DB mov     [ebx+124h], esi</span><br><span class="line">.text:004048E1 mov     ecx, edi        ; 当前线程传给ecx</span><br><span class="line">.text:004048E3 mov     byte ptr [edi+50h], 1</span><br><span class="line">.text:004048E7 call    @KiReadyThread@4 ; ecx传参，插入到就绪链表里</span><br><span class="line">.text:004048EC mov     cl, 1</span><br><span class="line">.text:004048EE call    SwapContext     ; 切换到NextThread</span><br><span class="line">.text:004048F3 mov     ebp, [esp+0Ch+var_C]</span><br><span class="line">.text:004048F6 mov     edi, [esp+0Ch+var_8]</span><br><span class="line">.text:004048FA mov     esi, [esp+0Ch+var_4]</span><br><span class="line">.text:004048FE add     esp, 0Ch</span><br></pre></td></tr></table></figure>
+<h2 id="常用结构体"><a href="#常用结构体" class="headerlink" title="常用结构体"></a>常用结构体</h2><h3 id="KPCR"><a href="#KPCR" class="headerlink" title="KPCR"></a>KPCR</h3><p>KPCR是描述CPU信息的结构体，一个CPU有自己的一个KPCR</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//0x3748 bytes (sizeof)</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> _<span class="title">KPCR</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">    <span class="keyword">union</span></span><br><span class="line">    &#123;</span><br><span class="line">        <span class="class"><span class="keyword">struct</span> _<span class="title">NT_TIB</span> <span class="title">NtTib</span>;</span>                                               <span class="comment">//0x0</span></span><br><span class="line">        <span class="class"><span class="keyword">struct</span></span></span><br><span class="line"><span class="class">        &#123;</span></span><br><span class="line">            <span class="class"><span class="keyword">struct</span> _<span class="title">EXCEPTION_REGISTRATION_RECORD</span>* <span class="title">Used_ExceptionList</span>;</span>      <span class="comment">//0x0</span></span><br><span class="line">            VOID* Used_StackBase;                                           <span class="comment">//0x4</span></span><br><span class="line">            VOID* Spare2;                                                   <span class="comment">//0x8</span></span><br><span class="line">            VOID* TssCopy;                                                  <span class="comment">//0xc</span></span><br><span class="line">            ULONG ContextSwitches;                                          <span class="comment">//0x10</span></span><br><span class="line">            ULONG SetMemberCopy;                                            <span class="comment">//0x14</span></span><br><span class="line">            VOID* Used_Self;                                                <span class="comment">//0x18</span></span><br><span class="line">        &#125;;</span><br><span class="line">    &#125;;</span><br><span class="line">    <span class="class"><span class="keyword">struct</span> _<span class="title">KPCR</span>* <span class="title">SelfPcr</span>;</span>                                                  <span class="comment">//0x1c</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> _<span class="title">KPRCB</span>* <span class="title">Prcb</span>;</span>                                                    <span class="comment">//0x20</span></span><br><span class="line">    UCHAR Irql;                                                             <span class="comment">//0x24</span></span><br><span class="line">    ULONG IRR;                                                              <span class="comment">//0x28</span></span><br><span class="line">    ULONG IrrActive;                                                        <span class="comment">//0x2c</span></span><br><span class="line">    ULONG IDR;                                                              <span class="comment">//0x30</span></span><br><span class="line">    VOID* KdVersionBlock;                                                   <span class="comment">//0x34</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> _<span class="title">KIDTENTRY</span>* <span class="title">IDT</span>;</span>                                                 <span class="comment">//0x38</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> _<span class="title">KGDTENTRY</span>* <span class="title">GDT</span>;</span>                                                 <span class="comment">//0x3c</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> _<span class="title">KTSS</span>* <span class="title">TSS</span>;</span>                                                      <span class="comment">//0x40</span></span><br><span class="line">    USHORT MajorVersion;                                                    <span class="comment">//0x44</span></span><br><span class="line">    USHORT MinorVersion;                                                    <span class="comment">//0x46</span></span><br><span class="line">    ULONG SetMember;                                                        <span class="comment">//0x48</span></span><br><span class="line">    ULONG StallScaleFactor;                                                 <span class="comment">//0x4c</span></span><br><span class="line">    UCHAR SpareUnused;                                                      <span class="comment">//0x50</span></span><br><span class="line">    UCHAR Number;                                                           <span class="comment">//0x51</span></span><br><span class="line">    UCHAR Spare0;                                                           <span class="comment">//0x52</span></span><br><span class="line">    UCHAR SecondLevelCacheAssociativity;                                    <span class="comment">//0x53</span></span><br><span class="line">    ULONG VdmAlert;                                                         <span class="comment">//0x54</span></span><br><span class="line">    ULONG KernelReserved[<span class="number">14</span>];                                               <span class="comment">//0x58</span></span><br><span class="line">    ULONG SecondLevelCacheSize;                                             <span class="comment">//0x90</span></span><br><span class="line">    ULONG HalReserved[<span class="number">16</span>];                                                  <span class="comment">//0x94</span></span><br><span class="line">    ULONG InterruptMode;                                                    <span class="comment">//0xd4</span></span><br><span class="line">    UCHAR Spare1;                                                           <span class="comment">//0xd8</span></span><br><span class="line">    ULONG KernelReserved2[<span class="number">17</span>];                                              <span class="comment">//0xdc</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> _<span class="title">KPRCB</span> <span class="title">PrcbData</span>;</span>                                                 <span class="comment">//0x120</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>SelfPcr;                                                  //0x1c   指向自身的指针</p>
+<p>Prcb;                                                    //0x20     指向KPRCB的指针</p>
+<p>IDT  TSS  GDT  是这个CPU的三个表</p>
+<h3 id="KPRCB"><a href="#KPRCB" class="headerlink" title="KPRCB"></a>KPRCB</h3><p>KPRCB是紧跟在KPCR后面的，作为拓展结构体</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br><span class="line">217</span><br><span class="line">218</span><br><span class="line">219</span><br><span class="line">220</span><br><span class="line">221</span><br><span class="line">222</span><br><span class="line">223</span><br><span class="line">224</span><br><span class="line">225</span><br><span class="line">226</span><br><span class="line">227</span><br><span class="line">228</span><br><span class="line">229</span><br><span class="line">230</span><br><span class="line">231</span><br><span class="line">232</span><br><span class="line">233</span><br><span class="line">234</span><br><span class="line">235</span><br><span class="line">236</span><br><span class="line">237</span><br><span class="line">238</span><br><span class="line">239</span><br><span class="line">240</span><br><span class="line">241</span><br><span class="line">242</span><br><span class="line">243</span><br><span class="line">244</span><br><span class="line">245</span><br><span class="line">246</span><br><span class="line">247</span><br><span class="line">248</span><br><span class="line">249</span><br><span class="line">250</span><br><span class="line">251</span><br><span class="line">252</span><br><span class="line">253</span><br><span class="line">254</span><br><span class="line">255</span><br><span class="line">256</span><br><span class="line">257</span><br><span class="line">258</span><br><span class="line">259</span><br><span class="line">260</span><br><span class="line">261</span><br><span class="line">262</span><br><span class="line">263</span><br><span class="line">264</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//0x3628 bytes (sizeof)</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> _<span class="title">KPRCB</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">    USHORT MinorVersion;                                                    <span class="comment">//0x0</span></span><br><span class="line">    USHORT MajorVersion;                                                    <span class="comment">//0x2</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> _<span class="title">KTHREAD</span>* <span class="title">CurrentThread</span>;</span>                                         <span class="comment">//0x4</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> _<span class="title">KTHREAD</span>* <span class="title">NextThread</span>;</span>                                            <span class="comment">//0x8</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> _<span class="title">KTHREAD</span>* <span class="title">IdleThread</span>;</span>                                            <span class="comment">//0xc</span></span><br><span class="line">    UCHAR LegacyNumber;                                                     <span class="comment">//0x10</span></span><br><span class="line">    UCHAR NestingLevel;                                                     <span class="comment">//0x11</span></span><br><span class="line">    USHORT BuildType;                                                       <span class="comment">//0x12</span></span><br><span class="line">    CHAR CpuType;                                                           <span class="comment">//0x14</span></span><br><span class="line">    CHAR CpuID;                                                             <span class="comment">//0x15</span></span><br><span class="line">    <span class="keyword">union</span></span><br><span class="line">    &#123;</span><br><span class="line">        USHORT CpuStep;                                                     <span class="comment">//0x16</span></span><br><span class="line">        <span class="class"><span class="keyword">struct</span></span></span><br><span class="line"><span class="class">        &#123;</span></span><br><span class="line">            UCHAR CpuStepping;                                              <span class="comment">//0x16</span></span><br><span class="line">            UCHAR CpuModel;                                                 <span class="comment">//0x17</span></span><br><span class="line">        &#125;;</span><br><span class="line">    &#125;;</span><br><span class="line">    <span class="class"><span class="keyword">struct</span> _<span class="title">KPROCESSOR_STATE</span> <span class="title">ProcessorState</span>;</span>                                <span class="comment">//0x18</span></span><br><span class="line">    ULONG KernelReserved[<span class="number">16</span>];                                               <span class="comment">//0x338</span></span><br><span class="line">    ULONG HalReserved[<span class="number">16</span>];                                                  <span class="comment">//0x378</span></span><br><span class="line">    ULONG CFlushSize;                                                       <span class="comment">//0x3b8</span></span><br><span class="line">    UCHAR CoresPerPhysicalProcessor;                                        <span class="comment">//0x3bc</span></span><br><span class="line">    UCHAR LogicalProcessorsPerCore;                                         <span class="comment">//0x3bd</span></span><br><span class="line">    UCHAR PrcbPad0[<span class="number">2</span>];                                                      <span class="comment">//0x3be</span></span><br><span class="line">    ULONG MHz;                                                              <span class="comment">//0x3c0</span></span><br><span class="line">    UCHAR CpuVendor;                                                        <span class="comment">//0x3c4</span></span><br><span class="line">    UCHAR GroupIndex;                                                       <span class="comment">//0x3c5</span></span><br><span class="line">    USHORT Group;                                                           <span class="comment">//0x3c6</span></span><br><span class="line">    ULONG GroupSetMember;                                                   <span class="comment">//0x3c8</span></span><br><span class="line">    ULONG Number;                                                           <span class="comment">//0x3cc</span></span><br><span class="line">    UCHAR PrcbPad1[<span class="number">72</span>];                                                     <span class="comment">//0x3d0</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> _<span class="title">KSPIN_LOCK_QUEUE</span> <span class="title">LockQueue</span>[17];</span>                                 <span class="comment">//0x418</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> _<span class="title">KTHREAD</span>* <span class="title">NpxThread</span>;</span>                                             <span class="comment">//0x4a0</span></span><br><span class="line">    ULONG InterruptCount;                                                   <span class="comment">//0x4a4</span></span><br><span class="line">    ULONG KernelTime;                                                       <span class="comment">//0x4a8</span></span><br><span class="line">    ULONG UserTime;                                                         <span class="comment">//0x4ac</span></span><br><span class="line">    ULONG DpcTime;                                                          <span class="comment">//0x4b0</span></span><br><span class="line">    ULONG DpcTimeCount;                                                     <span class="comment">//0x4b4</span></span><br><span class="line">    ULONG InterruptTime;                                                    <span class="comment">//0x4b8</span></span><br><span class="line">    ULONG AdjustDpcThreshold;                                               <span class="comment">//0x4bc</span></span><br><span class="line">    ULONG PageColor;                                                        <span class="comment">//0x4c0</span></span><br><span class="line">    UCHAR DebuggerSavedIRQL;                                                <span class="comment">//0x4c4</span></span><br><span class="line">    UCHAR NodeColor;                                                        <span class="comment">//0x4c5</span></span><br><span class="line">    UCHAR PrcbPad20[<span class="number">2</span>];                                                     <span class="comment">//0x4c6</span></span><br><span class="line">    ULONG NodeShiftedColor;                                                 <span class="comment">//0x4c8</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> _<span class="title">KNODE</span>* <span class="title">ParentNode</span>;</span>                                              <span class="comment">//0x4cc</span></span><br><span class="line">    ULONG SecondaryColorMask;                                               <span class="comment">//0x4d0</span></span><br><span class="line">    ULONG DpcTimeLimit;                                                     <span class="comment">//0x4d4</span></span><br><span class="line">    ULONG PrcbPad21[<span class="number">2</span>];                                                     <span class="comment">//0x4d8</span></span><br><span class="line">    ULONG CcFastReadNoWait;                                                 <span class="comment">//0x4e0</span></span><br><span class="line">    ULONG CcFastReadWait;                                                   <span class="comment">//0x4e4</span></span><br><span class="line">    ULONG CcFastReadNotPossible;                                            <span class="comment">//0x4e8</span></span><br><span class="line">    ULONG CcCopyReadNoWait;                                                 <span class="comment">//0x4ec</span></span><br><span class="line">    ULONG CcCopyReadWait;                                                   <span class="comment">//0x4f0</span></span><br><span class="line">    ULONG CcCopyReadNoWaitMiss;                                             <span class="comment">//0x4f4</span></span><br><span class="line">    <span class="keyword">volatile</span> LONG MmSpinLockOrdering;                                       <span class="comment">//0x4f8</span></span><br><span class="line">    <span class="keyword">volatile</span> LONG IoReadOperationCount;                                     <span class="comment">//0x4fc</span></span><br><span class="line">    <span class="keyword">volatile</span> LONG IoWriteOperationCount;                                    <span class="comment">//0x500</span></span><br><span class="line">    <span class="keyword">volatile</span> LONG IoOtherOperationCount;                                    <span class="comment">//0x504</span></span><br><span class="line">    <span class="keyword">union</span> _LARGE_INTEGER IoReadTransferCount;                               <span class="comment">//0x508</span></span><br><span class="line">    <span class="keyword">union</span> _LARGE_INTEGER IoWriteTransferCount;                              <span class="comment">//0x510</span></span><br><span class="line">    <span class="keyword">union</span> _LARGE_INTEGER IoOtherTransferCount;                              <span class="comment">//0x518</span></span><br><span class="line">    ULONG CcFastMdlReadNoWait;                                              <span class="comment">//0x520</span></span><br><span class="line">    ULONG CcFastMdlReadWait;                                                <span class="comment">//0x524</span></span><br><span class="line">    ULONG CcFastMdlReadNotPossible;                                         <span class="comment">//0x528</span></span><br><span class="line">    ULONG CcMapDataNoWait;                                                  <span class="comment">//0x52c</span></span><br><span class="line">    ULONG CcMapDataWait;                                                    <span class="comment">//0x530</span></span><br><span class="line">    ULONG CcPinMappedDataCount;                                             <span class="comment">//0x534</span></span><br><span class="line">    ULONG CcPinReadNoWait;                                                  <span class="comment">//0x538</span></span><br><span class="line">    ULONG CcPinReadWait;                                                    <span class="comment">//0x53c</span></span><br><span class="line">    ULONG CcMdlReadNoWait;                                                  <span class="comment">//0x540</span></span><br><span class="line">    ULONG CcMdlReadWait;                                                    <span class="comment">//0x544</span></span><br><span class="line">    ULONG CcLazyWriteHotSpots;                                              <span class="comment">//0x548</span></span><br><span class="line">    ULONG CcLazyWriteIos;                                                   <span class="comment">//0x54c</span></span><br><span class="line">    ULONG CcLazyWritePages;                                                 <span class="comment">//0x550</span></span><br><span class="line">    ULONG CcDataFlushes;                                                    <span class="comment">//0x554</span></span><br><span class="line">    ULONG CcDataPages;                                                      <span class="comment">//0x558</span></span><br><span class="line">    ULONG CcLostDelayedWrites;                                              <span class="comment">//0x55c</span></span><br><span class="line">    ULONG CcFastReadResourceMiss;                                           <span class="comment">//0x560</span></span><br><span class="line">    ULONG CcCopyReadWaitMiss;                                               <span class="comment">//0x564</span></span><br><span class="line">    ULONG CcFastMdlReadResourceMiss;                                        <span class="comment">//0x568</span></span><br><span class="line">    ULONG CcMapDataNoWaitMiss;                                              <span class="comment">//0x56c</span></span><br><span class="line">    ULONG CcMapDataWaitMiss;                                                <span class="comment">//0x570</span></span><br><span class="line">    ULONG CcPinReadNoWaitMiss;                                              <span class="comment">//0x574</span></span><br><span class="line">    ULONG CcPinReadWaitMiss;                                                <span class="comment">//0x578</span></span><br><span class="line">    ULONG CcMdlReadNoWaitMiss;                                              <span class="comment">//0x57c</span></span><br><span class="line">    ULONG CcMdlReadWaitMiss;                                                <span class="comment">//0x580</span></span><br><span class="line">    ULONG CcReadAheadIos;                                                   <span class="comment">//0x584</span></span><br><span class="line">    ULONG KeAlignmentFixupCount;                                            <span class="comment">//0x588</span></span><br><span class="line">    ULONG KeExceptionDispatchCount;                                         <span class="comment">//0x58c</span></span><br><span class="line">    ULONG KeSystemCalls;                                                    <span class="comment">//0x590</span></span><br><span class="line">    ULONG AvailableTime;                                                    <span class="comment">//0x594</span></span><br><span class="line">    ULONG PrcbPad22[<span class="number">2</span>];                                                     <span class="comment">//0x598</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> _<span class="title">PP_LOOKASIDE_LIST</span> <span class="title">PPLookasideList</span>[16];</span>                          <span class="comment">//0x5a0</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> _<span class="title">GENERAL_LOOKASIDE_POOL</span> <span class="title">PPNPagedLookasideList</span>[32];</span>               <span class="comment">//0x620</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> _<span class="title">GENERAL_LOOKASIDE_POOL</span> <span class="title">PPPagedLookasideList</span>[32];</span>                <span class="comment">//0xf20</span></span><br><span class="line">    <span class="keyword">volatile</span> ULONG PacketBarrier;                                           <span class="comment">//0x1820</span></span><br><span class="line">    <span class="keyword">volatile</span> LONG ReverseStall;                                             <span class="comment">//0x1824</span></span><br><span class="line">    VOID* IpiFrame;                                                         <span class="comment">//0x1828</span></span><br><span class="line">    UCHAR PrcbPad3[<span class="number">52</span>];                                                     <span class="comment">//0x182c</span></span><br><span class="line">    VOID* <span class="keyword">volatile</span> CurrentPacket[<span class="number">3</span>];                                        <span class="comment">//0x1860</span></span><br><span class="line">    <span class="keyword">volatile</span> ULONG TargetSet;                                               <span class="comment">//0x186c</span></span><br><span class="line">    VOID (* volatileWorkerRoutine)(VOID* arg1, VOID* arg2, VOID* arg3, VOID* arg4); <span class="comment">//0x1870</span></span><br><span class="line">    <span class="keyword">volatile</span> ULONG IpiFrozen;                                               <span class="comment">//0x1874</span></span><br><span class="line">    UCHAR PrcbPad4[<span class="number">40</span>];                                                     <span class="comment">//0x1878</span></span><br><span class="line">    <span class="keyword">volatile</span> ULONG RequestSummary;                                          <span class="comment">//0x18a0</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> _<span class="title">KPRCB</span>* <span class="title">volatile</span> <span class="title">SignalDone</span>;</span>                                     <span class="comment">//0x18a4</span></span><br><span class="line">    UCHAR PrcbPad50[<span class="number">56</span>];                                                    <span class="comment">//0x18a8</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> _<span class="title">KDPC_DATA</span> <span class="title">DpcData</span>[2];</span>                                           <span class="comment">//0x18e0</span></span><br><span class="line">    VOID* DpcStack;                                                         <span class="comment">//0x1908</span></span><br><span class="line">    LONG MaximumDpcQueueDepth;                                              <span class="comment">//0x190c</span></span><br><span class="line">    ULONG DpcRequestRate;                                                   <span class="comment">//0x1910</span></span><br><span class="line">    ULONG MinimumDpcRate;                                                   <span class="comment">//0x1914</span></span><br><span class="line">    ULONG DpcLastCount;                                                     <span class="comment">//0x1918</span></span><br><span class="line">    ULONG PrcbLock;                                                         <span class="comment">//0x191c</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> _<span class="title">KGATE</span> <span class="title">DpcGate</span>;</span>                                                  <span class="comment">//0x1920</span></span><br><span class="line">    UCHAR ThreadDpcEnable;                                                  <span class="comment">//0x1930</span></span><br><span class="line">    <span class="keyword">volatile</span> UCHAR QuantumEnd;                                              <span class="comment">//0x1931</span></span><br><span class="line">    <span class="keyword">volatile</span> UCHAR DpcRoutineActive;                                        <span class="comment">//0x1932</span></span><br><span class="line">    <span class="keyword">volatile</span> UCHAR IdleSchedule;                                            <span class="comment">//0x1933</span></span><br><span class="line">    <span class="keyword">union</span></span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">volatile</span> LONG DpcRequestSummary;                                    <span class="comment">//0x1934</span></span><br><span class="line">        SHORT DpcRequestSlot[<span class="number">2</span>];                                            <span class="comment">//0x1934</span></span><br><span class="line">        <span class="class"><span class="keyword">struct</span></span></span><br><span class="line"><span class="class">        &#123;</span></span><br><span class="line">            SHORT NormalDpcState;                                           <span class="comment">//0x1934</span></span><br><span class="line">            <span class="keyword">union</span></span><br><span class="line">            &#123;</span><br><span class="line">                <span class="keyword">volatile</span> USHORT DpcThreadActive:<span class="number">1</span>;                          <span class="comment">//0x1936</span></span><br><span class="line">                SHORT ThreadDpcState;                                       <span class="comment">//0x1936</span></span><br><span class="line">            &#125;;</span><br><span class="line">        &#125;;</span><br><span class="line">    &#125;;</span><br><span class="line">    <span class="keyword">volatile</span> ULONG TimerHand;                                               <span class="comment">//0x1938</span></span><br><span class="line">    ULONG LastTick;                                                         <span class="comment">//0x193c</span></span><br><span class="line">    LONG MasterOffset;                                                      <span class="comment">//0x1940</span></span><br><span class="line">    ULONG PrcbPad41[<span class="number">2</span>];                                                     <span class="comment">//0x1944</span></span><br><span class="line">    ULONG PeriodicCount;                                                    <span class="comment">//0x194c</span></span><br><span class="line">    ULONG PeriodicBias;                                                     <span class="comment">//0x1950</span></span><br><span class="line">    ULONGLONG TickOffset;                                                   <span class="comment">//0x1958</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> _<span class="title">KTIMER_TABLE</span> <span class="title">TimerTable</span>;</span>                                        <span class="comment">//0x1960</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> _<span class="title">KDPC</span> <span class="title">CallDpc</span>;</span>                                                   <span class="comment">//0x31a0</span></span><br><span class="line">    LONG ClockKeepAlive;                                                    <span class="comment">//0x31c0</span></span><br><span class="line">    UCHAR ClockCheckSlot;                                                   <span class="comment">//0x31c4</span></span><br><span class="line">    UCHAR ClockPollCycle;                                                   <span class="comment">//0x31c5</span></span><br><span class="line">    UCHAR PrcbPad6[<span class="number">2</span>];                                                      <span class="comment">//0x31c6</span></span><br><span class="line">    LONG DpcWatchdogPeriod;                                                 <span class="comment">//0x31c8</span></span><br><span class="line">    LONG DpcWatchdogCount;                                                  <span class="comment">//0x31cc</span></span><br><span class="line">    LONG ThreadWatchdogPeriod;                                              <span class="comment">//0x31d0</span></span><br><span class="line">    LONG ThreadWatchdogCount;                                               <span class="comment">//0x31d4</span></span><br><span class="line">    <span class="keyword">volatile</span> LONG KeSpinLockOrdering;                                       <span class="comment">//0x31d8</span></span><br><span class="line">    ULONG PrcbPad70[<span class="number">1</span>];                                                     <span class="comment">//0x31dc</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> _<span class="title">LIST_ENTRY</span> <span class="title">WaitListHead</span>;</span>                                        <span class="comment">//0x31e0</span></span><br><span class="line">    ULONG WaitLock;                                                         <span class="comment">//0x31e8</span></span><br><span class="line">    ULONG ReadySummary;                                                     <span class="comment">//0x31ec</span></span><br><span class="line">    ULONG QueueIndex;                                                       <span class="comment">//0x31f0</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> _<span class="title">SINGLE_LIST_ENTRY</span> <span class="title">DeferredReadyListHead</span>;</span>                        <span class="comment">//0x31f4</span></span><br><span class="line">    ULONGLONG StartCycles;                                                  <span class="comment">//0x31f8</span></span><br><span class="line">    <span class="keyword">volatile</span> ULONGLONG CycleTime;                                           <span class="comment">//0x3200</span></span><br><span class="line">    <span class="keyword">volatile</span> ULONG HighCycleTime;                                           <span class="comment">//0x3208</span></span><br><span class="line">    ULONG PrcbPad71;                                                        <span class="comment">//0x320c</span></span><br><span class="line">    ULONGLONG PrcbPad72[<span class="number">2</span>];                                                 <span class="comment">//0x3210</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> _<span class="title">LIST_ENTRY</span> <span class="title">DispatcherReadyListHead</span>[32];</span>                         <span class="comment">//0x3220</span></span><br><span class="line">    VOID* ChainedInterruptList;                                             <span class="comment">//0x3320</span></span><br><span class="line">    LONG LookasideIrpFloat;                                                 <span class="comment">//0x3324</span></span><br><span class="line">    <span class="keyword">volatile</span> LONG MmPageFaultCount;                                         <span class="comment">//0x3328</span></span><br><span class="line">    <span class="keyword">volatile</span> LONG MmCopyOnWriteCount;                                       <span class="comment">//0x332c</span></span><br><span class="line">    <span class="keyword">volatile</span> LONG MmTransitionCount;                                        <span class="comment">//0x3330</span></span><br><span class="line">    <span class="keyword">volatile</span> LONG MmCacheTransitionCount;                                   <span class="comment">//0x3334</span></span><br><span class="line">    <span class="keyword">volatile</span> LONG MmDemandZeroCount;                                        <span class="comment">//0x3338</span></span><br><span class="line">    <span class="keyword">volatile</span> LONG MmPageReadCount;                                          <span class="comment">//0x333c</span></span><br><span class="line">    <span class="keyword">volatile</span> LONG MmPageReadIoCount;                                        <span class="comment">//0x3340</span></span><br><span class="line">    <span class="keyword">volatile</span> LONG MmCacheReadCount;                                         <span class="comment">//0x3344</span></span><br><span class="line">    <span class="keyword">volatile</span> LONG MmCacheIoCount;                                           <span class="comment">//0x3348</span></span><br><span class="line">    <span class="keyword">volatile</span> LONG MmDirtyPagesWriteCount;                                   <span class="comment">//0x334c</span></span><br><span class="line">    <span class="keyword">volatile</span> LONG MmDirtyWriteIoCount;                                      <span class="comment">//0x3350</span></span><br><span class="line">    <span class="keyword">volatile</span> LONG MmMappedPagesWriteCount;                                  <span class="comment">//0x3354</span></span><br><span class="line">    <span class="keyword">volatile</span> LONG MmMappedWriteIoCount;                                     <span class="comment">//0x3358</span></span><br><span class="line">    <span class="keyword">volatile</span> ULONG CachedCommit;                                            <span class="comment">//0x335c</span></span><br><span class="line">    <span class="keyword">volatile</span> ULONG CachedResidentAvailable;                                 <span class="comment">//0x3360</span></span><br><span class="line">    VOID* HyperPte;                                                         <span class="comment">//0x3364</span></span><br><span class="line">    UCHAR PrcbPad8[<span class="number">4</span>];                                                      <span class="comment">//0x3368</span></span><br><span class="line">    UCHAR VendorString[<span class="number">13</span>];                                                 <span class="comment">//0x336c</span></span><br><span class="line">    UCHAR InitialApicId;                                                    <span class="comment">//0x3379</span></span><br><span class="line">    UCHAR LogicalProcessorsPerPhysicalProcessor;                            <span class="comment">//0x337a</span></span><br><span class="line">    UCHAR PrcbPad9[<span class="number">5</span>];                                                      <span class="comment">//0x337b</span></span><br><span class="line">    ULONG FeatureBits;                                                      <span class="comment">//0x3380</span></span><br><span class="line">    <span class="keyword">union</span> _LARGE_INTEGER UpdateSignature;                                   <span class="comment">//0x3388</span></span><br><span class="line">    <span class="keyword">volatile</span> ULONGLONG IsrTime;                                             <span class="comment">//0x3390</span></span><br><span class="line">    ULONGLONG RuntimeAccumulation;                                          <span class="comment">//0x3398</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> _<span class="title">PROCESSOR_POWER_STATE</span> <span class="title">PowerState</span>;</span>                               <span class="comment">//0x33a0</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> _<span class="title">KDPC</span> <span class="title">DpcWatchdogDpc</span>;</span>                                            <span class="comment">//0x3468</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> _<span class="title">KTIMER</span> <span class="title">DpcWatchdogTimer</span>;</span>                                        <span class="comment">//0x3488</span></span><br><span class="line">    VOID* WheaInfo;                                                         <span class="comment">//0x34b0</span></span><br><span class="line">    VOID* EtwSupport;                                                       <span class="comment">//0x34b4</span></span><br><span class="line">    <span class="keyword">union</span> _SLIST_HEADER InterruptObjectPool;                                <span class="comment">//0x34b8</span></span><br><span class="line">    <span class="keyword">union</span> _SLIST_HEADER HypercallPageList;                                  <span class="comment">//0x34c0</span></span><br><span class="line">    VOID* HypercallPageVirtual;                                             <span class="comment">//0x34c8</span></span><br><span class="line">    VOID* VirtualApicAssist;                                                <span class="comment">//0x34cc</span></span><br><span class="line">    ULONGLONG* StatisticsPage;                                              <span class="comment">//0x34d0</span></span><br><span class="line">    VOID* RateControl;                                                      <span class="comment">//0x34d4</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> _<span class="title">CACHE_DESCRIPTOR</span> <span class="title">Cache</span>[5];</span>                                      <span class="comment">//0x34d8</span></span><br><span class="line">    ULONG CacheCount;                                                       <span class="comment">//0x3514</span></span><br><span class="line">    ULONG CacheProcessorMask[<span class="number">5</span>];                                            <span class="comment">//0x3518</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> _<span class="title">KAFFINITY_EX</span> <span class="title">PackageProcessorSet</span>;</span>                               <span class="comment">//0x352c</span></span><br><span class="line">    ULONG PrcbPad91[<span class="number">1</span>];                                                     <span class="comment">//0x3538</span></span><br><span class="line">    ULONG CoreProcessorSet;                                                 <span class="comment">//0x353c</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> _<span class="title">KDPC</span> <span class="title">TimerExpirationDpc</span>;</span>                                        <span class="comment">//0x3540</span></span><br><span class="line">    ULONG SpinLockAcquireCount;                                             <span class="comment">//0x3560</span></span><br><span class="line">    ULONG SpinLockContentionCount;                                          <span class="comment">//0x3564</span></span><br><span class="line">    ULONG SpinLockSpinCount;                                                <span class="comment">//0x3568</span></span><br><span class="line">    ULONG IpiSendRequestBroadcastCount;                                     <span class="comment">//0x356c</span></span><br><span class="line">    ULONG IpiSendRequestRoutineCount;                                       <span class="comment">//0x3570</span></span><br><span class="line">    ULONG IpiSendSoftwareInterruptCount;                                    <span class="comment">//0x3574</span></span><br><span class="line">    ULONG ExInitializeResourceCount;                                        <span class="comment">//0x3578</span></span><br><span class="line">    ULONG ExReInitializeResourceCount;                                      <span class="comment">//0x357c</span></span><br><span class="line">    ULONG ExDeleteResourceCount;                                            <span class="comment">//0x3580</span></span><br><span class="line">    ULONG ExecutiveResourceAcquiresCount;                                   <span class="comment">//0x3584</span></span><br><span class="line">    ULONG ExecutiveResourceContentionsCount;                                <span class="comment">//0x3588</span></span><br><span class="line">    ULONG ExecutiveResourceReleaseExclusiveCount;                           <span class="comment">//0x358c</span></span><br><span class="line">    ULONG ExecutiveResourceReleaseSharedCount;                              <span class="comment">//0x3590</span></span><br><span class="line">    ULONG ExecutiveResourceConvertsCount;                                   <span class="comment">//0x3594</span></span><br><span class="line">    ULONG ExAcqResExclusiveAttempts;                                        <span class="comment">//0x3598</span></span><br><span class="line">    ULONG ExAcqResExclusiveAcquiresExclusive;                               <span class="comment">//0x359c</span></span><br><span class="line">    ULONG ExAcqResExclusiveAcquiresExclusiveRecursive;                      <span class="comment">//0x35a0</span></span><br><span class="line">    ULONG ExAcqResExclusiveWaits;                                           <span class="comment">//0x35a4</span></span><br><span class="line">    ULONG ExAcqResExclusiveNotAcquires;                                     <span class="comment">//0x35a8</span></span><br><span class="line">    ULONG ExAcqResSharedAttempts;                                           <span class="comment">//0x35ac</span></span><br><span class="line">    ULONG ExAcqResSharedAcquiresExclusive;                                  <span class="comment">//0x35b0</span></span><br><span class="line">    ULONG ExAcqResSharedAcquiresShared;                                     <span class="comment">//0x35b4</span></span><br><span class="line">    ULONG ExAcqResSharedAcquiresSharedRecursive;                            <span class="comment">//0x35b8</span></span><br><span class="line">    ULONG ExAcqResSharedWaits;                                              <span class="comment">//0x35bc</span></span><br><span class="line">    ULONG ExAcqResSharedNotAcquires;                                        <span class="comment">//0x35c0</span></span><br><span class="line">    ULONG ExAcqResSharedStarveExclusiveAttempts;                            <span class="comment">//0x35c4</span></span><br><span class="line">    ULONG ExAcqResSharedStarveExclusiveAcquiresExclusive;                   <span class="comment">//0x35c8</span></span><br><span class="line">    ULONG ExAcqResSharedStarveExclusiveAcquiresShared;                      <span class="comment">//0x35cc</span></span><br><span class="line">    ULONG ExAcqResSharedStarveExclusiveAcquiresSharedRecursive;             <span class="comment">//0x35d0</span></span><br><span class="line">    ULONG ExAcqResSharedStarveExclusiveWaits;                               <span class="comment">//0x35d4</span></span><br><span class="line">    ULONG ExAcqResSharedStarveExclusiveNotAcquires;                         <span class="comment">//0x35d8</span></span><br><span class="line">    ULONG ExAcqResSharedWaitForExclusiveAttempts;                           <span class="comment">//0x35dc</span></span><br><span class="line">    ULONG ExAcqResSharedWaitForExclusiveAcquiresExclusive;                  <span class="comment">//0x35e0</span></span><br><span class="line">    ULONG ExAcqResSharedWaitForExclusiveAcquiresShared;                     <span class="comment">//0x35e4</span></span><br><span class="line">    ULONG ExAcqResSharedWaitForExclusiveAcquiresSharedRecursive;            <span class="comment">//0x35e8</span></span><br><span class="line">    ULONG ExAcqResSharedWaitForExclusiveWaits;                              <span class="comment">//0x35ec</span></span><br><span class="line">    ULONG ExAcqResSharedWaitForExclusiveNotAcquires;                        <span class="comment">//0x35f0</span></span><br><span class="line">    ULONG ExSetResOwnerPointerExclusive;                                    <span class="comment">//0x35f4</span></span><br><span class="line">    ULONG ExSetResOwnerPointerSharedNew;                                    <span class="comment">//0x35f8</span></span><br><span class="line">    ULONG ExSetResOwnerPointerSharedOld;                                    <span class="comment">//0x35fc</span></span><br><span class="line">    ULONG ExTryToAcqExclusiveAttempts;                                      <span class="comment">//0x3600</span></span><br><span class="line">    ULONG ExTryToAcqExclusiveAcquires;                                      <span class="comment">//0x3604</span></span><br><span class="line">    ULONG ExBoostExclusiveOwner;                                            <span class="comment">//0x3608</span></span><br><span class="line">    ULONG ExBoostSharedOwners;                                              <span class="comment">//0x360c</span></span><br><span class="line">    ULONG ExEtwSynchTrackingNotificationsCount;                             <span class="comment">//0x3610</span></span><br><span class="line">    ULONG ExEtwSynchTrackingNotificationsAccountedCount;                    <span class="comment">//0x3614</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> _<span class="title">CONTEXT</span>* <span class="title">Context</span>;</span>                                               <span class="comment">//0x3618</span></span><br><span class="line">    ULONG ContextFlags;                                                     <span class="comment">//0x361c</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> _<span class="title">XSAVE_AREA</span>* <span class="title">ExtendedState</span>;</span>                                      <span class="comment">//0x3620</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>CurrentThread;                                         //0x4   当前线程</p>
+<p>NextThread;                                            //0x8  下个线程</p>
+<p>IdleThread;                                            //0xc  这个CPU的空闲线程</p>
+<h3 id="EPROCESS"><a href="#EPROCESS" class="headerlink" title="EPROCESS"></a>EPROCESS</h3><p>进程结构体，进程的本体</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//0x2c0 bytes (sizeof)</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> _<span class="title">EPROCESS</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> _<span class="title">KPROCESS</span> <span class="title">Pcb</span>;</span>                                                   <span class="comment">//0x0</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> _<span class="title">EX_PUSH_LOCK</span> <span class="title">ProcessLock</span>;</span>                                       <span class="comment">//0x98</span></span><br><span class="line">    <span class="keyword">union</span> _LARGE_INTEGER CreateTime;                                        <span class="comment">//0xa0</span></span><br><span class="line">    <span class="keyword">union</span> _LARGE_INTEGER ExitTime;                                          <span class="comment">//0xa8</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> _<span class="title">EX_RUNDOWN_REF</span> <span class="title">RundownProtect</span>;</span>                                  <span class="comment">//0xb0</span></span><br><span class="line">    VOID* UniqueProcessId;                                                  <span class="comment">//0xb4</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> _<span class="title">LIST_ENTRY</span> <span class="title">ActiveProcessLinks</span>;</span>                                  <span class="comment">//0xb8</span></span><br><span class="line">    ULONG ProcessQuotaUsage[<span class="number">2</span>];                                             <span class="comment">//0xc0</span></span><br><span class="line">    ULONG ProcessQuotaPeak[<span class="number">2</span>];                                              <span class="comment">//0xc8</span></span><br><span class="line">    <span class="keyword">volatile</span> ULONG CommitCharge;                                            <span class="comment">//0xd0</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> _<span class="title">EPROCESS_QUOTA_BLOCK</span>* <span class="title">QuotaBlock</span>;</span>                               <span class="comment">//0xd4</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> _<span class="title">PS_CPU_QUOTA_BLOCK</span>* <span class="title">CpuQuotaBlock</span>;</span>                              <span class="comment">//0xd8</span></span><br><span class="line">    ULONG PeakVirtualSize;                                                  <span class="comment">//0xdc</span></span><br><span class="line">    ULONG VirtualSize;                                                      <span class="comment">//0xe0</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> _<span class="title">LIST_ENTRY</span> <span class="title">SessionProcessLinks</span>;</span>                                 <span class="comment">//0xe4</span></span><br><span class="line">    VOID* DebugPort;                                                        <span class="comment">//0xec</span></span><br><span class="line">    <span class="keyword">union</span></span><br><span class="line">    &#123;</span><br><span class="line">        VOID* ExceptionPortData;                                            <span class="comment">//0xf0</span></span><br><span class="line">        ULONG ExceptionPortValue;                                           <span class="comment">//0xf0</span></span><br><span class="line">        ULONG ExceptionPortState:<span class="number">3</span>;                                         <span class="comment">//0xf0</span></span><br><span class="line">    &#125;;</span><br><span class="line">    <span class="class"><span class="keyword">struct</span> _<span class="title">HANDLE_TABLE</span>* <span class="title">ObjectTable</span>;</span>                                      <span class="comment">//0xf4</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> _<span class="title">EX_FAST_REF</span> <span class="title">Token</span>;</span>                                              <span class="comment">//0xf8</span></span><br><span class="line">    ULONG WorkingSetPage;                                                   <span class="comment">//0xfc</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> _<span class="title">EX_PUSH_LOCK</span> <span class="title">AddressCreationLock</span>;</span>                               <span class="comment">//0x100</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> _<span class="title">ETHREAD</span>* <span class="title">RotateInProgress</span>;</span>                                      <span class="comment">//0x104</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> _<span class="title">ETHREAD</span>* <span class="title">ForkInProgress</span>;</span>                                        <span class="comment">//0x108</span></span><br><span class="line">    ULONG HardwareTrigger;                                                  <span class="comment">//0x10c</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> _<span class="title">MM_AVL_TABLE</span>* <span class="title">PhysicalVadRoot</span>;</span>                                  <span class="comment">//0x110</span></span><br><span class="line">    VOID* CloneRoot;                                                        <span class="comment">//0x114</span></span><br><span class="line">    <span class="keyword">volatile</span> ULONG NumberOfPrivatePages;                                    <span class="comment">//0x118</span></span><br><span class="line">    <span class="keyword">volatile</span> ULONG NumberOfLockedPages;                                     <span class="comment">//0x11c</span></span><br><span class="line">    VOID* Win32Process;                                                     <span class="comment">//0x120</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> _<span class="title">EJOB</span>* <span class="title">volatile</span> <span class="title">Job</span>;</span>                                             <span class="comment">//0x124</span></span><br><span class="line">    VOID* SectionObject;                                                    <span class="comment">//0x128</span></span><br><span class="line">    VOID* SectionBaseAddress;                                               <span class="comment">//0x12c</span></span><br><span class="line">    ULONG Cookie;                                                           <span class="comment">//0x130</span></span><br><span class="line">    ULONG Spare8;                                                           <span class="comment">//0x134</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> _<span class="title">PAGEFAULT_HISTORY</span>* <span class="title">WorkingSetWatch</span>;</span>                             <span class="comment">//0x138</span></span><br><span class="line">    VOID* Win32WindowStation;                                               <span class="comment">//0x13c</span></span><br><span class="line">    VOID* InheritedFromUniqueProcessId;                                     <span class="comment">//0x140</span></span><br><span class="line">    VOID* LdtInformation;                                                   <span class="comment">//0x144</span></span><br><span class="line">    VOID* VdmObjects;                                                       <span class="comment">//0x148</span></span><br><span class="line">    ULONG ConsoleHostProcess;                                               <span class="comment">//0x14c</span></span><br><span class="line">    VOID* DeviceMap;                                                        <span class="comment">//0x150</span></span><br><span class="line">    VOID* EtwDataSource;                                                    <span class="comment">//0x154</span></span><br><span class="line">    VOID* FreeTebHint;                                                      <span class="comment">//0x158</span></span><br><span class="line">    <span class="keyword">union</span></span><br><span class="line">    &#123;</span><br><span class="line">        <span class="class"><span class="keyword">struct</span> _<span class="title">HARDWARE_PTE</span> <span class="title">PageDirectoryPte</span>;</span>                              <span class="comment">//0x160</span></span><br><span class="line">        ULONGLONG Filler;                                                   <span class="comment">//0x160</span></span><br><span class="line">    &#125;;</span><br><span class="line">    VOID* Session;                                                          <span class="comment">//0x168</span></span><br><span class="line">    UCHAR ImageFileName[<span class="number">15</span>];                                                <span class="comment">//0x16c</span></span><br><span class="line">    UCHAR PriorityClass;                                                    <span class="comment">//0x17b</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> _<span class="title">LIST_ENTRY</span> <span class="title">JobLinks</span>;</span>                                            <span class="comment">//0x17c</span></span><br><span class="line">    VOID* LockedPagesList;                                                  <span class="comment">//0x184</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> _<span class="title">LIST_ENTRY</span> <span class="title">ThreadListHead</span>;</span>                                      <span class="comment">//0x188</span></span><br><span class="line">    VOID* SecurityPort;                                                     <span class="comment">//0x190</span></span><br><span class="line">    VOID* PaeTop;                                                           <span class="comment">//0x194</span></span><br><span class="line">    <span class="keyword">volatile</span> ULONG ActiveThreads;                                           <span class="comment">//0x198</span></span><br><span class="line">    ULONG ImagePathHash;                                                    <span class="comment">//0x19c</span></span><br><span class="line">    ULONG DefaultHardErrorProcessing;                                       <span class="comment">//0x1a0</span></span><br><span class="line">    LONG LastThreadExitStatus;                                              <span class="comment">//0x1a4</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> _<span class="title">PEB</span>* <span class="title">Peb</span>;</span>                                                       <span class="comment">//0x1a8</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> _<span class="title">EX_FAST_REF</span> <span class="title">PrefetchTrace</span>;</span>                                      <span class="comment">//0x1ac</span></span><br><span class="line">    <span class="keyword">union</span> _LARGE_INTEGER ReadOperationCount;                                <span class="comment">//0x1b0</span></span><br><span class="line">    <span class="keyword">union</span> _LARGE_INTEGER WriteOperationCount;                               <span class="comment">//0x1b8</span></span><br><span class="line">    <span class="keyword">union</span> _LARGE_INTEGER OtherOperationCount;                               <span class="comment">//0x1c0</span></span><br><span class="line">    <span class="keyword">union</span> _LARGE_INTEGER ReadTransferCount;                                 <span class="comment">//0x1c8</span></span><br><span class="line">    <span class="keyword">union</span> _LARGE_INTEGER WriteTransferCount;                                <span class="comment">//0x1d0</span></span><br><span class="line">    <span class="keyword">union</span> _LARGE_INTEGER OtherTransferCount;                                <span class="comment">//0x1d8</span></span><br><span class="line">    ULONG CommitChargeLimit;                                                <span class="comment">//0x1e0</span></span><br><span class="line">    <span class="keyword">volatile</span> ULONG CommitChargePeak;                                        <span class="comment">//0x1e4</span></span><br><span class="line">    VOID* AweInfo;                                                          <span class="comment">//0x1e8</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> _<span class="title">SE_AUDIT_PROCESS_CREATION_INFO</span> <span class="title">SeAuditProcessCreationInfo</span>;</span>      <span class="comment">//0x1ec</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> _<span class="title">MMSUPPORT</span> <span class="title">Vm</span>;</span>                                                   <span class="comment">//0x1f0</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> _<span class="title">LIST_ENTRY</span> <span class="title">MmProcessLinks</span>;</span>                                      <span class="comment">//0x25c</span></span><br><span class="line">    VOID* HighestUserAddress;                                               <span class="comment">//0x264</span></span><br><span class="line">    ULONG ModifiedPageCount;                                                <span class="comment">//0x268</span></span><br><span class="line">    <span class="keyword">union</span></span><br><span class="line">    &#123;</span><br><span class="line">        ULONG Flags2;                                                       <span class="comment">//0x26c</span></span><br><span class="line">        <span class="class"><span class="keyword">struct</span></span></span><br><span class="line"><span class="class">        &#123;</span></span><br><span class="line">            ULONG JobNotReallyActive:<span class="number">1</span>;                                     <span class="comment">//0x26c</span></span><br><span class="line">            ULONG AccountingFolded:<span class="number">1</span>;                                       <span class="comment">//0x26c</span></span><br><span class="line">            ULONG NewProcessReported:<span class="number">1</span>;                                     <span class="comment">//0x26c</span></span><br><span class="line">            ULONG ExitProcessReported:<span class="number">1</span>;                                    <span class="comment">//0x26c</span></span><br><span class="line">            ULONG ReportCommitChanges:<span class="number">1</span>;                                    <span class="comment">//0x26c</span></span><br><span class="line">            ULONG LastReportMemory:<span class="number">1</span>;                                       <span class="comment">//0x26c</span></span><br><span class="line">            ULONG ReportPhysicalPageChanges:<span class="number">1</span>;                              <span class="comment">//0x26c</span></span><br><span class="line">            ULONG HandleTableRundown:<span class="number">1</span>;                                     <span class="comment">//0x26c</span></span><br><span class="line">            ULONG NeedsHandleRundown:<span class="number">1</span>;                                     <span class="comment">//0x26c</span></span><br><span class="line">            ULONG RefTraceEnabled:<span class="number">1</span>;                                        <span class="comment">//0x26c</span></span><br><span class="line">            ULONG NumaAware:<span class="number">1</span>;                                              <span class="comment">//0x26c</span></span><br><span class="line">            ULONG ProtectedProcess:<span class="number">1</span>;                                       <span class="comment">//0x26c</span></span><br><span class="line">            ULONG DefaultPagePriority:<span class="number">3</span>;                                    <span class="comment">//0x26c</span></span><br><span class="line">            ULONG PrimaryTokenFrozen:<span class="number">1</span>;                                     <span class="comment">//0x26c</span></span><br><span class="line">            ULONG ProcessVerifierTarget:<span class="number">1</span>;                                  <span class="comment">//0x26c</span></span><br><span class="line">            ULONG StackRandomizationDisabled:<span class="number">1</span>;                             <span class="comment">//0x26c</span></span><br><span class="line">            ULONG AffinityPermanent:<span class="number">1</span>;                                      <span class="comment">//0x26c</span></span><br><span class="line">            ULONG AffinityUpdateEnable:<span class="number">1</span>;                                   <span class="comment">//0x26c</span></span><br><span class="line">            ULONG PropagateNode:<span class="number">1</span>;                                          <span class="comment">//0x26c</span></span><br><span class="line">            ULONG ExplicitAffinity:<span class="number">1</span>;                                       <span class="comment">//0x26c</span></span><br><span class="line">        &#125;;</span><br><span class="line">    &#125;;</span><br><span class="line">    <span class="keyword">union</span></span><br><span class="line">    &#123;</span><br><span class="line">        ULONG Flags;                                                        <span class="comment">//0x270</span></span><br><span class="line">        <span class="class"><span class="keyword">struct</span></span></span><br><span class="line"><span class="class">        &#123;</span></span><br><span class="line">            ULONG CreateReported:<span class="number">1</span>;                                         <span class="comment">//0x270</span></span><br><span class="line">            ULONG NoDebugInherit:<span class="number">1</span>;                                         <span class="comment">//0x270</span></span><br><span class="line">            ULONG ProcessExiting:<span class="number">1</span>;                                         <span class="comment">//0x270</span></span><br><span class="line">            ULONG ProcessDelete:<span class="number">1</span>;                                          <span class="comment">//0x270</span></span><br><span class="line">            ULONG Wow64SplitPages:<span class="number">1</span>;                                        <span class="comment">//0x270</span></span><br><span class="line">            ULONG VmDeleted:<span class="number">1</span>;                                              <span class="comment">//0x270</span></span><br><span class="line">            ULONG OutswapEnabled:<span class="number">1</span>;                                         <span class="comment">//0x270</span></span><br><span class="line">            ULONG Outswapped:<span class="number">1</span>;                                             <span class="comment">//0x270</span></span><br><span class="line">            ULONG ForkFailed:<span class="number">1</span>;                                             <span class="comment">//0x270</span></span><br><span class="line">            ULONG Wow64VaSpace4Gb:<span class="number">1</span>;                                        <span class="comment">//0x270</span></span><br><span class="line">            ULONG AddressSpaceInitialized:<span class="number">2</span>;                                <span class="comment">//0x270</span></span><br><span class="line">            ULONG SetTimerResolution:<span class="number">1</span>;                                     <span class="comment">//0x270</span></span><br><span class="line">            ULONG BreakOnTermination:<span class="number">1</span>;                                     <span class="comment">//0x270</span></span><br><span class="line">            ULONG DeprioritizeViews:<span class="number">1</span>;                                      <span class="comment">//0x270</span></span><br><span class="line">            ULONG WriteWatch:<span class="number">1</span>;                                             <span class="comment">//0x270</span></span><br><span class="line">            ULONG ProcessInSession:<span class="number">1</span>;                                       <span class="comment">//0x270</span></span><br><span class="line">            ULONG OverrideAddressSpace:<span class="number">1</span>;                                   <span class="comment">//0x270</span></span><br><span class="line">            ULONG HasAddressSpace:<span class="number">1</span>;                                        <span class="comment">//0x270</span></span><br><span class="line">            ULONG LaunchPrefetched:<span class="number">1</span>;                                       <span class="comment">//0x270</span></span><br><span class="line">            ULONG InjectInpageErrors:<span class="number">1</span>;                                     <span class="comment">//0x270</span></span><br><span class="line">            ULONG VmTopDown:<span class="number">1</span>;                                              <span class="comment">//0x270</span></span><br><span class="line">            ULONG ImageNotifyDone:<span class="number">1</span>;                                        <span class="comment">//0x270</span></span><br><span class="line">            ULONG PdeUpdateNeeded:<span class="number">1</span>;                                        <span class="comment">//0x270</span></span><br><span class="line">            ULONG VdmAllowed:<span class="number">1</span>;                                             <span class="comment">//0x270</span></span><br><span class="line">            ULONG CrossSessionCreate:<span class="number">1</span>;                                     <span class="comment">//0x270</span></span><br><span class="line">            ULONG ProcessInserted:<span class="number">1</span>;                                        <span class="comment">//0x270</span></span><br><span class="line">            ULONG DefaultIoPriority:<span class="number">3</span>;                                      <span class="comment">//0x270</span></span><br><span class="line">            ULONG ProcessSelfDelete:<span class="number">1</span>;                                      <span class="comment">//0x270</span></span><br><span class="line">            ULONG SetTimerResolutionLink:<span class="number">1</span>;                                 <span class="comment">//0x270</span></span><br><span class="line">        &#125;;</span><br><span class="line">    &#125;;</span><br><span class="line">    LONG ExitStatus;                                                        <span class="comment">//0x274</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> _<span class="title">MM_AVL_TABLE</span> <span class="title">VadRoot</span>;</span>                                           <span class="comment">//0x278</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> _<span class="title">ALPC_PROCESS_CONTEXT</span> <span class="title">AlpcContext</span>;</span>                               <span class="comment">//0x298</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> _<span class="title">LIST_ENTRY</span> <span class="title">TimerResolutionLink</span>;</span>                                 <span class="comment">//0x2a8</span></span><br><span class="line">    ULONG RequestedTimerResolution;                                         <span class="comment">//0x2b0</span></span><br><span class="line">    ULONG ActiveThreadsHighWatermark;                                       <span class="comment">//0x2b4</span></span><br><span class="line">    ULONG SmallestTimerResolution;                                          <span class="comment">//0x2b8</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> _<span class="title">PO_DIAG_STACK_RECORD</span>* <span class="title">TimerResolutionStackRecord</span>;</span>               <span class="comment">//0x2bc</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p> struct _KPROCESS Pcb;                                                   //0x0   EPROCESS里面嵌入的KPROCESS结构体</p>
+<p>UniqueProcessId;                                                  //0xb4  进程的PID，</p>
+<p>DebugPort;                                                        //0xec  调试的关键</p>
+<p>ThreadListHead;                                      //0x188    链上了当前进程内的所有线程</p>
+<p>ActiveThreads;                                           //0x198  活动线程的总数量</p>
+<p>_PEB* Peb;                                                       //0x1a8    三环下的PEB</p>
+<p>_SE_AUDIT_PROCESS_CREATION_INFO SeAuditProcessCreationInfo;      //0x1ec   当前进程的完整路径</p>
+<p>Flags;                                                        //0x270   进程的一些属性</p>
+<ul>
+<li><p>ProcessExiting：进程退出标志位。置1后表明该进程已退出，但实际还在运行。可以达到反调试的效果。同时进程无法使用任务管理器结束。</p>
+</li>
+<li><p>ProcessDelete：进程退出标志位。置1后表明该进程已退出，但实际还在运行。可以达到反调试的效果。同时进程无法使用任务管理器结束。</p>
+<p><img src="https://bbs.pediy.com/upload/attach/202112/867232_99MMP7ZRN9H3JR2.jpg" alt="image-20210927153322421"></p>
+</li>
+<li><p>BreakOnTermination：该位置1后，任务管理器结束进程时将提示“是否结束系统进程XXX”。结束后windbg将会断下。</p>
+<p><img src="https://bbs.pediy.com/upload/attach/202112/867232_9HSHFG7SVAGK97J.jpg" alt="image-20210927152849916"></p>
+</li>
+<li><p>VmTopDown：该位置1时，VirtualAlloc一类的申请内存函数将会从大地址开始申请。</p>
+</li>
+<li><p>ProcessInserted：该位置0后，OD附加进程列表找不到该进程。任务管理器结束不掉该进程。CE打不开该进程，无图标。</p>
+</li>
+</ul>
+<h3 id="KPROCESS"><a href="#KPROCESS" class="headerlink" title="KPROCESS"></a>KPROCESS</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//0x98 bytes (sizeof)</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> _<span class="title">KPROCESS</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> _<span class="title">DISPATCHER_HEADER</span> <span class="title">Header</span>;</span>                                       <span class="comment">//0x0</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> _<span class="title">LIST_ENTRY</span> <span class="title">ProfileListHead</span>;</span>                                     <span class="comment">//0x10</span></span><br><span class="line">    ULONG DirectoryTableBase;                                               <span class="comment">//0x18</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> _<span class="title">KGDTENTRY</span> <span class="title">LdtDescriptor</span>;</span>                                        <span class="comment">//0x1c</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> _<span class="title">KIDTENTRY</span> <span class="title">Int21Descriptor</span>;</span>                                      <span class="comment">//0x24</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> _<span class="title">LIST_ENTRY</span> <span class="title">ThreadListHead</span>;</span>                                      <span class="comment">//0x2c</span></span><br><span class="line">    ULONG ProcessLock;                                                      <span class="comment">//0x34</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> _<span class="title">KAFFINITY_EX</span> <span class="title">Affinity</span>;</span>                                          <span class="comment">//0x38</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> _<span class="title">LIST_ENTRY</span> <span class="title">ReadyListHead</span>;</span>                                       <span class="comment">//0x44</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> _<span class="title">SINGLE_LIST_ENTRY</span> <span class="title">SwapListEntry</span>;</span>                                <span class="comment">//0x4c</span></span><br><span class="line">    <span class="keyword">volatile</span> <span class="class"><span class="keyword">struct</span> _<span class="title">KAFFINITY_EX</span> <span class="title">ActiveProcessors</span>;</span>                         <span class="comment">//0x50</span></span><br><span class="line">    <span class="keyword">union</span></span><br><span class="line">    &#123;</span><br><span class="line">        <span class="class"><span class="keyword">struct</span></span></span><br><span class="line"><span class="class">        &#123;</span></span><br><span class="line">            <span class="keyword">volatile</span> LONG AutoAlignment:<span class="number">1</span>;                                  <span class="comment">//0x5c</span></span><br><span class="line">            <span class="keyword">volatile</span> LONG DisableBoost:<span class="number">1</span>;                                   <span class="comment">//0x5c</span></span><br><span class="line">            <span class="keyword">volatile</span> LONG DisableQuantum:<span class="number">1</span>;                                 <span class="comment">//0x5c</span></span><br><span class="line">            <span class="keyword">volatile</span> ULONG ActiveGroupsMask:<span class="number">1</span>;                              <span class="comment">//0x5c</span></span><br><span class="line">            <span class="keyword">volatile</span> LONG ReservedFlags:<span class="number">28</span>;                                 <span class="comment">//0x5c</span></span><br><span class="line">        &#125;;</span><br><span class="line">        <span class="keyword">volatile</span> LONG ProcessFlags;                                         <span class="comment">//0x5c</span></span><br><span class="line">    &#125;;</span><br><span class="line">    CHAR BasePriority;                                                      <span class="comment">//0x60</span></span><br><span class="line">    CHAR QuantumReset;                                                      <span class="comment">//0x61</span></span><br><span class="line">    UCHAR Visited;                                                          <span class="comment">//0x62</span></span><br><span class="line">    UCHAR Unused3;                                                          <span class="comment">//0x63</span></span><br><span class="line">    ULONG ThreadSeed[<span class="number">1</span>];                                                    <span class="comment">//0x64</span></span><br><span class="line">    USHORT IdealNode[<span class="number">1</span>];                                                    <span class="comment">//0x68</span></span><br><span class="line">    USHORT IdealGlobalNode;                                                 <span class="comment">//0x6a</span></span><br><span class="line">    <span class="keyword">union</span> _KEXECUTE_OPTIONS Flags;                                          <span class="comment">//0x6c</span></span><br><span class="line">    UCHAR Unused1;                                                          <span class="comment">//0x6d</span></span><br><span class="line">    USHORT IopmOffset;                                                      <span class="comment">//0x6e</span></span><br><span class="line">    ULONG Unused4;                                                          <span class="comment">//0x70</span></span><br><span class="line">    <span class="keyword">union</span> _KSTACK_COUNT StackCount;                                         <span class="comment">//0x74</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> _<span class="title">LIST_ENTRY</span> <span class="title">ProcessListEntry</span>;</span>                                    <span class="comment">//0x78</span></span><br><span class="line">    <span class="keyword">volatile</span> ULONGLONG CycleTime;                                           <span class="comment">//0x80</span></span><br><span class="line">    ULONG KernelTime;                                                       <span class="comment">//0x88</span></span><br><span class="line">    ULONG UserTime;                                                         <span class="comment">//0x8c</span></span><br><span class="line">    VOID* VdmTrapcHandler;                                                  <span class="comment">//0x90</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<h3 id="ETHREAD"><a href="#ETHREAD" class="headerlink" title="ETHREAD"></a>ETHREAD</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//0x2b8 bytes (sizeof)</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> _<span class="title">ETHREAD</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> _<span class="title">KTHREAD</span> <span class="title">Tcb</span>;</span>                                                    <span class="comment">//0x0</span></span><br><span class="line">    <span class="keyword">union</span> _LARGE_INTEGER CreateTime;                                        <span class="comment">//0x200</span></span><br><span class="line">    <span class="keyword">union</span></span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">union</span> _LARGE_INTEGER ExitTime;                                      <span class="comment">//0x208</span></span><br><span class="line">        <span class="class"><span class="keyword">struct</span> _<span class="title">LIST_ENTRY</span> <span class="title">KeyedWaitChain</span>;</span>                                  <span class="comment">//0x208</span></span><br><span class="line">    &#125;;</span><br><span class="line">    LONG ExitStatus;                                                        <span class="comment">//0x210</span></span><br><span class="line">    <span class="keyword">union</span></span><br><span class="line">    &#123;</span><br><span class="line">        <span class="class"><span class="keyword">struct</span> _<span class="title">LIST_ENTRY</span> <span class="title">PostBlockList</span>;</span>                                   <span class="comment">//0x214</span></span><br><span class="line">        <span class="class"><span class="keyword">struct</span></span></span><br><span class="line"><span class="class">        &#123;</span></span><br><span class="line">            VOID* ForwardLinkShadow;                                        <span class="comment">//0x214</span></span><br><span class="line">            VOID* StartAddress;                                             <span class="comment">//0x218</span></span><br><span class="line">        &#125;;</span><br><span class="line">    &#125;;</span><br><span class="line">    <span class="keyword">union</span></span><br><span class="line">    &#123;</span><br><span class="line">        <span class="class"><span class="keyword">struct</span> _<span class="title">TERMINATION_PORT</span>* <span class="title">TerminationPort</span>;</span>                          <span class="comment">//0x21c</span></span><br><span class="line">        <span class="class"><span class="keyword">struct</span> _<span class="title">ETHREAD</span>* <span class="title">ReaperLink</span>;</span>                                        <span class="comment">//0x21c</span></span><br><span class="line">        VOID* KeyedWaitValue;                                               <span class="comment">//0x21c</span></span><br><span class="line">    &#125;;</span><br><span class="line">    ULONG ActiveTimerListLock;                                              <span class="comment">//0x220</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> _<span class="title">LIST_ENTRY</span> <span class="title">ActiveTimerListHead</span>;</span>                                 <span class="comment">//0x224</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> _<span class="title">CLIENT_ID</span> <span class="title">Cid</span>;</span>                                                  <span class="comment">//0x22c</span></span><br><span class="line">    <span class="keyword">union</span></span><br><span class="line">    &#123;</span><br><span class="line">        <span class="class"><span class="keyword">struct</span> _<span class="title">KSEMAPHORE</span> <span class="title">KeyedWaitSemaphore</span>;</span>                              <span class="comment">//0x234</span></span><br><span class="line">        <span class="class"><span class="keyword">struct</span> _<span class="title">KSEMAPHORE</span> <span class="title">AlpcWaitSemaphore</span>;</span>                               <span class="comment">//0x234</span></span><br><span class="line">    &#125;;</span><br><span class="line">    <span class="keyword">union</span> _PS_CLIENT_SECURITY_CONTEXT ClientSecurity;                       <span class="comment">//0x248</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> _<span class="title">LIST_ENTRY</span> <span class="title">IrpList</span>;</span>                                             <span class="comment">//0x24c</span></span><br><span class="line">    ULONG TopLevelIrp;                                                      <span class="comment">//0x254</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> _<span class="title">DEVICE_OBJECT</span>* <span class="title">DeviceToVerify</span>;</span>                                  <span class="comment">//0x258</span></span><br><span class="line">    <span class="keyword">union</span> _PSP_CPU_QUOTA_APC* CpuQuotaApc;                                  <span class="comment">//0x25c</span></span><br><span class="line">    VOID* Win32StartAddress;                                                <span class="comment">//0x260</span></span><br><span class="line">    VOID* LegacyPowerObject;                                                <span class="comment">//0x264</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> _<span class="title">LIST_ENTRY</span> <span class="title">ThreadListEntry</span>;</span>                                     <span class="comment">//0x268</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> _<span class="title">EX_RUNDOWN_REF</span> <span class="title">RundownProtect</span>;</span>                                  <span class="comment">//0x270</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> _<span class="title">EX_PUSH_LOCK</span> <span class="title">ThreadLock</span>;</span>                                        <span class="comment">//0x274</span></span><br><span class="line">    ULONG ReadClusterSize;                                                  <span class="comment">//0x278</span></span><br><span class="line">    <span class="keyword">volatile</span> LONG MmLockOrdering;                                           <span class="comment">//0x27c</span></span><br><span class="line">    <span class="keyword">union</span></span><br><span class="line">    &#123;</span><br><span class="line">        ULONG CrossThreadFlags;                                             <span class="comment">//0x280</span></span><br><span class="line">        <span class="class"><span class="keyword">struct</span></span></span><br><span class="line"><span class="class">        &#123;</span></span><br><span class="line">            ULONG Terminated:<span class="number">1</span>;                                             <span class="comment">//0x280</span></span><br><span class="line">            ULONG ThreadInserted:<span class="number">1</span>;                                         <span class="comment">//0x280</span></span><br><span class="line">            ULONG HideFromDebugger:<span class="number">1</span>;                                       <span class="comment">//0x280</span></span><br><span class="line">            ULONG ActiveImpersonationInfo:<span class="number">1</span>;                                <span class="comment">//0x280</span></span><br><span class="line">            ULONG Reserved:<span class="number">1</span>;                                               <span class="comment">//0x280</span></span><br><span class="line">            ULONG HardErrorsAreDisabled:<span class="number">1</span>;                                  <span class="comment">//0x280</span></span><br><span class="line">            ULONG BreakOnTermination:<span class="number">1</span>;                                     <span class="comment">//0x280</span></span><br><span class="line">            ULONG SkipCreationMsg:<span class="number">1</span>;                                        <span class="comment">//0x280</span></span><br><span class="line">            ULONG SkipTerminationMsg:<span class="number">1</span>;                                     <span class="comment">//0x280</span></span><br><span class="line">            ULONG CopyTokenOnOpen:<span class="number">1</span>;                                        <span class="comment">//0x280</span></span><br><span class="line">            ULONG ThreadIoPriority:<span class="number">3</span>;                                       <span class="comment">//0x280</span></span><br><span class="line">            ULONG ThreadPagePriority:<span class="number">3</span>;                                     <span class="comment">//0x280</span></span><br><span class="line">            ULONG RundownFail:<span class="number">1</span>;                                            <span class="comment">//0x280</span></span><br><span class="line">            ULONG NeedsWorkingSetAging:<span class="number">1</span>;                                   <span class="comment">//0x280</span></span><br><span class="line">        &#125;;</span><br><span class="line">    &#125;;</span><br><span class="line">    <span class="keyword">union</span></span><br><span class="line">    &#123;</span><br><span class="line">        ULONG SameThreadPassiveFlags;                                       <span class="comment">//0x284</span></span><br><span class="line">        <span class="class"><span class="keyword">struct</span></span></span><br><span class="line"><span class="class">        &#123;</span></span><br><span class="line">            ULONG ActiveExWorker:<span class="number">1</span>;                                         <span class="comment">//0x284</span></span><br><span class="line">            ULONG ExWorkerCanWaitUser:<span class="number">1</span>;                                    <span class="comment">//0x284</span></span><br><span class="line">            ULONG MemoryMaker:<span class="number">1</span>;                                            <span class="comment">//0x284</span></span><br><span class="line">            ULONG ClonedThread:<span class="number">1</span>;                                           <span class="comment">//0x284</span></span><br><span class="line">            ULONG KeyedEventInUse:<span class="number">1</span>;                                        <span class="comment">//0x284</span></span><br><span class="line">            ULONG RateApcState:<span class="number">2</span>;                                           <span class="comment">//0x284</span></span><br><span class="line">            ULONG SelfTerminate:<span class="number">1</span>;                                          <span class="comment">//0x284</span></span><br><span class="line">        &#125;;</span><br><span class="line">    &#125;;</span><br><span class="line">    <span class="keyword">union</span></span><br><span class="line">    &#123;</span><br><span class="line">        ULONG SameThreadApcFlags;                                           <span class="comment">//0x288</span></span><br><span class="line">        <span class="class"><span class="keyword">struct</span></span></span><br><span class="line"><span class="class">        &#123;</span></span><br><span class="line">            UCHAR Spare:<span class="number">1</span>;                                                  <span class="comment">//0x288</span></span><br><span class="line">            <span class="keyword">volatile</span> UCHAR StartAddressInvalid:<span class="number">1</span>;                           <span class="comment">//0x288</span></span><br><span class="line">            UCHAR EtwPageFaultCalloutActive:<span class="number">1</span>;                              <span class="comment">//0x288</span></span><br><span class="line">            UCHAR OwnsProcessWorkingSetExclusive:<span class="number">1</span>;                         <span class="comment">//0x288</span></span><br><span class="line">            UCHAR OwnsProcessWorkingSetShared:<span class="number">1</span>;                            <span class="comment">//0x288</span></span><br><span class="line">            UCHAR OwnsSystemCacheWorkingSetExclusive:<span class="number">1</span>;                     <span class="comment">//0x288</span></span><br><span class="line">            UCHAR OwnsSystemCacheWorkingSetShared:<span class="number">1</span>;                        <span class="comment">//0x288</span></span><br><span class="line">            UCHAR OwnsSessionWorkingSetExclusive:<span class="number">1</span>;                         <span class="comment">//0x288</span></span><br><span class="line">            UCHAR OwnsSessionWorkingSetShared:<span class="number">1</span>;                            <span class="comment">//0x289</span></span><br><span class="line">            UCHAR OwnsProcessAddressSpaceExclusive:<span class="number">1</span>;                       <span class="comment">//0x289</span></span><br><span class="line">            UCHAR OwnsProcessAddressSpaceShared:<span class="number">1</span>;                          <span class="comment">//0x289</span></span><br><span class="line">            UCHAR SuppressSymbolLoad:<span class="number">1</span>;                                     <span class="comment">//0x289</span></span><br><span class="line">            UCHAR Prefetching:<span class="number">1</span>;                                            <span class="comment">//0x289</span></span><br><span class="line">            UCHAR OwnsDynamicMemoryShared:<span class="number">1</span>;                                <span class="comment">//0x289</span></span><br><span class="line">            UCHAR OwnsChangeControlAreaExclusive:<span class="number">1</span>;                         <span class="comment">//0x289</span></span><br><span class="line">            UCHAR OwnsChangeControlAreaShared:<span class="number">1</span>;                            <span class="comment">//0x289</span></span><br><span class="line">            UCHAR OwnsPagedPoolWorkingSetExclusive:<span class="number">1</span>;                       <span class="comment">//0x28a</span></span><br><span class="line">            UCHAR OwnsPagedPoolWorkingSetShared:<span class="number">1</span>;                          <span class="comment">//0x28a</span></span><br><span class="line">            UCHAR OwnsSystemPtesWorkingSetExclusive:<span class="number">1</span>;                      <span class="comment">//0x28a</span></span><br><span class="line">            UCHAR OwnsSystemPtesWorkingSetShared:<span class="number">1</span>;                         <span class="comment">//0x28a</span></span><br><span class="line">            UCHAR TrimTrigger:<span class="number">2</span>;                                            <span class="comment">//0x28a</span></span><br><span class="line">            UCHAR Spare1:<span class="number">2</span>;                                                 <span class="comment">//0x28a</span></span><br><span class="line">            UCHAR PriorityRegionActive;                                     <span class="comment">//0x28b</span></span><br><span class="line">        &#125;;</span><br><span class="line">    &#125;;</span><br><span class="line">    UCHAR CacheManagerActive;                                               <span class="comment">//0x28c</span></span><br><span class="line">    UCHAR DisablePageFaultClustering;                                       <span class="comment">//0x28d</span></span><br><span class="line">    UCHAR ActiveFaultCount;                                                 <span class="comment">//0x28e</span></span><br><span class="line">    UCHAR LockOrderState;                                                   <span class="comment">//0x28f</span></span><br><span class="line">    ULONG AlpcMessageId;                                                    <span class="comment">//0x290</span></span><br><span class="line">    <span class="keyword">union</span></span><br><span class="line">    &#123;</span><br><span class="line">        VOID* AlpcMessage;                                                  <span class="comment">//0x294</span></span><br><span class="line">        ULONG AlpcReceiveAttributeSet;                                      <span class="comment">//0x294</span></span><br><span class="line">    &#125;;</span><br><span class="line">    <span class="class"><span class="keyword">struct</span> _<span class="title">LIST_ENTRY</span> <span class="title">AlpcWaitListEntry</span>;</span>                                   <span class="comment">//0x298</span></span><br><span class="line">    ULONG CacheManagerCount;                                                <span class="comment">//0x2a0</span></span><br><span class="line">    ULONG IoBoostCount;                                                     <span class="comment">//0x2a4</span></span><br><span class="line">    ULONG IrpListLock;                                                      <span class="comment">//0x2a8</span></span><br><span class="line">    VOID* ReservedForSynchTracking;                                         <span class="comment">//0x2ac</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> _<span class="title">SINGLE_LIST_ENTRY</span> <span class="title">CmCallbackListHead</span>;</span>                           <span class="comment">//0x2b0</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>_KTHREAD Tcb;                                                    //0x0   跟EPROCESS一样，第一个结构体是嵌入的KTHREAD</p>
+<p>StartAddress;                                             //0x218   线程函数的起始地址</p>
+<p>ThreadListEntry;                                     //0x268    就是在这里链到进程的双向链表</p>
+<h3 id="KTHREAD"><a href="#KTHREAD" class="headerlink" title="KTHREAD"></a>KTHREAD</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//0x200 bytes (sizeof)</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> _<span class="title">KTHREAD</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> _<span class="title">DISPATCHER_HEADER</span> <span class="title">Header</span>;</span>                                       <span class="comment">//0x0</span></span><br><span class="line">    <span class="keyword">volatile</span> ULONGLONG CycleTime;                                           <span class="comment">//0x10</span></span><br><span class="line">    <span class="keyword">volatile</span> ULONG HighCycleTime;                                           <span class="comment">//0x18</span></span><br><span class="line">    ULONGLONG QuantumTarget;                                                <span class="comment">//0x20</span></span><br><span class="line">    VOID* InitialStack;                                                     <span class="comment">//0x28</span></span><br><span class="line">    VOID* <span class="keyword">volatile</span> StackLimit;                                              <span class="comment">//0x2c</span></span><br><span class="line">    VOID* KernelStack;                                                      <span class="comment">//0x30</span></span><br><span class="line">    ULONG ThreadLock;                                                       <span class="comment">//0x34</span></span><br><span class="line">    <span class="keyword">union</span> _KWAIT_STATUS_REGISTER WaitRegister;                              <span class="comment">//0x38</span></span><br><span class="line">    <span class="keyword">volatile</span> UCHAR Running;                                                 <span class="comment">//0x39</span></span><br><span class="line">    UCHAR Alerted[<span class="number">2</span>];                                                       <span class="comment">//0x3a</span></span><br><span class="line">    <span class="keyword">union</span></span><br><span class="line">    &#123;</span><br><span class="line">        <span class="class"><span class="keyword">struct</span></span></span><br><span class="line"><span class="class">        &#123;</span></span><br><span class="line">            ULONG KernelStackResident:<span class="number">1</span>;                                    <span class="comment">//0x3c</span></span><br><span class="line">            ULONG ReadyTransition:<span class="number">1</span>;                                        <span class="comment">//0x3c</span></span><br><span class="line">            ULONG ProcessReadyQueue:<span class="number">1</span>;                                      <span class="comment">//0x3c</span></span><br><span class="line">            ULONG WaitNext:<span class="number">1</span>;                                               <span class="comment">//0x3c</span></span><br><span class="line">            ULONG SystemAffinityActive:<span class="number">1</span>;                                   <span class="comment">//0x3c</span></span><br><span class="line">            ULONG Alertable:<span class="number">1</span>;                                              <span class="comment">//0x3c</span></span><br><span class="line">            ULONG GdiFlushActive:<span class="number">1</span>;                                         <span class="comment">//0x3c</span></span><br><span class="line">            ULONG UserStackWalkActive:<span class="number">1</span>;                                    <span class="comment">//0x3c</span></span><br><span class="line">            ULONG ApcInterruptRequest:<span class="number">1</span>;                                    <span class="comment">//0x3c</span></span><br><span class="line">            ULONG ForceDeferSchedule:<span class="number">1</span>;                                     <span class="comment">//0x3c</span></span><br><span class="line">            ULONG QuantumEndMigrate:<span class="number">1</span>;                                      <span class="comment">//0x3c</span></span><br><span class="line">            ULONG UmsDirectedSwitchEnable:<span class="number">1</span>;                                <span class="comment">//0x3c</span></span><br><span class="line">            ULONG TimerActive:<span class="number">1</span>;                                            <span class="comment">//0x3c</span></span><br><span class="line">            ULONG SystemThread:<span class="number">1</span>;                                           <span class="comment">//0x3c</span></span><br><span class="line">            ULONG Reserved:<span class="number">18</span>;                                              <span class="comment">//0x3c</span></span><br><span class="line">        &#125;;</span><br><span class="line">        LONG MiscFlags;                                                     <span class="comment">//0x3c</span></span><br><span class="line">    &#125;;</span><br><span class="line">    <span class="keyword">union</span></span><br><span class="line">    &#123;</span><br><span class="line">        <span class="class"><span class="keyword">struct</span> _<span class="title">KAPC_STATE</span> <span class="title">ApcState</span>;</span>                                        <span class="comment">//0x40</span></span><br><span class="line">        <span class="class"><span class="keyword">struct</span></span></span><br><span class="line"><span class="class">        &#123;</span></span><br><span class="line">            UCHAR ApcStateFill[<span class="number">23</span>];                                         <span class="comment">//0x40</span></span><br><span class="line">            CHAR Priority;                                                  <span class="comment">//0x57</span></span><br><span class="line">        &#125;;</span><br><span class="line">    &#125;;</span><br><span class="line">    <span class="keyword">volatile</span> ULONG NextProcessor;                                           <span class="comment">//0x58</span></span><br><span class="line">    <span class="keyword">volatile</span> ULONG DeferredProcessor;                                       <span class="comment">//0x5c</span></span><br><span class="line">    ULONG ApcQueueLock;                                                     <span class="comment">//0x60</span></span><br><span class="line">    ULONG ContextSwitches;                                                  <span class="comment">//0x64</span></span><br><span class="line">    <span class="keyword">volatile</span> UCHAR State;                                                   <span class="comment">//0x68</span></span><br><span class="line">    CHAR NpxState;                                                          <span class="comment">//0x69</span></span><br><span class="line">    UCHAR WaitIrql;                                                         <span class="comment">//0x6a</span></span><br><span class="line">    CHAR WaitMode;                                                          <span class="comment">//0x6b</span></span><br><span class="line">    <span class="keyword">volatile</span> LONG WaitStatus;                                               <span class="comment">//0x6c</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> _<span class="title">KWAIT_BLOCK</span>* <span class="title">WaitBlockList</span>;</span>                                     <span class="comment">//0x70</span></span><br><span class="line">    <span class="keyword">union</span></span><br><span class="line">    &#123;</span><br><span class="line">        <span class="class"><span class="keyword">struct</span> _<span class="title">LIST_ENTRY</span> <span class="title">WaitListEntry</span>;</span>                                   <span class="comment">//0x74</span></span><br><span class="line">        <span class="class"><span class="keyword">struct</span> _<span class="title">SINGLE_LIST_ENTRY</span> <span class="title">SwapListEntry</span>;</span>                            <span class="comment">//0x74</span></span><br><span class="line">    &#125;;</span><br><span class="line">    <span class="class"><span class="keyword">struct</span> _<span class="title">KQUEUE</span>* <span class="title">volatile</span> <span class="title">Queue</span>;</span>                                         <span class="comment">//0x7c</span></span><br><span class="line">    ULONG WaitTime;                                                         <span class="comment">//0x80</span></span><br><span class="line">    <span class="keyword">union</span></span><br><span class="line">    &#123;</span><br><span class="line">        <span class="class"><span class="keyword">struct</span></span></span><br><span class="line"><span class="class">        &#123;</span></span><br><span class="line">            SHORT KernelApcDisable;                                         <span class="comment">//0x84</span></span><br><span class="line">            SHORT SpecialApcDisable;                                        <span class="comment">//0x86</span></span><br><span class="line">        &#125;;</span><br><span class="line">        ULONG CombinedApcDisable;                                           <span class="comment">//0x84</span></span><br><span class="line">    &#125;;</span><br><span class="line">    VOID* Teb;                                                              <span class="comment">//0x88</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> _<span class="title">KTIMER</span> <span class="title">Timer</span>;</span>                                                   <span class="comment">//0x90</span></span><br><span class="line">    <span class="keyword">union</span></span><br><span class="line">    &#123;</span><br><span class="line">        <span class="class"><span class="keyword">struct</span></span></span><br><span class="line"><span class="class">        &#123;</span></span><br><span class="line">            <span class="keyword">volatile</span> ULONG AutoAlignment:<span class="number">1</span>;                                 <span class="comment">//0xb8</span></span><br><span class="line">            <span class="keyword">volatile</span> ULONG DisableBoost:<span class="number">1</span>;                                  <span class="comment">//0xb8</span></span><br><span class="line">            <span class="keyword">volatile</span> ULONG EtwStackTraceApc1Inserted:<span class="number">1</span>;                     <span class="comment">//0xb8</span></span><br><span class="line">            <span class="keyword">volatile</span> ULONG EtwStackTraceApc2Inserted:<span class="number">1</span>;                     <span class="comment">//0xb8</span></span><br><span class="line">            <span class="keyword">volatile</span> ULONG CalloutActive:<span class="number">1</span>;                                 <span class="comment">//0xb8</span></span><br><span class="line">            <span class="keyword">volatile</span> ULONG ApcQueueable:<span class="number">1</span>;                                  <span class="comment">//0xb8</span></span><br><span class="line">            <span class="keyword">volatile</span> ULONG EnableStackSwap:<span class="number">1</span>;                               <span class="comment">//0xb8</span></span><br><span class="line">            <span class="keyword">volatile</span> ULONG GuiThread:<span class="number">1</span>;                                     <span class="comment">//0xb8</span></span><br><span class="line">            <span class="keyword">volatile</span> ULONG UmsPerformingSyscall:<span class="number">1</span>;                          <span class="comment">//0xb8</span></span><br><span class="line">            <span class="keyword">volatile</span> ULONG VdmSafe:<span class="number">1</span>;                                       <span class="comment">//0xb8</span></span><br><span class="line">            <span class="keyword">volatile</span> ULONG UmsDispatched:<span class="number">1</span>;                                 <span class="comment">//0xb8</span></span><br><span class="line">            <span class="keyword">volatile</span> ULONG ReservedFlags:<span class="number">21</span>;                                <span class="comment">//0xb8</span></span><br><span class="line">        &#125;;</span><br><span class="line">        <span class="keyword">volatile</span> LONG ThreadFlags;                                          <span class="comment">//0xb8</span></span><br><span class="line">    &#125;;</span><br><span class="line">    VOID* ServiceTable;                                                     <span class="comment">//0xbc</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> _<span class="title">KWAIT_BLOCK</span> <span class="title">WaitBlock</span>[4];</span>                                       <span class="comment">//0xc0</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> _<span class="title">LIST_ENTRY</span> <span class="title">QueueListEntry</span>;</span>                                      <span class="comment">//0x120</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> _<span class="title">KTRAP_FRAME</span>* <span class="title">TrapFrame</span>;</span>                                         <span class="comment">//0x128</span></span><br><span class="line">    VOID* FirstArgument;                                                    <span class="comment">//0x12c</span></span><br><span class="line">    <span class="keyword">union</span></span><br><span class="line">    &#123;</span><br><span class="line">        VOID* CallbackStack;                                                <span class="comment">//0x130</span></span><br><span class="line">        ULONG CallbackDepth;                                                <span class="comment">//0x130</span></span><br><span class="line">    &#125;;</span><br><span class="line">    UCHAR ApcStateIndex;                                                    <span class="comment">//0x134</span></span><br><span class="line">    CHAR BasePriority;                                                      <span class="comment">//0x135</span></span><br><span class="line">    <span class="keyword">union</span></span><br><span class="line">    &#123;</span><br><span class="line">        CHAR PriorityDecrement;                                             <span class="comment">//0x136</span></span><br><span class="line">        <span class="class"><span class="keyword">struct</span></span></span><br><span class="line"><span class="class">        &#123;</span></span><br><span class="line">            UCHAR ForegroundBoost:<span class="number">4</span>;                                        <span class="comment">//0x136</span></span><br><span class="line">            UCHAR UnusualBoost:<span class="number">4</span>;                                           <span class="comment">//0x136</span></span><br><span class="line">        &#125;;</span><br><span class="line">    &#125;;</span><br><span class="line">    UCHAR Preempted;                                                        <span class="comment">//0x137</span></span><br><span class="line">    UCHAR AdjustReason;                                                     <span class="comment">//0x138</span></span><br><span class="line">    CHAR AdjustIncrement;                                                   <span class="comment">//0x139</span></span><br><span class="line">    CHAR PreviousMode;                                                      <span class="comment">//0x13a</span></span><br><span class="line">    CHAR Saturation;                                                        <span class="comment">//0x13b</span></span><br><span class="line">    ULONG SystemCallNumber;                                                 <span class="comment">//0x13c</span></span><br><span class="line">    ULONG FreezeCount;                                                      <span class="comment">//0x140</span></span><br><span class="line">    <span class="keyword">volatile</span> <span class="class"><span class="keyword">struct</span> _<span class="title">GROUP_AFFINITY</span> <span class="title">UserAffinity</span>;</span>                           <span class="comment">//0x144</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> _<span class="title">KPROCESS</span>* <span class="title">Process</span>;</span>                                              <span class="comment">//0x150</span></span><br><span class="line">    <span class="keyword">volatile</span> <span class="class"><span class="keyword">struct</span> _<span class="title">GROUP_AFFINITY</span> <span class="title">Affinity</span>;</span>                               <span class="comment">//0x154</span></span><br><span class="line">    ULONG IdealProcessor;                                                   <span class="comment">//0x160</span></span><br><span class="line">    ULONG UserIdealProcessor;                                               <span class="comment">//0x164</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> _<span class="title">KAPC_STATE</span>* <span class="title">ApcStatePointer</span>[2];</span>                                 <span class="comment">//0x168</span></span><br><span class="line">    <span class="keyword">union</span></span><br><span class="line">    &#123;</span><br><span class="line">        <span class="class"><span class="keyword">struct</span> _<span class="title">KAPC_STATE</span> <span class="title">SavedApcState</span>;</span>                                   <span class="comment">//0x170</span></span><br><span class="line">        <span class="class"><span class="keyword">struct</span></span></span><br><span class="line"><span class="class">        &#123;</span></span><br><span class="line">            UCHAR SavedApcStateFill[<span class="number">23</span>];                                    <span class="comment">//0x170</span></span><br><span class="line">            UCHAR WaitReason;                                               <span class="comment">//0x187</span></span><br><span class="line">        &#125;;</span><br><span class="line">    &#125;;</span><br><span class="line">    CHAR SuspendCount;                                                      <span class="comment">//0x188</span></span><br><span class="line">    CHAR Spare1;                                                            <span class="comment">//0x189</span></span><br><span class="line">    UCHAR OtherPlatformFill;                                                <span class="comment">//0x18a</span></span><br><span class="line">    VOID* <span class="keyword">volatile</span> Win32Thread;                                             <span class="comment">//0x18c</span></span><br><span class="line">    VOID* StackBase;                                                        <span class="comment">//0x190</span></span><br><span class="line">    <span class="keyword">union</span></span><br><span class="line">    &#123;</span><br><span class="line">        <span class="class"><span class="keyword">struct</span> _<span class="title">KAPC</span> <span class="title">SuspendApc</span>;</span>                                            <span class="comment">//0x194</span></span><br><span class="line">        <span class="class"><span class="keyword">struct</span></span></span><br><span class="line"><span class="class">        &#123;</span></span><br><span class="line">            UCHAR SuspendApcFill0[<span class="number">1</span>];                                       <span class="comment">//0x194</span></span><br><span class="line">            UCHAR ResourceIndex;                                            <span class="comment">//0x195</span></span><br><span class="line">        &#125;;</span><br><span class="line">        <span class="class"><span class="keyword">struct</span></span></span><br><span class="line"><span class="class">        &#123;</span></span><br><span class="line">            UCHAR SuspendApcFill1[<span class="number">3</span>];                                       <span class="comment">//0x194</span></span><br><span class="line">            UCHAR QuantumReset;                                             <span class="comment">//0x197</span></span><br><span class="line">        &#125;;</span><br><span class="line">        <span class="class"><span class="keyword">struct</span></span></span><br><span class="line"><span class="class">        &#123;</span></span><br><span class="line">            UCHAR SuspendApcFill2[<span class="number">4</span>];                                       <span class="comment">//0x194</span></span><br><span class="line">            ULONG KernelTime;                                               <span class="comment">//0x198</span></span><br><span class="line">        &#125;;</span><br><span class="line">        <span class="class"><span class="keyword">struct</span></span></span><br><span class="line"><span class="class">        &#123;</span></span><br><span class="line">            UCHAR SuspendApcFill3[<span class="number">36</span>];                                      <span class="comment">//0x194</span></span><br><span class="line">            <span class="class"><span class="keyword">struct</span> _<span class="title">KPRCB</span>* <span class="title">volatile</span> <span class="title">WaitPrcb</span>;</span>                               <span class="comment">//0x1b8</span></span><br><span class="line">        &#125;;</span><br><span class="line">        <span class="class"><span class="keyword">struct</span></span></span><br><span class="line"><span class="class">        &#123;</span></span><br><span class="line">            UCHAR SuspendApcFill4[<span class="number">40</span>];                                      <span class="comment">//0x194</span></span><br><span class="line">            VOID* LegoData;                                                 <span class="comment">//0x1bc</span></span><br><span class="line">        &#125;;</span><br><span class="line">        <span class="class"><span class="keyword">struct</span></span></span><br><span class="line"><span class="class">        &#123;</span></span><br><span class="line">            UCHAR SuspendApcFill5[<span class="number">47</span>];                                      <span class="comment">//0x194</span></span><br><span class="line">            UCHAR LargeStack;                                               <span class="comment">//0x1c3</span></span><br><span class="line">        &#125;;</span><br><span class="line">    &#125;;</span><br><span class="line">    ULONG UserTime;                                                         <span class="comment">//0x1c4</span></span><br><span class="line">    <span class="keyword">union</span></span><br><span class="line">    &#123;</span><br><span class="line">        <span class="class"><span class="keyword">struct</span> _<span class="title">KSEMAPHORE</span> <span class="title">SuspendSemaphore</span>;</span>                                <span class="comment">//0x1c8</span></span><br><span class="line">        UCHAR SuspendSemaphorefill[<span class="number">20</span>];                                     <span class="comment">//0x1c8</span></span><br><span class="line">    &#125;;</span><br><span class="line">    ULONG SListFaultCount;                                                  <span class="comment">//0x1dc</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> _<span class="title">LIST_ENTRY</span> <span class="title">ThreadListEntry</span>;</span>                                     <span class="comment">//0x1e0</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> _<span class="title">LIST_ENTRY</span> <span class="title">MutantListHead</span>;</span>                                      <span class="comment">//0x1e8</span></span><br><span class="line">    VOID* SListFaultAddress;                                                <span class="comment">//0x1f0</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> _<span class="title">KTHREAD_COUNTERS</span>* <span class="title">ThreadCounters</span>;</span>                               <span class="comment">//0x1f4</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> _<span class="title">XSTATE_SAVE</span>* <span class="title">XStateSave</span>;</span>                                        <span class="comment">//0x1f8</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>Header;                                       //0x0  可等待对象的标准头部</p>
+<p>InitialStack;                                                     //0x28    当前线程的栈底</p>
+<p>StackLimit;                                              //0x2c   当前线程的最大栈顶</p>
+<p>KernelStack;                                                      //0x30   线程切换时，会保存当前的ESP，等到再次切换回来时，从这里恢复ESP</p>
+<p>_LIST_ENTRY ThreadListEntry;                                     //0x1e0   这里仍然是链在进程的双向链表中</p>
+<h2 id="Refs"><a href="#Refs" class="headerlink" title="Refs"></a>Refs</h2><p><a href="https://bbs.pediy.com/thread-270660.htm#msg_header_h1_0" target="_blank" rel="noopener">X86内核笔记_4_进程和线程-软件逆向-看雪论坛-安全社区|安全招聘|bbs.pediy.com</a></p>
+<p><a href="https://bbs.pediy.com/thread-270917.htm" target="_blank" rel="noopener">[原创]Windows内核学习笔记之线程（下）-软件逆向-看雪论坛-安全社区|安全招聘|bbs.pediy.com</a></p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2022/01/18/Christomas/" rel="next" title="SCTF2021 Christomas">
+                <i class="fa fa-chevron-left"></i> SCTF2021 Christomas
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2022/02/13/HWS2022/" rel="prev" title="HWS2022 复现WP">
+                HWS2022 复现WP <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/head.jpg" alt="zzrR0">
+            
+              <p class="site-author-name" itemprop="name">zzrR0</p>
+              <p class="site-description motion-element" itemprop="description">Why am i so cai.</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">21</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">5</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://xmzyshypnc.github.io/" title="xmzyshypnc" target="_blank">xmzyshypnc</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://wood1314.github.io/" title="Wood" target="_blank">Wood</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://blog.zeddyu.info/" title="Zedd" target="_blank">Zedd</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://kestudy.top/" title="Ke" target="_blank">Ke</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Windows线程切换"><span class="nav-number">1.</span> <span class="nav-text">Windows线程切换</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#ntoskrnl-exe"><span class="nav-number">1.1.</span> <span class="nav-text">ntoskrnl.exe</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#线程切换"><span class="nav-number">1.2.</span> <span class="nav-text">线程切换</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#被动切换-时钟中断"><span class="nav-number">1.2.1.</span> <span class="nav-text">被动切换 时钟中断</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#常用结构体"><span class="nav-number">1.3.</span> <span class="nav-text">常用结构体</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#KPCR"><span class="nav-number">1.3.1.</span> <span class="nav-text">KPCR</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#KPRCB"><span class="nav-number">1.3.2.</span> <span class="nav-text">KPRCB</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#EPROCESS"><span class="nav-number">1.3.3.</span> <span class="nav-text">EPROCESS</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#KPROCESS"><span class="nav-number">1.3.4.</span> <span class="nav-text">KPROCESS</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ETHREAD"><span class="nav-number">1.3.5.</span> <span class="nav-text">ETHREAD</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#KTHREAD"><span class="nav-number">1.3.6.</span> <span class="nav-text">KTHREAD</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Refs"><span class="nav-number">1.4.</span> <span class="nav-text">Refs</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2023</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">zzrR0</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动 v3.9.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 – <a class="theme-link" target="_blank" href="https://theme-next.org">NexT.Pisces</a> v6.3.0</div>
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv" title="总访客量">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+    </span>
+  
+
+  
+    <span class="site-pv" title="总访问量">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.3.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.3.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.3.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.3.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.3.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.3.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.3.0"></script>
+
+
+
+  
+
+  
+    <script id="dsq-count-scr" src="https://xmzyshypnc.disqus.com/count.js" async></script>
+  
+
+  
+    <script type="text/javascript">
+      var disqus_config = function () {
+        this.page.url = 'http://yoursite.com/2022/02/13/ThreadSwitch/';
+        this.page.identifier = '2022/02/13/ThreadSwitch/';
+        this.page.title = '线程切换小结';
+        };
+      function loadComments () {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://xmzyshypnc.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      }
+      
+        loadComments();
+      
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  
+  
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(function (item) {
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: true,
+        notify: true,
+        appId: 'YbpHIa6XHNsKv4wX2wGjnrK7-gzGzoHsz',
+        appKey: '1fjf9mQl90nKdRPfq1zhDyIE',
+        placeholder: '',
+        avatar:'mm',
+        meta:guest,
+        pageSize:'10' || 10,
+        visitor: true
+    });
+  </script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+<script type="text/javascript" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","model":{"scale":1,"hHeadPos":0.5,"vHeadPos":0.618,"jsonPath":"live2d-widget-model-hijiki"},"display":{"superSample":2,"width":150,"height":300,"position":"right","hOffset":0,"vOffset":-50},"mobile":{"show":true,"scale":0.5},"react":{"opacityDefault":0.7,"opacityOnHover":0.2},"log":false,"tagMode":false});</script></body>
+</html>

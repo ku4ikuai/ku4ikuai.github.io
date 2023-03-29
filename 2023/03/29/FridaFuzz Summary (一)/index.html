@@ -1,0 +1,1245 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.3.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.3.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.3.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.3.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.3.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '6.3.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="FridaFuzz总结起始您可以使用Notion的内置目录功能来自动生成目录。在左侧边栏中，选择“添加目录”，然后将其拖动到您想要的位置。在文档中添加标题后，目录将自动更新。注意，此功能仅在页面级别上工作，而不是在段落级别上工作。  大概12.17.18号，走模拟的方案，因为要克服的障碍太多了（各种依赖），最终在费劲修复了ExANE的一个bug之后还是选择换一个fuzz方案， frida方案的优势">
+<meta property="og:type" content="article">
+<meta property="og:title" content="FridaFuzz Summary (一)">
+<meta property="og:url" content="http://yoursite.com/2023/03/29/FridaFuzz Summary (一)/index.html">
+<meta property="og:site_name" content="zzrR0">
+<meta property="og:description" content="FridaFuzz总结起始您可以使用Notion的内置目录功能来自动生成目录。在左侧边栏中，选择“添加目录”，然后将其拖动到您想要的位置。在文档中添加标题后，目录将自动更新。注意，此功能仅在页面级别上工作，而不是在段落级别上工作。  大概12.17.18号，走模拟的方案，因为要克服的障碍太多了（各种依赖），最终在费劲修复了ExANE的一个bug之后还是选择换一个fuzz方案， frida方案的优势">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://yoursite.com/2023/03/29/FridaFuzz%20Summary%20(一)/Untitled.png">
+<meta property="og:image" content="http://yoursite.com/2023/03/29/FridaFuzz%20Summary%20(一)/Untitled%201.png">
+<meta property="og:image" content="http://yoursite.com/2023/03/29/FridaFuzz%20Summary%20(一)/Untitled%202.png">
+<meta property="og:image" content="http://yoursite.com/2023/03/29/FridaFuzz%20Summary%20(一)/Untitled%203.png">
+<meta property="og:image" content="http://yoursite.com/2023/03/29/FridaFuzz%20Summary%20(一)/Untitled%204.png">
+<meta property="og:image" content="http://yoursite.com/2023/03/29/FridaFuzz%20Summary%20(一)/Untitled%205.png">
+<meta property="og:image" content="http://yoursite.com/2023/03/29/FridaFuzz%20Summary%20(一)/Untitled%206.png">
+<meta property="og:image" content="http://yoursite.com/2023/03/29/FridaFuzz%20Summary%20(一)/Untitled%207.png">
+<meta property="og:image" content="http://yoursite.com/2023/03/29/FridaFuzz%20Summary%20(一)/Untitled%208.png">
+<meta property="og:image" content="http://yoursite.com/2023/03/29/FridaFuzz%20Summary%20(一)/Untitled%209.png">
+<meta property="og:image" content="http://yoursite.com/2023/03/29/FridaFuzz%20Summary%20(一)/Untitled%2010.png">
+<meta property="og:image" content="http://yoursite.com/2023/03/29/FridaFuzz%20Summary%20(一)/Untitled%2011.png">
+<meta property="og:image" content="http://yoursite.com/2023/03/29/FridaFuzz%20Summary%20(一)/Untitled%2012.png">
+<meta property="og:image" content="http://yoursite.com/2023/03/29/FridaFuzz%20Summary%20(一)/Untitled%2013.png">
+<meta property="og:image" content="http://yoursite.com/2023/03/29/FridaFuzz%20Summary%20(一)/Untitled%2014.png">
+<meta property="og:image" content="http://yoursite.com/2023/03/29/FridaFuzz%20Summary%20(一)/Untitled%2015.png">
+<meta property="og:image" content="http://yoursite.com/2023/03/29/FridaFuzz%20Summary%20(一)/Untitled%2016.png">
+<meta property="og:image" content="http://yoursite.com/2023/03/29/FridaFuzz%20Summary%20(一)/Untitled%2017.png">
+<meta property="og:image" content="http://yoursite.com/2023/03/29/FridaFuzz%20Summary%20(一)/Untitled%2018.png">
+<meta property="og:image" content="http://yoursite.com/2023/03/29/FridaFuzz%20Summary%20(一)/Untitled%2019.png">
+<meta property="og:image" content="http://yoursite.com/2023/03/29/FridaFuzz%20Summary%20(一)/Untitled%2020.png">
+<meta property="og:image" content="http://yoursite.com/2023/03/29/FridaFuzz%20Summary%20(一)/Untitled%2021.png">
+<meta property="og:image" content="http://yoursite.com/2023/03/29/FridaFuzz%20Summary%20(一)/Untitled%2022.png">
+<meta property="og:image" content="http://yoursite.com/2023/03/29/FridaFuzz%20Summary%20(一)/Untitled%2023.png">
+<meta property="og:image" content="http://yoursite.com/2023/03/29/FridaFuzz%20Summary%20(一)/Untitled%2024.png">
+<meta property="og:image" content="http://yoursite.com/2023/03/29/FridaFuzz%20Summary%20(一)/Untitled%2025.png">
+<meta property="og:image" content="http://yoursite.com/2023/03/29/FridaFuzz%20Summary%20(一)/Untitled%2026.png">
+<meta property="og:image" content="http://yoursite.com/2023/03/29/FridaFuzz%20Summary%20(一)/Untitled%2027.png">
+<meta property="og:image" content="http://yoursite.com/2023/03/29/FridaFuzz%20Summary%20(一)/Untitled%2028.png">
+<meta property="og:image" content="http://yoursite.com/2023/03/29/FridaFuzz%20Summary%20(一)/Untitled%2029.png">
+<meta property="og:image" content="http://yoursite.com/2023/03/29/FridaFuzz%20Summary%20(一)/Untitled%2030.png">
+<meta property="og:image" content="http://yoursite.com/2023/03/29/FridaFuzz%20Summary%20(一)/Untitled%2031.png">
+<meta property="og:image" content="http://yoursite.com/2023/03/29/FridaFuzz%20Summary%20(一)/Untitled%2032.png">
+<meta property="og:image" content="http://yoursite.com/2023/03/29/FridaFuzz%20Summary%20(一)/Untitled%2033.png">
+<meta property="og:image" content="http://yoursite.com/2023/03/29/FridaFuzz%20Summary%20(一)/Untitled%2034.png">
+<meta property="og:image" content="http://yoursite.com/2023/03/29/FridaFuzz%20Summary%20(一)/Untitled%2035.png">
+<meta property="og:image" content="http://yoursite.com/2023/03/29/FridaFuzz%20Summary%20(一)/Untitled%2036.png">
+<meta property="og:image" content="http://yoursite.com/2023/03/29/FridaFuzz%20Summary%20(一)/Untitled%2037.png">
+<meta property="og:image" content="http://yoursite.com/2023/03/29/FridaFuzz%20Summary%20(一)/Untitled%2038.png">
+<meta property="og:image" content="http://yoursite.com/2023/03/29/FridaFuzz%20Summary%20(一)/Untitled%2039.png">
+<meta property="og:image" content="http://yoursite.com/2023/03/29/FridaFuzz%20Summary%20(一)/Untitled%2040.png">
+<meta property="og:image" content="http://yoursite.com/2023/03/29/FridaFuzz%20Summary%20(一)/Untitled%2041.png">
+<meta property="og:image" content="http://yoursite.com/2023/03/29/FridaFuzz%20Summary%20(一)/Untitled%2042.png">
+<meta property="og:updated_time" content="2023-03-29T02:35:34.892Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="FridaFuzz Summary (一)">
+<meta name="twitter:description" content="FridaFuzz总结起始您可以使用Notion的内置目录功能来自动生成目录。在左侧边栏中，选择“添加目录”，然后将其拖动到您想要的位置。在文档中添加标题后，目录将自动更新。注意，此功能仅在页面级别上工作，而不是在段落级别上工作。  大概12.17.18号，走模拟的方案，因为要克服的障碍太多了（各种依赖），最终在费劲修复了ExANE的一个bug之后还是选择换一个fuzz方案， frida方案的优势">
+<meta name="twitter:image" content="http://yoursite.com/2023/03/29/FridaFuzz%20Summary%20(一)/Untitled.png">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2023/03/29/FridaFuzz Summary (一)/">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>FridaFuzz Summary (一) | zzrR0</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">zzrR0</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+    <a href="/about/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2023/03/29/FridaFuzz Summary (一)/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="zzrR0">
+      <meta itemprop="description" content="Why am i so cai.">
+      <meta itemprop="image" content="/images/head.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="zzrR0">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">FridaFuzz Summary (一)
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2023-03-29 10:33:40 / 修改时间：10:35:34" itemprop="dateCreated datePublished" datetime="2023-03-29T10:33:40+08:00">2023-03-29</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2023/03/29/FridaFuzz Summary (一)/#comments" itemprop="discussionUrl">
+                
+                  <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2023/03/29/FridaFuzz Summary (一)/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2023/03/29/FridaFuzz Summary (一)/" class="leancloud_visitors" data-flag-title="FridaFuzz Summary (一)">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数：</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="FridaFuzz总结"><a href="#FridaFuzz总结" class="headerlink" title="FridaFuzz总结"></a>FridaFuzz总结</h1><h1 id="起始"><a href="#起始" class="headerlink" title="起始"></a>起始</h1><p>您可以使用Notion的内置目录功能来自动生成目录。在左侧边栏中，选择“添加目录”，然后将其拖动到您想要的位置。在文档中添加标题后，目录将自动更新。注意，此功能仅在页面级别上工作，而不是在段落级别上工作。</p>
+<p><img src="/2023/03/29/FridaFuzz Summary (一)/Untitled.png" alt="Untitled"></p>
+<p>大概12.17.18号，走模拟的方案，因为要克服的障碍太多了（各种依赖），最终在费劲修复了ExANE的一个bug之后还是选择换一个fuzz方案，</p>
+<p><strong>frida方案的优势和劣势</strong></p>
+<p>对于服务器、防火墙这种东西来说，配置本来就高，frida模式可以肆无忌惮的去fuzz<br>但是对于手机来说，内存就很成问题，虽然未来的趋势肯定是内存越来越高，Android系统的稳定性也是一大问题</p>
+<p>但是要用frida-fuzz,部署环境得是支持frida_server的机器，而且还得能跑AFL，像Android部署就支持frida_server，只不过部署AFL++时要克服一下共享内存和信号量的问题。</p>
+<p>总的来说，不需要模拟的原生态fuzz本身就减少了很大的工作量了。</p>
+<p><a href="https://juejin.cn/post/6925697577908174861" target="_blank" rel="noopener">安卓Native层共享库fuzzing技术思路及实践 - 掘金 (juejin.cn)</a></p>
+<p>这篇21 2月份发的文章其实就已经在讨论Android fuzz的事了，现在已经两年了。。。只不过其是去fuzz的纯Native库，</p>
+<p>这里fuzz的目标入口大概分3个等级</p>
+<ul>
+<li>纯Native代码，不涉及Java虚拟机环境</li>
+<li>JNI函数，设计JNIEnv，需要一定的和Java虚拟机交互的能力</li>
+<li>直接调用Java函数，需要完全的Java虚拟机Hook能力</li>
+</ul>
+<p>用frida去fuzz，理论上这三个目标入口等级都是支持的，只不过从后期的实践效果来看，越往下越不稳定，但是辅助逆向工作量越小</p>
+<p><a href="https://github.com/AFLplusplus/AFLplusplus/tree/stable/frida_mode" target="_blank" rel="noopener">AFLplusplus/frida_mode at stable · AFLplusplus/AFLplusplus (github.com)</a></p>
+<p>AFL++也引入了fridamode，这个后面也有分析，一些资料</p>
+<p><a href="https://github.com/AFLplusplus/AFLplusplus/blob/stable/frida_mode/Scripting.md" target="_blank" rel="noopener">AFLplusplus/Scripting.md at stable · AFLplusplus/AFLplusplus (github.com)</a></p>
+<p><a href="https://www.youtube.com/watch?v=mLgx7kyxsas" target="_blank" rel="noopener">Blackbox Fuzzing #4: New AFL++ FRIDA mode, How it Perform against QEMU mode?</a></p>
+<h1 id="Android漏洞挖掘资料"><a href="#Android漏洞挖掘资料" class="headerlink" title="Android漏洞挖掘资料"></a>Android漏洞挖掘资料</h1><p><a href="https://source.android.com/docs/security/overview/acknowledgements#nov-22" target="_blank" rel="noopener">Android Security Acknowledgements  |  Android Open Source Project</a></p>
+<p>Android的漏洞致谢列表，最好的研究资料。</p>
+<p>研究root的资料 —- DirtyPipe在Android上的移植</p>
+<p><a href="https://github.com/polygraphene/DirtyPipe-Android" target="_blank" rel="noopener">https://github.com/polygraphene/DirtyPipe-Android</a></p>
+<p>字节的污点分析工具</p>
+<p><a href="https://github.com/bytedance/appshark" target="_blank" rel="noopener">https://github.com/bytedance/appshark</a></p>
+<p>WebView漏洞学习 </p>
+<p><a href="https://blog.oversecured.com/Android-security-checklist-webview/#attack-using-hierarchicaluri-and-the-java-reflection-api" target="_blank" rel="noopener">Android security checklist: WebView | Oversecured Blog</a></p>
+<p><a href="https://github.com/idhyt/AndroidFridaFuzz" target="_blank" rel="noopener">https://github.com/idhyt/AndroidFridaFuzz</a></p>
+<p>这个也非常关键，三星的漏洞列表</p>
+<p><a href="https://github.com/NetKingJ/awesome-android-security/blob/main/Samsung_SVE_DataBase/Samsung_Security_Other_Updates.csv" target="_blank" rel="noopener">awesome-android-security/Samsung_Security_Other_Updates.csv at main · NetKingJ/awesome-android-security (github.com)</a></p>
+<p>三星的SRC，以及漏洞认证分类</p>
+<p><a href="https://security.samsungmobile.com/securityReportingRiskClassification.smsb" target="_blank" rel="noopener">Security Reporting | Samsung Mobile Security</a></p>
+<p>Frida_mode的核心是stalker，下面分析一下stalker</p>
+<h1 id="stalker"><a href="#stalker" class="headerlink" title="stalker"></a>stalker</h1><p><a href="https://frida.re/docs/stalker/" target="_blank" rel="noopener">Stalker | Frida • A world-class dynamic instrumentation toolkit</a></p>
+<p>stalker是一个动态插桩工具，允许对x86、x64、arm32、arm64进行动态插桩</p>
+<p><a href="https://medium.com/@oleavr/anatomy-of-a-code-tracer-b081aadb0df8" target="_blank" rel="noopener">Anatomy of a code tracer | by Ole André Vadla Ravnås | Medium</a></p>
+<p>大胡子最初写的关于stalker的介绍</p>
+<p>stalker源自于大胡子急需一个tracer<br>软件断点会修改内存，硬件断点也很容易被检测到，基于调试器去实现，每次trap都会消耗大量的资源，所以灵活粒度很关键，其思想就是把原来要执行的代码拷贝出来，然后在副本上加上各种log桩点，这样原先执行的反调试和校验逻辑可以正常执行，而且我们也可以粒度灵活</p>
+<p>只对call感兴趣就只在call周围加，意味着可以根据是需要添加运行时开销</p>
+<p>这个是实现起来也不简单，首先各种指令集插代码就和很麻烦，Capstone反编译器缓解了一部分问题，而且许多代码是位置相关的，需要调整</p>
+<p>stalker的设计是一个基本块一个基本块的翻译，一个基本块执行完，就返回到引擎，计算分支信息，翻译下一个基本块去执行，这样肯定代价很大，一个优化策略就是重用已经编译的代码</p>
+<p>另外像jmp+56这种，我们可以直接patch成直接跳转，但是这种修改必须谨慎，因为有些程序是自修改的，因此需要引入一个trust-threshold参数，</p>
+<p>stalker的官方文档，其中很多内容暂时都用不上，因为涉及到stalker的底层实现，挺复杂的</p>
+<p><a href="https://frida.re/docs/stalker/" target="_blank" rel="noopener">Stalker | Frida • A world-class dynamic instrumentation toolkit</a></p>
+<h2 id="Transform"><a href="#Transform" class="headerlink" title="Transform"></a>Transform</h2><p>Transform是用来产生插桩代码的，默认的Transform长这个样</p>
+<p><img src="/2023/03/29/FridaFuzz Summary (一)/Untitled%201.png" alt="Untitled"></p>
+<p>可以看到默认的Transform一次遍历一条指令,Keep就是指令保持原样</p>
+<p>Transform是在gum_exec_ctx_obtain_block_for调用的，也即执行到一个基本块时调用用户定义的transform</p>
+<p>控制流跑到Stalker引擎时会保存运行上下文，stalker会存储插桩指令在slabs里面</p>
+<p><img src="/2023/03/29/FridaFuzz Summary (一)/Untitled%202.png" alt="Untitled"></p>
+<p>新版本的stalker好像已经分code_slab和data_slab，虽然官方的doc中写的还是原来的slab</p>
+<p>这个是在14.2中提到的</p>
+<p><img src="/2023/03/29/FridaFuzz Summary (一)/Untitled%203.png" alt="Untitled"></p>
+<p>Frida 正常的unfollow里面会调用gum_exec_ctx_free来释放内存</p>
+<h1 id="Frida框架层"><a href="#Frida框架层" class="headerlink" title="Frida框架层"></a>Frida框架层</h1><p>在开发FridaFuzz的过程中，更多的还是去使用其框架层，这其中有几篇关于框架层介绍的文章</p>
+<p><a href="https://evilpan.com/2022/04/05/frida-internal/" target="_blank" rel="noopener">Frida Internal - Part 1: 架构、Gum 与 V8 - evilpan</a></p>
+<p><img src="/2023/03/29/FridaFuzz Summary (一)/Untitled%204.png" alt="Untitled"></p>
+<h2 id="frida-gum"><a href="#frida-gum" class="headerlink" title="frida-gum"></a>frida-gum</h2><p>对各种架构指令集进行inline-hook的基础</p>
+<p><a href="https://github.com/frida/frida-gum" target="_blank" rel="noopener">https://github.com/frida/frida-gum</a></p>
+<p>stalker的实现也在这个项目的具体后端代码里</p>
+<p><a href="https://github.com/frida/frida-gum/tree/main/gum/backend-arm64" target="_blank" rel="noopener">frida-gum/gum/backend-arm64 at main · frida/frida-gum (github.com)</a></p>
+<p>不知道后面再调试代码bug是不是还要详细研究这个代码</p>
+<p>除了stalker，基于frida-gum，frida还实现了一个内存监控模块。。。其实正好是去年给HW做开发的时候我研究的东西。甚至原理跟frida的都一样</p>
+<p><img src="/2023/03/29/FridaFuzz Summary (一)/Untitled%205.png" alt="Untitled"></p>
+<h2 id="gum-js"><a href="#gum-js" class="headerlink" title="gum-js"></a>gum-js</h2><p>就说是Frida-gum很强大，但是C语言接口使用很不方便，因此有了上层frida接口的JS封装，这块还没深入研究过。</p>
+<h2 id="frida-core"><a href="#frida-core" class="headerlink" title="frida-core"></a>frida-core</h2><p>Frida-core封装了很多系统级的东西，我们用frida-tools，其实内部都是通过python binding走的fride-core</p>
+<h2 id="frida-java-bridge"><a href="#frida-java-bridge" class="headerlink" title="frida-java-bridge"></a>frida-java-bridge</h2><p>最最靠近我们所编写的JS的脚本的一层，发现有疑惑的API，以及奇怪的报错，可以先去这里寻找一些内部实现</p>
+<p><a href="https://github.com/frida/frida-java-bridge" target="_blank" rel="noopener">frida/frida-java-bridge: Java runtime interop from Frida (github.com)</a></p>
+<h2 id="frida-server-主要是stalker的修复线"><a href="#frida-server-主要是stalker的修复线" class="headerlink" title="frida-server(主要是stalker的修复线)"></a>frida-server(主要是stalker的修复线)</h2><p>上面说的那么多东西，特别是frida-core和frida-gum最终是以集成到frida-server中给用户呈现使用的。</p>
+<p>当时想起来研究frida-server，是因为在测试fuzzer的过程中，总是稳定的在iter几次之后崩溃，错误如下</p>
+<p><img src="/2023/03/29/FridaFuzz Summary (一)/Untitled%206.png" alt="Untitled"></p>
+<p>这个错我一开始以为是用Java.perform才遇到的，后来改写成JNI的native调用模式，还是稳定崩溃，于是就开始长达好几天的debug，最后没办法了，才研究的frida-server的debug编译，尝试从源码中找到bug</p>
+<p>整个bug的唯一线索就是图片中给出的bug发生的pc值，如果从adb logcat中看的话，可以看到bug发生在frida-agent中，当然也可以从fpicker前面打印的模块地址列表中，找到这个地址在哪个模块里</p>
+<p><img src="/2023/03/29/FridaFuzz Summary (一)/Untitled%207.png" alt="Untitled"></p>
+<h3 id="编译"><a href="#编译" class="headerlink" title="编译"></a>编译</h3><p><a href="https://bbs.kanxue.com/thread-272536-1.htm" target="_blank" rel="noopener">[原创][分享]fridaserver去特征检测以及编译-Android安全-看雪论坛-安全社区|安全招聘|bbs.pediy.com (kanxue.com)</a></p>
+<p>看雪上编译frida-server的文档还挺多的，因为逆向大佬通常需要魔改server来绕过检测</p>
+<p>先把frida拉下来</p>
+<p><code>git clone **--**recurse**-**submodules https:**//**github.com**/**frida**/**frida</code></p>
+<p>配置NDK路径</p>
+<p><code>export ANDROID_NDK_ROOT**=**&#39;/opt/android-ndk-r22b&#39;</code></p>
+<p>不过现在需要的25了</p>
+<p>直接运行make core-android-arm64就行</p>
+<p>如果要编译debug版本带调试符号的server可以</p>
+<p><a href="https://github.com/frida/frida/issues/1107" target="_blank" rel="noopener">Creating debug build · Issue #1107 · frida/frida (github.com)</a></p>
+<blockquote>
+<p>Before building Frida I start by editing <code>config.mk</code><br> to remove <code>--strip</code><br>, so the resulting binaries have debug symbols.</p>
+</blockquote>
+<p>编译成功的效果</p>
+<p><img src="/2023/03/29/FridaFuzz Summary (一)/Untitled%208.png" alt="Untitled"></p>
+<p><img src="/2023/03/29/FridaFuzz Summary (一)/Untitled%209.png" alt="Untitled"></p>
+<p>有了调试符号，下面就介绍一下我是怎么fix这个bug的</p>
+<h3 id="stalker的内存bug-fix"><a href="#stalker的内存bug-fix" class="headerlink" title="stalker的内存bug fix"></a>stalker的内存bug fix</h3><p>通过调试符号追溯那张图中PC对应的位置</p>
+<p>这个错发生在 gum_exec_block_maybe_create_new_data_slab</p>
+<p><img src="/2023/03/29/FridaFuzz Summary (一)/Untitled%2010.png" alt="Untitled"></p>
+<p>具体位置在这里，那就是这里分配内存失败了啊</p>
+<p><img src="/2023/03/29/FridaFuzz Summary (一)/Untitled%2011.png" alt="Untitled"></p>
+<p>有时候也会发生在code_slab的分配过程中</p>
+<p><img src="/2023/03/29/FridaFuzz Summary (一)/Untitled%2012.png" alt="Untitled"></p>
+<p><img src="/2023/03/29/FridaFuzz Summary (一)/Untitled%2013.png" alt="Untitled"></p>
+<p>简单调用栈如下，（应该是改成Java.perform主动调用上层Java函数才能得到这里的native调用栈，如果主动调用的是native函数就不会得到这个调用栈）</p>
+<p><img src="/2023/03/29/FridaFuzz Summary (一)/Untitled%2014.png" alt="Untitled"></p>
+<p>gum_exec_ctx_switch_block<br>gum_exec_ctx_obtain_block_for<br>gum_exec_block_new<br>gum_exec_block_maybe_create_new_code_slabs</p>
+<p>因为我们没办法调试frida-server，就只能插桩打印，找了几个打印都不行，最后直接用的_android_log_print打印到logcat里面</p>
+<p>在new_code_slab和allocate_near中加上相关地址打印</p>
+<p>new_code_slab</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">static GumCodeSlab *</span><br><span class="line">gum_code_slab_new (GumExecCtx * ctx)</span><br><span class="line">&#123;</span><br><span class="line">  GumStalker * stalker = ctx-&gt;stalker;</span><br><span class="line">  gsize total_size;</span><br><span class="line">  GumCodeSlab * code_slab;</span><br><span class="line">  GumSlowSlab * slow_slab;</span><br><span class="line">  GumAddressSpec spec;</span><br><span class="line">	//g_print(<span class="string">"gum_code_slab_new be called \n"</span>);</span><br><span class="line">	//g_log (<span class="string">"SlabDebug"</span>, G_LOG_LEVEL_INFO, <span class="string">"gum_code_slab_new be called \n"</span>);</span><br><span class="line">	__android_log_print(ANDROID_LOG_INFO,<span class="string">"SlabDebug"</span>,<span class="string">"1. gum_code_slab_new be called \n"</span>);</span><br><span class="line">  total_size = stalker-&gt;code_slab_size_dynamic +</span><br><span class="line">      stalker-&gt;slow_slab_size_dynamic;</span><br><span class="line"></span><br><span class="line">  gum_exec_ctx_compute_code_address_spec (ctx, total_size, &amp;spec);</span><br><span class="line">  __android_log_print(ANDROID_LOG_INFO,<span class="string">"SlabDebug"</span>,<span class="string">"2. ctx address : %p\n"</span>,ctx);</span><br><span class="line">  __android_log_print(ANDROID_LOG_INFO,<span class="string">"SlabDebug"</span>,<span class="string">"3. spec address : %p\n"</span>,spec.near_address);</span><br><span class="line">  code_slab = gum_memory_allocate_near (&amp;spec, total_size, stalker-&gt;page_size,</span><br><span class="line">      stalker-&gt;is_rwx_supported ? GUM_PAGE_RWX : GUM_PAGE_RW);</span><br><span class="line">	//g_print("new code_slab addr: %p\n",code_slab-&gt;slab);</span><br><span class="line">	//g_log ("SlabDebug", G_LOG_LEVEL_INFO, "new code_slab addr: %p\n",code_slab-&gt;slab);</span><br><span class="line">	__android_log_print(ANDROID_LOG_INFO,<span class="string">"SlabDebug"</span>,<span class="string">"new code_slab addr: %p\n"</span>,code_slab);</span><br><span class="line">  gum_code_slab_init (code_slab, stalker-&gt;code_slab_size_dynamic, total_size,</span><br><span class="line">      stalker-&gt;page_size);</span><br><span class="line"></span><br><span class="line">  slow_slab = gum_slab_end (&amp;code_slab-&gt;slab);</span><br><span class="line">  gum_slow_slab_init (slow_slab, stalker-&gt;slow_slab_size_dynamic, 0,</span><br><span class="line">      stalker-&gt;page_size);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> code_slab;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>allocate_near</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line">gpointer</span><br><span class="line">gum_memory_allocate_near (<span class="keyword">const</span> GumAddressSpec * spec,</span><br><span class="line">                          gsize size,</span><br><span class="line">                          gsize alignment,</span><br><span class="line">                          GumPageProtection prot)</span><br><span class="line">&#123;</span><br><span class="line">  gpointer suggested_base, received_base;</span><br><span class="line">  GumAllocNearContext ctx;</span><br><span class="line">  <span class="comment">//g_print("gum_memory_allocate_near be called\n");	</span></span><br><span class="line">  <span class="comment">//g_log ("SlabDebug", G_LOG_LEVEL_INFO, "gum_memory_allocate_near be called\n");</span></span><br><span class="line">  __android_log_print(ANDROID_LOG_INFO,<span class="string">"SlabDebug"</span>,<span class="string">"4. gum_memory_allocate_near be called\n"</span>);</span><br><span class="line">  suggested_base = (spec != <span class="literal">NULL</span>) ? spec-&gt;near_address : <span class="literal">NULL</span>;</span><br><span class="line">  </span><br><span class="line">  </span><br><span class="line">  </span><br><span class="line">  received_base = gum_memory_allocate (suggested_base, size, alignment, prot);</span><br><span class="line">  <span class="comment">//g_print("1. gum_memory_allocate_near received_base %p\n",received_base);	</span></span><br><span class="line">  <span class="comment">//g_log ("SlabDebug", G_LOG_LEVEL_INFO, "1. gum_memory_allocate_near received_base %p\n",received_base);</span></span><br><span class="line">  <span class="keyword">if</span>(spec != <span class="literal">NULL</span>)</span><br><span class="line">  	__android_log_print(ANDROID_LOG_INFO,<span class="string">"SlabDebug"</span>,<span class="string">"8.1 spec address : %p\n"</span>,spec-&gt;near_address);</span><br><span class="line">  __android_log_print(ANDROID_LOG_INFO,<span class="string">"SlabDebug"</span>,<span class="string">"8.2. gum_memory_allocate_near received_base %p\n"</span>,received_base);</span><br><span class="line">  <span class="keyword">if</span>(spec != <span class="literal">NULL</span> &amp;&amp; !gum_address_spec_is_satisfied_by (spec, received_base))</span><br><span class="line">  &#123;	</span><br><span class="line">  	__android_log_print(ANDROID_LOG_INFO,<span class="string">"SlabDebug"</span>,<span class="string">"8.3 unsatisfied spec!!!!!!!!!!"</span>);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">//delete spec</span></span><br><span class="line">  spec = <span class="literal">NULL</span>;</span><br><span class="line">  <span class="keyword">if</span> (received_base == <span class="literal">NULL</span>)</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">NULL</span>;</span><br><span class="line">  <span class="keyword">if</span> (spec == <span class="literal">NULL</span> || gum_address_spec_is_satisfied_by (spec, received_base))</span><br><span class="line">    <span class="keyword">return</span> received_base;</span><br><span class="line">  gum_memory_free (received_base, size);</span><br><span class="line"></span><br><span class="line">  ctx.spec = spec;</span><br><span class="line">  ctx.size = size;</span><br><span class="line">  ctx.alignment = alignment;</span><br><span class="line">  ctx.page_size = gum_query_page_size ();</span><br><span class="line">  ctx.prot = prot;</span><br><span class="line">  ctx.result = <span class="literal">NULL</span>;</span><br><span class="line"></span><br><span class="line">  gum_enumerate_free_ranges (gum_try_alloc_in_range_if_near_enough, &amp;ctx);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> ctx.result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>分配空间先会从gum_memory_allocate 中分配，里面就是一个mmap，如果分配条件为空或者gum_address_spec_is_satisfied_by 不满足，就会调用gum_enumerate_free_ranges遍历内存 ，从当前空闲的内存区域中分配，这里spec=NULL，就是我做的fix，后面再说，</p>
+<p>gum_address_spec_is_satisfied_by 是判断当前分配的地址是否离spec过远</p>
+<p><img src="/2023/03/29/FridaFuzz Summary (一)/Untitled%2015.png" alt="Untitled"></p>
+<p>本来alloc_near会传入一个建议分配到的地址，但是mmap要求分配的地址和返回地址不一定一样，这里我做了个实验，可以看到我传的预想地址是0x7000.结果两次mmap返回的地址都不是</p>
+<p><img src="/2023/03/29/FridaFuzz Summary (一)/Untitled%2016.png" alt="Untitled"></p>
+<p>既然这里mmap addr和mmap result地址不同，那如果是这样，总有可能分配出来的大于uint32</p>
+<p>之所以报crash，就是因为申请到的地址大于0x7ffffffff不满足条件，所以触发了下面alloc in range，结果一个都找不到，最终只能返回0，因为slab初始化时因为访问了0地址，产生了各种奇怪的0x18、0x10类的错误，其实都是结构体成员的偏移。我们用stalker插桩还必须得让其能够分配出来slab，所以这里到底为什么要加这个spec，原因不是很明白。。分配不出来怎么办，大胡子也没说，所以最终我尝试始终给spec赋值为NULL，这样其就不会检查分配出的内存的合理性，相当于取消spec检查，结果发现反而可以正常跑了。。。</p>
+<p>老版本是没有这个spec的限制的</p>
+<p><img src="/2023/03/29/FridaFuzz Summary (一)/Untitled%2017.png" alt="Untitled"></p>
+<p>直到14.2.14引入的code和data slab分离，spec也是在这时被加入的</p>
+<p><img src="/2023/03/29/FridaFuzz Summary (一)/Untitled%2018.png" alt="Untitled"></p>
+<p>当时就没搞懂为什么要加这个限制，看文档疑似讨论了这个点，还是不懂</p>
+<p><img src="/2023/03/29/FridaFuzz Summary (一)/Untitled%2019.png" alt="Untitled"></p>
+<p>最后只能在github上提了个issue，到现在也没人回</p>
+<p><a href="https://github.com/frida/frida-gum/issues/707" target="_blank" rel="noopener">https://github.com/frida/frida-gum/issues/707</a></p>
+<h1 id="AFL"><a href="#AFL" class="headerlink" title="AFL++"></a>AFL++</h1><p>本文主要使用的fpicker-android中引用AFL++版本，其Readme中介绍的是用AOSP的编译环境进行编译的，最新版本的AFL++，我还没有试过用AOSP的环境能不能编译出来，其对应的编译文件Android.bp的开头就写了因为AFL++没有团队成员用Android。。所以大概率编译会出错，不过暂时不用考虑这个问题，AFL++的变异驱动，先用fpicker-android这个版本，能用就行。</p>
+<p><img src="/2023/03/29/FridaFuzz Summary (一)/Untitled%2020.png" alt="Untitled"></p>
+<p>fpicker使用的版本还是3.13</p>
+<p><img src="/2023/03/29/FridaFuzz Summary (一)/Untitled%2021.png" alt="Untitled"></p>
+<h2 id="编译-1"><a href="#编译-1" class="headerlink" title="编译"></a>编译</h2><p>要编译AFL++，得先配置AOSP的编译环境，这个已经不知道复现多少次了</p>
+<p><a href="https://www.anquanke.com/post/id/199898#h2-1" target="_blank" rel="noopener">2020年安卓源码编译指南及FART脱壳机谷歌全设备镜像发布-安全客 - 安全资讯平台 (anquanke.com)</a></p>
+<h3 id="AOSP配置"><a href="#AOSP配置" class="headerlink" title="AOSP配置"></a>AOSP配置</h3><p>原先都是刷Android8，直接下载别人下载好的源码包，现在要fuzz的是最新的12、13，只能自己把整个源码包下载下来了，还好国内有科大、清华两个源</p>
+<p><a href="https://source.android.com/source/downloading?hl=zh-cn" target="_blank" rel="noopener">下载源代码  |  Android 开源项目  |  Android Open Source Project</a></p>
+<p>下载完毕后</p>
+<p>repo init -u <a href="https://aosp.tuna.tsinghua.edu.cn/platform/manifest" target="_blank" rel="noopener">https://aosp.tuna.tsinghua.edu.cn/platform/manifest</a> -b android-12.1.0_r1</p>
+<p>这中间可能会经历git的错误</p>
+<p><img src="/2023/03/29/FridaFuzz Summary (一)/Untitled%2022.png" alt="Untitled"></p>
+<p>这个问题修复，其让我增大http的缓存，但实际上他给的buffer大小也就500MB，jdk11我下载发现是578MB，所以我们再扩大一点buffer<br>git config –global http.postBuffer 10485760000</p>
+<p>如果还报错，可以把错误的对象分支删掉。。要是还有别的错误可以问下chatGPT</p>
+<p><a href="https://blog.csdn.net/qq_41614928/article/details/126047953" target="_blank" rel="noopener">(46条消息) fatal: bad object refs/remotes/origin/xxx 解决方法_舜岳的博客-CSDN博客</a></p>
+<h3 id="afl-编译"><a href="#afl-编译" class="headerlink" title="afl++编译"></a>afl++编译</h3><p>AFL++的编译非常简单，只需要把fpicker里跟的AFL++拖到AOSP的根目录</p>
+<p>先运行source build/envsetup配置下环境</p>
+<p>然后lunch选第二项（arm64-eng）</p>
+<p>最后直接mmm afl++即可，编译成功会给出afl++产生在哪个文件夹里</p>
+<p>这里编译用的应该就是Android.bp，Android的编译系统</p>
+<p><a href="https://source.android.com/docs/setup/build" target="_blank" rel="noopener">Soong Build System  |  Android Open Source Project</a></p>
+<p><img src="/2023/03/29/FridaFuzz Summary (一)/Untitled%2023.png" alt="Untitled"></p>
+<p>但是没看出bp哪里有特别的地方，</p>
+<p><img src="/2023/03/29/FridaFuzz Summary (一)/Untitled%2024.png" alt="Untitled"></p>
+<p><img src="/2023/03/29/FridaFuzz Summary (一)/Untitled%2025.png" alt="Untitled"></p>
+<p>编译成功的效果</p>
+<p><img src="/2023/03/29/FridaFuzz Summary (一)/Untitled%2026.png" alt="Untitled"></p>
+<p><img src="/2023/03/29/FridaFuzz Summary (一)/Untitled%2027.png" alt="Untitled"></p>
+<p><img src="/2023/03/29/FridaFuzz Summary (一)/Untitled%2028.png" alt="Untitled"></p>
+<p>FASAN，常规的Address Sanitizer basics是用DT_NEED把 ASAN的库链接到目标程序里，主要逻辑包括设置shadow memory，提供内存替代函数的实现。<br>主要的替换就是malloc、free、memcpy等</p>
+<h2 id="testcase"><a href="#testcase" class="headerlink" title="testcase"></a>testcase</h2><p>一开始疑惑frida-mode怎么测，后来发现frida-mode里面有示例的testcase</p>
+<p><a href="https://github.com/AFLplusplus/AFLplusplus/blob/stable/frida_mode/test/freetype2/GNUmakefile" target="_blank" rel="noopener">AFLplusplus/GNUmakefile at stable · AFLplusplus/AFLplusplus (github.com)</a></p>
+<p>以一个freetype的MakeFile看一下frida_mode是怎么fuzz的</p>
+<p>下载freetype</p>
+<p><img src="/2023/03/29/FridaFuzz Summary (一)/Untitled%2029.png" alt="Untitled"></p>
+<p>libfuzzer的Harness</p>
+<p>就是包裹一层main函数</p>
+<p><img src="/2023/03/29/FridaFuzz Summary (一)/Untitled%2030.png" alt="Untitled"></p>
+<h2 id="源码分析"><a href="#源码分析" class="headerlink" title="源码分析"></a>源码分析</h2><p>2-11</p>
+<h3 id="参数解析"><a href="#参数解析" class="headerlink" title="参数解析"></a>参数解析</h3><p>i 设置输入目录，指定-i- 就是恢复模式</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> <span class="string">'i'</span>:                                                <span class="comment">/* input dir */</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (afl-&gt;in_dir) &#123; FATAL(<span class="string">"Multiple -i options not supported"</span>); &#125;</span><br><span class="line">        <span class="keyword">if</span> (optarg == <span class="literal">NULL</span>) &#123; FATAL(<span class="string">"Invalid -i option (got NULL)."</span>); &#125;</span><br><span class="line">        afl-&gt;in_dir = optarg;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (!<span class="built_in">strcmp</span>(afl-&gt;in_dir, <span class="string">"-"</span>)) &#123; afl-&gt;in_place_resume = <span class="number">1</span>; &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">break</span>;</span><br></pre></td></tr></table></figure>
+<h3 id="Resume模式"><a href="#Resume模式" class="headerlink" title="Resume模式"></a>Resume模式</h3><p>搜索_resume</p>
+<p>处理resume的逻辑在这里</p>
+<p>就是简单把原来的queue重命名为_resume</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment">/* Delete fuzzer output directory if we recognize it as ours, if the fuzzer</span></span><br><span class="line"><span class="comment">   is not currently running, and if the last run time isn't too great.</span></span><br><span class="line"><span class="comment">   Resume fuzzing if `-` is set as in_dir or if AFL_AUTORESUME is set */</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">handle_existing_out_dir</span><span class="params">(<span class="keyword">afl_state_t</span> *afl)</span> </span>&#123;</span><br><span class="line">	<span class="keyword">if</span> (afl-&gt;in_place_resume) &#123;</span><br><span class="line"></span><br><span class="line">    u8 *orig_q = alloc_printf(<span class="string">"%s/queue"</span>, afl-&gt;out_dir);</span><br><span class="line"></span><br><span class="line">    afl-&gt;in_dir = alloc_printf(<span class="string">"%s/_resume"</span>, afl-&gt;out_dir);</span><br><span class="line">		rename(orig_q, afl-&gt;in_dir);                           <span class="comment">/* Ignore errors */</span></span><br><span class="line"></span><br><span class="line">    OKF(<span class="string">"Output directory exists, will attempt session resume."</span>);</span><br><span class="line"></span><br><span class="line">    ck_free(orig_q);</span><br></pre></td></tr></table></figure>
+<p>in_place_resume就是输入参数-in-时设置的</p>
+<p><img src="/2023/03/29/FridaFuzz Summary (一)/Untitled%2031.png" alt="Untitled"></p>
+<p>而Handle_exiting_out_dir是在配置输出目录时设置的</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">setup_dirs_fds</span><span class="params">(<span class="keyword">afl_state_t</span> *afl)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">  u8 *tmp;</span><br><span class="line"></span><br><span class="line">  ACTF(<span class="string">"Setting up output directories..."</span>);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (afl-&gt;sync_id &amp;&amp; mkdir(afl-&gt;sync_dir, <span class="number">0700</span>) &amp;&amp; errno != EEXIST) &#123;</span><br><span class="line"></span><br><span class="line">    PFATAL(<span class="string">"Unable to create '%s'"</span>, afl-&gt;sync_dir);</span><br><span class="line"></span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (mkdir(afl-&gt;out_dir, <span class="number">0700</span>)) &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (errno != EEXIST) &#123; PFATAL(<span class="string">"Unable to create '%s'"</span>, afl-&gt;out_dir); &#125;</span><br><span class="line"></span><br><span class="line">    handle_existing_out_dir(afl);</span><br><span class="line"></span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br></pre></td></tr></table></figure>
+<p>然后看一下queue目录是怎么生成的</p>
+<p>fuzz刚开始时候的输出</p>
+<p><img src="/2023/03/29/FridaFuzz Summary (一)/Untitled%2032.png" alt="Untitled"></p>
+<p>首先是<strong>scan</strong>，然后是<strong>load</strong>，然后是<strong>create hard links，</strong>就在<strong>pivot_inputs</strong>里</p>
+<p>Pivot-queue实际就是遍历queue_paths，然后在queue中创建对应项</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* Create hard links for input test cases in the output directory, choosing</span></span><br><span class="line"><span class="comment">   good names and pivoting accordingly. */</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">pivot_inputs</span><span class="params">(<span class="keyword">afl_state_t</span> *afl)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">queue_entry</span> *<span class="title">q</span>;</span></span><br><span class="line">  u32                 id = <span class="number">0</span>, i;</span><br><span class="line"></span><br><span class="line">  ACTF(<span class="string">"Creating hard links for all input files..."</span>);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; afl-&gt;queued_paths &amp;&amp; likely(afl-&gt;queue_buf[i]); i++) &#123;</span><br><span class="line"></span><br><span class="line">    q = afl-&gt;queue_buf[i];</span><br><span class="line"></span><br><span class="line">		nfn = alloc_printf(<span class="string">"%s/queue/id:%06u,time:0,orig:%s"</span>, afl-&gt;out_dir, id,</span><br><span class="line">		                       use_name);</span><br><span class="line">		</span><br><span class="line">		<span class="meta">#<span class="meta-keyword">else</span></span></span><br><span class="line">		</span><br><span class="line">		    nfn = alloc_printf(<span class="string">"%s/queue/id_%06u"</span>, afl-&gt;out_dir, id);</span><br><span class="line">		</span><br><span class="line">		<span class="meta">#<span class="meta-keyword">endif</span>                                                    <span class="comment">/* ^!SIMPLE_FILES */</span></span></span><br><span class="line">		</span><br><span class="line">		  &#125;</span><br><span class="line">		</span><br><span class="line">		  <span class="comment">/* Pivot to the new queue entry. */</span></span><br><span class="line">		</span><br><span class="line">		  link_or_copy(q-&gt;fname, nfn);</span><br></pre></td></tr></table></figure>
+<p>创建hard_link的函数就是<strong>Link_or_copy ，就是拷贝</strong></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">link_or_copy</span><span class="params">(u8 *old_path, u8 *new_path)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">  s32 i = link(old_path, new_path);</span><br><span class="line">  s32 sfd, dfd;</span><br><span class="line">  u8 *tmp;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (!i) &#123; <span class="keyword">return</span>; &#125;</span><br><span class="line"></span><br><span class="line">  sfd = open(old_path, O_RDONLY);</span><br><span class="line">  <span class="keyword">if</span> (sfd &lt; <span class="number">0</span>) &#123; PFATAL(<span class="string">"Unable to open '%s'"</span>, old_path); &#125;</span><br><span class="line"></span><br><span class="line">  dfd = open(new_path, O_WRONLY | O_CREAT | O_EXCL, DEFAULT_PERMISSION);</span><br><span class="line">  <span class="keyword">if</span> (dfd &lt; <span class="number">0</span>) &#123; PFATAL(<span class="string">"Unable to create '%s'"</span>, new_path); &#125;</span><br><span class="line"></span><br><span class="line">  tmp = ck_alloc(<span class="number">64</span> * <span class="number">1024</span>);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">while</span> ((i = read(sfd, tmp, <span class="number">64</span> * <span class="number">1024</span>)) &gt; <span class="number">0</span>) &#123;</span><br><span class="line"></span><br><span class="line">    ck_write(dfd, tmp, i, new_path);</span><br><span class="line"></span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (i &lt; <span class="number">0</span>) &#123; PFATAL(<span class="string">"read() failed"</span>); &#125;</span><br><span class="line"></span><br><span class="line">  ck_free(tmp);</span><br><span class="line">  close(sfd);</span><br><span class="line">  close(dfd);</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>正常创建queue，在开局scan input_dir时会创建一次，</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* Read all testcases from the input directory, then queue them for testing.</span></span><br><span class="line"><span class="comment">   Called at startup. */</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">read_testcases</span><span class="params">(<span class="keyword">afl_state_t</span> *afl, u8 *directory)</span> </span>&#123;</span><br><span class="line">	ACTF(<span class="string">"Scanning '%s'..."</span>, dir);</span><br><span class="line"></span><br><span class="line">	add_to_queue(afl, fn2, st.st_size &gt;= MAX_FILE ? MAX_FILE : st.st_size,</span><br><span class="line">                 passed_det);</span><br></pre></td></tr></table></figure>
+<p>之后就是<strong>save_if_intersting ，</strong>会把感兴趣的样本也放进去</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* Check if the result of an execve() during routine fuzzing is interesting,</span></span><br><span class="line"><span class="comment">   save or queue the input test case for further analysis if so. Returns 1 if</span></span><br><span class="line"><span class="comment">   entry is saved, 0 otherwise. */</span></span><br><span class="line"></span><br><span class="line">u8 __attribute__((hot))</span><br><span class="line">save_if_interesting(<span class="keyword">afl_state_t</span> *afl, <span class="keyword">void</span> *mem, u32 len, u8 fault) &#123;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (unlikely(len == <span class="number">0</span>)) &#123; <span class="keyword">return</span> <span class="number">0</span>; &#125;</span><br><span class="line"></span><br><span class="line">  u8 *queue_fn = <span class="string">""</span>;</span><br><span class="line">  u8  new_bits = <span class="string">'\0'</span>;</span><br><span class="line">  s32 fd;</span><br><span class="line">  u8  keeping = <span class="number">0</span>, res, classified = <span class="number">0</span>;</span><br><span class="line">  u64 cksum = <span class="number">0</span>;</span><br><span class="line">	<span class="meta">#<span class="meta-keyword">ifndef</span> SIMPLE_FILES</span></span><br><span class="line">	</span><br><span class="line">	    queue_fn = alloc_printf(</span><br><span class="line">	        <span class="string">"%s/queue/id:%06u,%s"</span>, afl-&gt;out_dir, afl-&gt;queued_paths,</span><br><span class="line">	        describe_op(afl, new_bits, NAME_MAX - <span class="built_in">strlen</span>(<span class="string">"id:000000,"</span>)));</span><br><span class="line">	</span><br><span class="line">	<span class="meta">#<span class="meta-keyword">else</span></span></span><br><span class="line">	</span><br><span class="line">	    queue_fn =</span><br><span class="line">	        alloc_printf(<span class="string">"%s/queue/id_%06u"</span>, afl-&gt;out_dir, afl-&gt;queued_paths);</span><br><span class="line">	</span><br><span class="line">	<span class="meta">#<span class="meta-keyword">endif</span>                                                    <span class="comment">/* ^!SIMPLE_FILES */</span></span></span><br><span class="line">	    fd = open(queue_fn, O_WRONLY | O_CREAT | O_EXCL, DEFAULT_PERMISSION);</span><br><span class="line">	    <span class="keyword">if</span> (unlikely(fd &lt; <span class="number">0</span>)) &#123; PFATAL(<span class="string">"Unable to create '%s'"</span>, queue_fn); &#125;</span><br><span class="line">	    ck_write(fd, mem, len, queue_fn);</span><br><span class="line">	    close(fd);</span><br><span class="line">	    add_to_queue(afl, queue_fn, len, <span class="number">0</span>);</span><br></pre></td></tr></table></figure>
+<h3 id="共享内存的创建"><a href="#共享内存的创建" class="headerlink" title="共享内存的创建"></a>共享内存的创建</h3><p>AFL通过共享内存来和Forkserver共享覆盖率</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment">/* Configure shared memory.</span></span><br><span class="line"><span class="comment">   Returns a pointer to shm-&gt;map for ease of use.</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="comment">//add COMMAP</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> COMMAP_SIZE 0xA0000</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> COMMAP_ENV_MAP <span class="meta-string">"COMMAP_ENV_MAP"</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> EXEC_ENV_MAP <span class="meta-string">"EXEC_ENV_MAP"</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> ITER_ENV_MAP <span class="meta-string">"ITER_ENV_MAP"</span></span></span><br><span class="line"><span class="function">u8 *<span class="title">afl_shm_init</span><span class="params">(<span class="keyword">sharedmem_t</span> *shm, <span class="keyword">size_t</span> map_size,</span></span></span><br><span class="line"><span class="function"><span class="params">                 <span class="keyword">unsigned</span> <span class="keyword">char</span> non_instrumented_mode)</span> </span>&#123;</span><br><span class="line">	shm-&gt;<span class="built_in">map</span> = <span class="literal">NULL</span>;</span><br><span class="line">  shm-&gt;cmp_map = <span class="literal">NULL</span>;</span><br><span class="line">  shm-&gt;commap = <span class="literal">NULL</span>;</span><br><span class="line">  u8 *shm_str;</span><br><span class="line"></span><br><span class="line">  shm-&gt;shm_id =</span><br><span class="line">      shmget(IPC_PRIVATE, map_size, IPC_CREAT | IPC_EXCL | DEFAULT_PERMISSION);</span><br><span class="line">  <span class="built_in">printf</span>(<span class="string">"shm_id %i\n"</span>,shm-&gt;shm_id);</span><br><span class="line">  <span class="keyword">if</span> (shm-&gt;shm_id &lt; <span class="number">0</span>) &#123; PFATAL(<span class="string">"shmget() failed"</span>); &#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (shm-&gt;cmplog_mode) &#123;</span><br><span class="line"></span><br><span class="line">    shm-&gt;cmplog_shm_id = shmget(IPC_PRIVATE, <span class="keyword">sizeof</span>(struct cmp_map),</span><br><span class="line">                                IPC_CREAT | IPC_EXCL | DEFAULT_PERMISSION);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (shm-&gt;cmplog_shm_id &lt; <span class="number">0</span>) &#123;</span><br><span class="line"></span><br><span class="line">      shmctl(shm-&gt;shm_id, IPC_RMID, <span class="literal">NULL</span>);  <span class="comment">// do not leak shmem</span></span><br><span class="line">      PFATAL(<span class="string">"shmget() failed"</span>);</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">setenv(SHM_ENV_VAR, shm_str, <span class="number">1</span>);</span><br><span class="line">setenv(CMPLOG_SHM_ENV_VAR, shm_str, <span class="number">1</span>);</span><br><span class="line"></span><br><span class="line">shm-&gt;<span class="built_in">map</span> = shmat(shm-&gt;shm_id, <span class="literal">NULL</span>, <span class="number">0</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (shm-&gt;cmplog_mode) &#123;</span><br><span class="line"></span><br><span class="line">    shm-&gt;cmp_map = shmat(shm-&gt;cmplog_shm_id, <span class="literal">NULL</span>, <span class="number">0</span>);</span><br></pre></td></tr></table></figure>
+<p>map-size就是65536，shmget打开共享内存，如果开了CMP_LOG，下面还会打开一个cmplog_shm_id</p>
+<p>这个id会被设置到环境变量中，最后会通过shmat将两个id对应的shm映射到进程中</p>
+<h3 id="核心Fuzz逻辑"><a href="#核心Fuzz逻辑" class="headerlink" title="核心Fuzz逻辑"></a>核心Fuzz逻辑</h3><p>解析参数，分析in目录的种子</p>
+<p><strong>perform_dry_run</strong></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment">/* Perform dry run of all test cases to confirm that the app is working as</span></span><br><span class="line"><span class="comment">   expected. This is done only for the initial inputs, and only once. */</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">perform_dry_run</span><span class="params">(<span class="keyword">afl_state_t</span> *afl)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">queue_entry</span> *<span class="title">q</span>;</span></span><br><span class="line">  u32                 cal_failures = <span class="number">0</span>, idx;</span><br><span class="line">  u8 *                skip_crashes = afl-&gt;afl_env.afl_skip_crashes;</span><br><span class="line">  u8 *                use_mem;</span><br><span class="line">  <span class="comment">//dry每个输入</span></span><br><span class="line">  DACTF(<span class="string">"[debug 1] perform_dry_run: queued_paths,%d."</span>, afl-&gt;queued_paths);</span><br><span class="line">  <span class="keyword">for</span> (idx = <span class="number">0</span>; idx &lt; afl-&gt;queued_paths; idx++) &#123;</span><br><span class="line"></span><br><span class="line">    q = afl-&gt;queue_buf[idx];</span><br><span class="line">    <span class="keyword">if</span> (unlikely(!q || q-&gt;disabled)) &#123; <span class="keyword">continue</span>; &#125;</span><br><span class="line"></span><br><span class="line">    u8  res;</span><br><span class="line">    s32 fd;</span><br></pre></td></tr></table></figure>
+<p>AFL会维护一个当前的所有种子，保存在队列Queue_paths，dry_run会遍历整个种子队列,都运行一遍看看其是否能正常使用，不会有crash、timeout这种，dry到哪了会打印出来</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">u8 *fn = <span class="built_in">strrchr</span>(q-&gt;fname, <span class="string">'/'</span>) + <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line">    ACTF(<span class="string">"Attempting dry run with '%s'..."</span>, fn);</span><br></pre></td></tr></table></figure>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">fd = open(q-&gt;fname, O_RDONLY);</span><br><span class="line">    <span class="keyword">if</span> (fd &lt; <span class="number">0</span>) &#123; PFATAL(<span class="string">"Unable to open '%s'"</span>, q-&gt;fname); &#125;</span><br><span class="line"></span><br><span class="line">    u32 read_len = MIN(q-&gt;len, (u32)MAX_FILE);</span><br><span class="line">    use_mem = afl_realloc(AFL_BUF_PARAM(in), read_len);</span><br><span class="line">    <span class="keyword">if</span> (read(fd, use_mem, read_len) != (<span class="keyword">ssize_t</span>)read_len) &#123;</span><br><span class="line"></span><br><span class="line">      FATAL(<span class="string">"Short read from '%s'"</span>, q-&gt;fname);</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    close(fd);</span><br><span class="line"></span><br><span class="line">    res = calibrate_case(afl, q, use_mem, <span class="number">0</span>, <span class="number">1</span>);</span><br></pre></td></tr></table></figure>
+<p>具体dry是通过<strong>calibrate_case</strong>函数，这里面会运行多次，以确保是样本是没问题的,默认就是8次</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//calibrate_case 8次，确保输入是没问题的</span></span><br><span class="line">  <span class="keyword">for</span> (afl-&gt;stage_cur = <span class="number">0</span>; afl-&gt;stage_cur &lt; afl-&gt;stage_max; ++afl-&gt;stage_cur) &#123;</span><br><span class="line"></span><br><span class="line">    u64 cksum;</span><br><span class="line">    <span class="comment">//写入testcases</span></span><br><span class="line">    write_to_testcase(afl, use_mem, q-&gt;len);</span><br><span class="line"></span><br><span class="line">    fault = fuzz_run_target(afl, &amp;afl-&gt;fsrv, use_tmout);</span><br><span class="line">    DACTF(<span class="string">"[debug 1] calibrate_case: fuzz_run_target."</span>);</span><br></pre></td></tr></table></figure>
+<p>AFL++每次进行fuzz前都会先对样本queue进行依次dry(就上面分析的)</p>
+<p>这个正常是没问题的，但是因为我们针对glib老是崩溃的问题，用了fuzz启动器不停的启动fuzz，这就导致，后期resume模式下，queue越来越长，这里dry的时间就会越来长，一种解决方式是可以减少stage_max到1次，而且按AFL，也必须运行一次，因为要载入trace_bits…</p>
+<h3 id="保存状态"><a href="#保存状态" class="headerlink" title="保存状态"></a>保存状态</h3><h3 id="和Fpicker的通讯"><a href="#和Fpicker的通讯" class="headerlink" title="和Fpicker的通讯"></a>和Fpicker的通讯</h3><p>2-16</p>
+<h3 id="Libdislocator"><a href="#Libdislocator" class="headerlink" title="Libdislocator"></a>Libdislocator</h3><h1 id="Fpicker"><a href="#Fpicker" class="headerlink" title="Fpicker"></a>Fpicker</h1><p><a href="https://insinuator.net/2021/03/fpicker-fuzzing-with-frida/" target="_blank" rel="noopener">fpicker: Fuzzing with Frida – Insinuator.net</a></p>
+<p>最初的介绍文档</p>
+<h2 id="fpicker的Android移植"><a href="#fpicker的Android移植" class="headerlink" title="fpicker的Android移植"></a>fpicker的Android移植</h2><p>虽然fpicker最初写的支持Android、Linux、Macos，但是其实对Android的支持非常有限</p>
+<p><img src="/2023/03/29/FridaFuzz Summary (一)/Untitled%2033.png" alt="Untitled"></p>
+<p>从源代码里可以看到用USB时，不支持共享内存，也不支持AFL</p>
+<p>直接搜Android是能找到很多和我一样的疑问的，如何使fpicker运行在Android上</p>
+<p><img src="/2023/03/29/FridaFuzz Summary (一)/Untitled%2034.png" alt="Untitled"></p>
+<p>讨论的非常多</p>
+<p><a href="https://github.com/marcinguy/fpicker/tree/android-port-forward" target="_blank" rel="noopener">marcinguy/fpicker at android-port-forward (github.com)</a></p>
+<p>有许多讨论，不过作者都没有合并，这个是让fpicker支持网络模式的</p>
+<p><a href="https://github.com/ttdennis/fpicker/issues/5" target="_blank" rel="noopener">Fuzzing in afl++ mode on android device · Issue #5 · ttdennis/fpicker (github.com)</a></p>
+<p>这个是讨论怎么支持afl++在Android模式上</p>
+<p>作者说因为fpicker需要AFL++的共享内存，如果要跨USB使用，就得用standalone mode，然后自己实现一个更好的mutator，否则就得用fpicker自己实现的random变异</p>
+<p>因为Android上没有全局共享内存的概念，</p>
+<p><img src="/2023/03/29/FridaFuzz Summary (一)/Untitled%2035.png" alt="Untitled"></p>
+<p>当时本来觉得研究就此无望了，结果这老哥隔了一年，就在我发现这个玩意的上个月把自己的fpicker移植Android的成果发出来了</p>
+<p><img src="/2023/03/29/FridaFuzz Summary (一)/Untitled%2036.png" alt="Untitled"></p>
+<p><img src="/2023/03/29/FridaFuzz Summary (一)/Untitled%2037.png" alt="Untitled"></p>
+<p><a href="https://github.com/marcinguy/fpicker-aflpp-android/" target="_blank" rel="noopener">https://github.com/marcinguy/fpicker-aflpp-android/</a></p>
+<p>其瑕疵还是不少，但是就此开启了我后面两个月的debug。。。。</p>
+<p>之所以作者能把fpicker移植成功，是因为其将共享内存的相关代码都换成了android-shmem的模拟实现上</p>
+<h2 id="源码分析-1"><a href="#源码分析-1" class="headerlink" title="源码分析"></a>源码分析</h2><p>fpicker一共就三个文件，fpicker.c 、fp_communicate.c 、fp_afl_mode.c</p>
+<p>fpicker.c是负责fpicker的启动和一些通用类</p>
+<p>fp_communicate.c是负责和harness Agent的交流</p>
+<p>fp_afl_mode.c是负责和AFL交流</p>
+<p>fpicker的main主要下面几个过程</p>
+<h3 id="解析参数"><a href="#解析参数" class="headerlink" title="解析参数"></a>解析参数</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">fuzzer_state_t</span> *fstate = parse_args(argc, argv);</span><br></pre></td></tr></table></figure>
+<p>fstate是包含整个fstate状态的结构体，其中fconfig记录了当前解析参数得到各项配置</p>
+<p>具体一些选项可以看github</p>
+<p><a href="https://github.com/ttdennis/fpicker" target="_blank" rel="noopener">https://github.com/ttdennis/fpicker</a></p>
+<p>我们主要用的几个选项就是afl，in_process、spawn，一个样例启动参数如下</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">AFL_DEBUG=<span class="number">1</span> AFL_SKIP_BIN_CHECK=<span class="number">1</span> LD_PRELOAD=/data/local/tmp/libandroid-shmem.so AFL_NO_AFFINITY=<span class="number">1</span> ./afl-fuzz -i- -o out -- ./fpicker -v  -u send --fuzzer-mode afl -e spawn -p com.zzr.testfuzz -f ./agent.js -t <span class="number">9999</span> com.zzr.testfuzz</span><br></pre></td></tr></table></figure>
+<h3 id="配置和AFL进行覆盖率通信的SHM"><a href="#配置和AFL进行覆盖率通信的SHM" class="headerlink" title="配置和AFL进行覆盖率通信的SHM"></a>配置和AFL进行覆盖率通信的SHM</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (fstate-&gt;config-&gt;fuzzer_mode == FUZZER_MODE_AFL) &#123;</span><br><span class="line">        fstate-&gt;shm_id = getenv(SHM_ENV_VAR);</span><br><span class="line">        <span class="comment">// if SHM_ENV_VAR does not exist we're not running in AFL (or there's some other problem)</span></span><br><span class="line">        <span class="keyword">if</span> (!fstate-&gt;shm_id) &#123;</span><br><span class="line">            plog(<span class="string">"[!] "</span> SHM_ENV_VAR <span class="string">" not defined!\n"</span>);</span><br><span class="line">            <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        plog(<span class="string">"[*] SHM_ENV_VAR = %s\n"</span>, fstate-&gt;shm_id);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>这个shm会向下传递给stalker，其会在执行到基本块时写进这个共享内存</p>
+<h3 id="配置和Harness交流shm"><a href="#配置和Harness交流shm" class="headerlink" title="配置和Harness交流shm"></a>配置和Harness交流shm</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">fstate-&gt;config-&gt;verbose = <span class="literal">true</span>;</span><br><span class="line">    <span class="keyword">if</span> (fstate-&gt;config-&gt;communication_mode == COMMUNICATION_MODE_SHM) &#123;</span><br><span class="line">        plog(<span class="string">"[*] create_communication_map \n"</span>);</span><br><span class="line">        <span class="comment">//create_communication_map(fstate);</span></span><br><span class="line">        <span class="comment">//open_communication_map(fstate);</span></span><br><span class="line">    &#125;</span><br><span class="line">    open_communication_map(fstate);</span><br></pre></td></tr></table></figure>
+<p>不知道为什么在fpicker中没办法创建共享内存，因为LD_PRELOAD=/data/local/tmp/libandroid-shmem.so打在AFL的启动前面的，可能没办法hook到fpicker这个子进程上，所以我采用的办法和覆盖率SHM时一样的，就是由AFL创建，然后fpicker再打开使用</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">define</span> COMMAP_ENV_MAP <span class="meta-string">"COMMAP_ENV_MAP"</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> EXEC_ENV_MAP <span class="meta-string">"EXEC_ENV_MAP"</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> ITER_ENV_MAP <span class="meta-string">"ITER_ENV_MAP"</span></span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">open_communication_map</span><span class="params">(<span class="keyword">fuzzer_state_t</span> *fstate)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">char</span> *shm_id = <span class="built_in">malloc</span>(<span class="number">128</span>);</span><br><span class="line">    <span class="keyword">char</span> *commap_id_str  = getenv(COMMAP_ENV_MAP);</span><br><span class="line">    <span class="comment">// if SHM_ENV_VAR does not exist we're not running in AFL (or there's some other problem)</span></span><br><span class="line">    <span class="keyword">if</span> (!commap_id_str) &#123;</span><br><span class="line">        plog(<span class="string">"[!] "</span> COMMAP_ENV_MAP <span class="string">" not defined!\n"</span>);</span><br><span class="line">        do_exit(fstate);;</span><br><span class="line">    &#125;</span><br><span class="line">    plog(<span class="string">"[*] COMMAP_ENV_MAP = %s\n"</span>, commap_id_str);</span><br><span class="line">    <span class="keyword">unsigned</span> <span class="keyword">int</span>  commap_id = atoi(commap_id_str);        </span><br><span class="line">    <span class="comment">//核心的传输入数据的共享内存</span></span><br><span class="line">    <span class="comment">//int commap_id = shmget(IPC_PRIVATE, COMMAP_SIZE, IPC_CREAT | IPC_EXCL | 0644);</span></span><br><span class="line">    plog(<span class="string">"[*] Created commap = %d\n"</span>, commap_id);</span><br><span class="line">    <span class="keyword">if</span>(commap_id == <span class="number">-1</span>)</span><br><span class="line">        plog(<span class="string">"%s\n"</span>, strerror(errno));</span><br><span class="line">    <span class="built_in">snprintf</span>(shm_id, <span class="number">128</span>, <span class="string">"%d"</span>, commap_id);</span><br><span class="line">    fstate-&gt;commap_id = shm_id;</span><br><span class="line">    fstate-&gt;commap = shmat(commap_id, <span class="literal">NULL</span>, <span class="number">0</span>);</span><br><span class="line">    plog(<span class="string">"[*] commap_addr = %lx\n"</span>, fstate-&gt;commap);   </span><br><span class="line"></span><br><span class="line">    <span class="comment">//open exec and iter map</span></span><br><span class="line">    <span class="comment">//char *exec_id = malloc(128);</span></span><br><span class="line">    <span class="keyword">char</span> *exec_map_id_str  = getenv(EXEC_ENV_MAP);    </span><br><span class="line">    <span class="comment">//char *iter_id = malloc(128);</span></span><br><span class="line">    <span class="keyword">char</span> *iter_map_id_str  = getenv(ITER_ENV_MAP); </span><br><span class="line">    <span class="keyword">if</span> (!exec_map_id_str || !iter_map_id_str) &#123;</span><br><span class="line">        plog(<span class="string">"[!] "</span> EXEC_ENV_MAP <span class="string">" not defined!\n"</span>);</span><br><span class="line">        do_exit(fstate);;</span><br><span class="line">    &#125;</span><br><span class="line">    plog(<span class="string">"[*] EXEC_ENV_MAP = %s\n"</span>, exec_map_id_str);</span><br><span class="line">    plog(<span class="string">"[*] ITER_ENV_MAP = %s\n"</span>, iter_map_id_str);</span><br><span class="line">    <span class="keyword">unsigned</span> <span class="keyword">int</span>  exec_id = atoi(exec_map_id_str); </span><br><span class="line">    <span class="keyword">unsigned</span> <span class="keyword">int</span>  iter_id = atoi(iter_map_id_str); </span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span>(exec_id == <span class="number">-1</span> || iter_id == <span class="number">-1</span>)  </span><br><span class="line">        plog(<span class="string">"%s\n"</span>, strerror(errno));</span><br><span class="line">    fstate-&gt;exec_id = exec_map_id_str;</span><br><span class="line">    fstate-&gt;exec_sem = shmat(exec_id, <span class="literal">NULL</span>, <span class="number">0</span>);</span><br><span class="line">    plog(<span class="string">"[*] exec_addr = %lx\n"</span>,fstate-&gt;exec_sem );   </span><br><span class="line"></span><br><span class="line">    fstate-&gt;iter_id = iter_map_id_str;</span><br><span class="line">    fstate-&gt;iteration_sem = shmat(iter_id, <span class="literal">NULL</span>, <span class="number">0</span>);</span><br><span class="line">    plog(<span class="string">"[*] iter_addr = %lx\n"</span>,fstate-&gt;iteration_sem );   </span><br><span class="line">    *(fstate-&gt;exec_sem) = <span class="number">0</span>;</span><br><span class="line">    *(fstate-&gt;iteration_sem) = <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>因为Android不支持信号量，所以exec_sem和iteration_sem两个信号量也是用共享内存实现的，一开始担心不是原子操作会不会出同步问题，后来想想，两个共享内存负责进出还好，不会出现问题。。</p>
+<h3 id="frida加载"><a href="#frida加载" class="headerlink" title="frida加载"></a>frida加载</h3><p>首先是frida初始化</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">frida_init()</span><br></pre></td></tr></table></figure>
+<p>这个就是直接调用core里面的API，说起来frida-core下载解压后，其API都在frida-core.h里面</p>
+<p>创建设备管理器，遍历设备，得到当前的设备数目</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">manager = frida_device_manager_new();</span><br><span class="line">devices = frida_device_manager_enumerate_devices_sync(manager, <span class="literal">NULL</span>, &amp;error);</span><br><span class="line">num_devices = frida_device_list_size(devices);</span><br><span class="line"><span class="comment">//保存device到fstate中</span></span><br><span class="line">fstate-&gt;frida_device = device;</span><br><span class="line"></span><br><span class="line">session = spawn_or_attach(fstate);</span><br></pre></td></tr></table></figure>
+<p>经过测试，只有用Remote类型连上frida-server才能成功进行接下来的操作，</p>
+<p>得到device需要启动并附加到device上的进程中，因为我们要考虑到fuzz过程中crash、以及目标app突然退出的问题，所以必须采用spawn模式</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">FridaSession *<span class="title">spawn_or_attach</span><span class="params">(<span class="keyword">fuzzer_state_t</span> *fstate)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">fuzzer_config_t</span> *config = fstate-&gt;config;</span><br><span class="line"></span><br><span class="line">    FridaSession *session;</span><br><span class="line">    GError *error = <span class="literal">NULL</span>;</span><br><span class="line">    <span class="keyword">pid_t</span> target_pid = <span class="number">0</span>;</span><br><span class="line">    FridaDevice *device = fstate-&gt;frida_device;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (config-&gt;exec_mode == EXEC_MODE_SPAWN) &#123;</span><br><span class="line">        plog(<span class="string">"[*] Trying to spawn %s on device %s\n"</span>, config-&gt;process_name, frida_device_get_name(device));</span><br><span class="line">        plog(<span class="string">"[*] spawn argc %d argv %s\n"</span>, config-&gt;spawn_argc, config-&gt;spawn_argv[<span class="number">0</span>]);</span><br><span class="line">        FridaSpawnOptions *spawn_options = frida_spawn_options_new();</span><br><span class="line">        <span class="keyword">if</span> (config-&gt;spawn_argc &gt; <span class="number">1</span>) &#123;</span><br><span class="line">            plog(<span class="string">"[*]  set spawn options\n"</span>);</span><br><span class="line">            frida_spawn_options_set_argv(spawn_options, config-&gt;spawn_argv, config-&gt;spawn_argc);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        target_pid = frida_device_spawn_sync(device, config-&gt;process_name, spawn_options, <span class="literal">NULL</span>, &amp;error);</span><br><span class="line">        g_object_unref(spawn_options);</span><br><span class="line">        <span class="keyword">if</span> (error) &#123;</span><br><span class="line">            plog(<span class="string">"[!] Failed to spawn %s %s\n"</span>, config-&gt;process_name,error-&gt;message);</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">NULL</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        plog(<span class="string">"[*] Spawned %s with PID %d\n"</span>, config-&gt;process_name, target_pid);</span><br><span class="line">        fstate-&gt;target_pid = target_pid;</span><br><span class="line">        plog(<span class="string">"[*] test processName %s\n"</span>, config-&gt;process_name);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>目前版本的frida，spawn启动，只要process_name是app的包名就行，其会自动启动app，其实当时我还想过一个折衷方案，就是写一个c程序用pm去启动，再用attach去附加，不过后来摸索出来直接用frida去spawn的API写法，这里spawn完成会返回pid</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">session = frida_device_attach_sync(device, target_pid, FRIDA_REALM_NATIVE, <span class="literal">NULL</span>, &amp;error);</span><br></pre></td></tr></table></figure>
+<p>紧接着调用attach把frida挂上去，得到session，最后还有两个关键的步骤,因为frida spawn之后，程序是卡在入口的，所以这里要resume，让其恢复运行</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">frida_device_resume_sync(fstate-&gt;frida_device,fstate-&gt;target_pid,<span class="literal">NULL</span>,&amp;error);</span><br><span class="line">    <span class="keyword">if</span> (error != <span class="literal">NULL</span>) &#123;</span><br><span class="line">        <span class="comment">//plog("[!] Failed to attach to process %s on frida device %s (%s)\n", config-&gt;process_name, frida_device_get_name(device), error-&gt;message);</span></span><br><span class="line">        plog(<span class="string">"[*] %s\n"</span>,error-&gt;message);        </span><br><span class="line">        g_error_free(error);</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">NULL</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    frida_session_resume_sync(session,<span class="literal">NULL</span>,&amp;error);</span><br><span class="line">        <span class="keyword">if</span> (error != <span class="literal">NULL</span>) &#123;</span><br><span class="line">        <span class="comment">//plog("[!] Failed to attach to process %s on frida device %s (%s)\n", config-&gt;process_name, frida_device_get_name(device), error-&gt;message);</span></span><br><span class="line">        plog(<span class="string">"[*] %s\n"</span>,error-&gt;message);        </span><br><span class="line">        g_error_free(error);</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">NULL</span>;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<h2 id="编译-2"><a href="#编译-2" class="headerlink" title="编译"></a>编译</h2><h2 id="Harness-Agent"><a href="#Harness-Agent" class="headerlink" title="Harness Agent"></a>Harness Agent</h2><h3 id="Prepare阶段"><a href="#Prepare阶段" class="headerlink" title="Prepare阶段"></a>Prepare阶段</h3><p>有时候fuzz的不是静态方法，就需要在prepare阶段找一下对象实例</p>
+<figure class="highlight jsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">fuzz(payload, len) &#123;</span><br><span class="line">        <span class="keyword">if</span>(<span class="keyword">this</span>.taget_object == <span class="literal">null</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">this</span>.prepare();</span><br><span class="line">        &#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight jsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">Java.perform(<span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;   </span><br><span class="line">            Java.choose(<span class="string">"com.zzr.testfuzz.MainActivity"</span>,&#123;</span><br><span class="line">                onMatch : <span class="function"><span class="keyword">function</span>(<span class="params">instance</span>)</span>&#123;</span><br><span class="line">                    self.debug_log(<span class="string">"find targetObject!!"</span>);</span><br><span class="line">                    <span class="comment">// something to do...</span></span><br><span class="line">                    MainActivity_obj = Java.retain(instance);</span><br><span class="line">                &#125;,</span><br><span class="line">                </span><br><span class="line">                onComplete: <span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">                    self.debug_log(<span class="string">"compelete!!!"</span>);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;);</span><br><span class="line"></span><br><span class="line">        &#125;);</span><br></pre></td></tr></table></figure>
+<h3 id="数组类型"><a href="#数组类型" class="headerlink" title="数组类型"></a>数组类型</h3><p>用frida的API，Java.array,这个效率奇低，不知道为什么，因为经过了Java虚拟机吗。。</p>
+<p>但是如果我们想fuzz的就是Java层的API，那就只能用这种方式，除非再往下逆向到JNI层</p>
+<h1 id="Scudo"><a href="#Scudo" class="headerlink" title="Scudo"></a>Scudo</h1><p>新版Android的Scudo确实给我带来了许多麻烦。。</p>
+<h2 id="内存标签"><a href="#内存标签" class="headerlink" title="内存标签"></a>内存标签</h2><p><a href="https://juejin.cn/post/7027025137320853534" target="_blank" rel="noopener">Andriod Native | 采样型内存调试工具GWP-ASan - 掘金 (juejin.cn)</a></p>
+<p><img src="/2023/03/29/FridaFuzz Summary (一)/Untitled%2038.png" alt="Untitled"></p>
+<p><img src="/2023/03/29/FridaFuzz Summary (一)/Untitled%2039.png" alt="Untitled"></p>
+<p>Scudo分配的内存会在高位上打一个tag，所以后面我们做malloc hook的时候，就要判断下这个tag，</p>
+<h3 id="Scudo-crash流程分析"><a href="#Scudo-crash流程分析" class="headerlink" title="Scudo crash流程分析"></a>Scudo crash流程分析</h3><p>2-27</p>
+<h1 id="Fuzz测试"><a href="#Fuzz测试" class="headerlink" title="Fuzz测试"></a>Fuzz测试</h1><h2 id="testfuzz"><a href="#testfuzz" class="headerlink" title="testfuzz"></a>testfuzz</h2><p>自己写的测试程序，写了几个简单的crash的条件分支</p>
+<p>访问0地址和堆溢出</p>
+<p><img src="/2023/03/29/FridaFuzz Summary (一)/Untitled%2040.png" alt="Untitled"></p>
+<p>要注意堆溢出并不一定会立马产生crash，特别是如果没有加ASAN的情况下，因此在我们这个测试场景下，<strong>延迟的crash只是因为堆的overflow不能立马造成crash</strong>，后面一系列继续的堆操作才导致的crash，如果这个继续的堆操作刚好位于下次的执行就会出现延迟crash的问题，<br>因为我们还没研究重置堆环境这个问题。</p>
+<p>所以这个fuzz，不算太精准的fuzz</p>
+<h2 id="Fuzz启动器"><a href="#Fuzz启动器" class="headerlink" title="Fuzz启动器"></a>Fuzz启动器</h2><p>其实可能也是上面介绍的堆的问题，fuzz很不稳定，大概fuzz到一定次数就会<strong>报一个glib的错误</strong>，至今还没解决，所以我只能采取一个替代方案，就是写一个fuzz启动器，监测到fuzz结束就重启，</p>
+<p>主循环如下</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> pipefd[<span class="number">2</span>];</span><br><span class="line">    <span class="keyword">pid_t</span> pid;</span><br><span class="line"></span><br><span class="line">    FILE *fp = fopen(<span class="string">"fuzz_daemon_output.txt"</span>, <span class="string">"w"</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 创建管道</span></span><br><span class="line">    <span class="keyword">if</span> (pipe(pipefd) == <span class="number">-1</span>) &#123;</span><br><span class="line">        perror(<span class="string">"pipe"</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">int</span> first_iter = <span class="number">1</span>;</span><br><span class="line">    <span class="keyword">while</span> (<span class="number">1</span>) &#123;</span><br><span class="line">        <span class="comment">// 创建子进程</span></span><br><span class="line">        pid = fork();</span><br><span class="line">        <span class="keyword">if</span> (pid == <span class="number">-1</span>) &#123;</span><br><span class="line">            perror(<span class="string">"fork"</span>);</span><br><span class="line">            <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (pid == <span class="number">0</span>) &#123;</span><br><span class="line">            <span class="comment">// 子进程中启动子程序，并将其输出重定向到管道中</span></span><br><span class="line">            close(pipefd[<span class="number">0</span>]);</span><br><span class="line">            dup2(pipefd[<span class="number">1</span>], STDOUT_FILENO);</span><br><span class="line"></span><br><span class="line">            <span class="keyword">char</span> *envp[] = &#123;</span><br><span class="line">                <span class="string">"AFL_DEBUG=1"</span>,</span><br><span class="line">                <span class="string">"AFL_SKIP_BIN_CHECK=1"</span>,</span><br><span class="line">                <span class="string">"LD_PRELOAD=/data/local/tmp/libandroid-shmem.so"</span>,</span><br><span class="line">                <span class="string">"AFL_NO_AFFINITY=1"</span>,</span><br><span class="line">                <span class="literal">NULL</span></span><br><span class="line">            &#125;;</span><br><span class="line">            <span class="keyword">if</span>(first_iter)&#123;</span><br><span class="line">                </span><br><span class="line">                execle(<span class="string">"./afl-fuzz"</span>, <span class="string">"afl-fuzz"</span>, <span class="string">"-i"</span>,<span class="string">"in"</span>, <span class="string">"-o"</span>, <span class="string">"out"</span>, <span class="string">"--"</span>, <span class="string">"./fpicker"</span>, <span class="string">"-v"</span>, <span class="string">"-u"</span>, <span class="string">"send"</span>, <span class="string">"--fuzzer-mode"</span>, <span class="string">"afl"</span>, <span class="string">"-e"</span>, <span class="string">"spawn"</span>, <span class="string">"-p"</span>, <span class="string">"com.zzr.testfuzz"</span>, <span class="string">"-f"</span>, <span class="string">"./agent.js"</span>, <span class="string">"-t"</span>, <span class="string">"9999"</span>, <span class="string">"com.zzr.testfuzz"</span>, <span class="literal">NULL</span>, envp);</span><br><span class="line">                perror(<span class="string">"execl"</span>);</span><br><span class="line">                </span><br><span class="line">            &#125;<span class="keyword">else</span></span><br><span class="line">            &#123;</span><br><span class="line">                execle(<span class="string">"./afl-fuzz"</span>, <span class="string">"afl-fuzz"</span>, <span class="string">"-i-"</span>, <span class="string">"-o"</span>, <span class="string">"out"</span>, <span class="string">"--"</span>, <span class="string">"./fpicker"</span>, <span class="string">"-v"</span>, <span class="string">"-u"</span>, <span class="string">"send"</span>, <span class="string">"--fuzzer-mode"</span>, <span class="string">"afl"</span>, <span class="string">"-e"</span>, <span class="string">"spawn"</span>, <span class="string">"-p"</span>, <span class="string">"com.zzr.testfuzz"</span>, <span class="string">"-f"</span>, <span class="string">"./agent.js"</span>, <span class="string">"-t"</span>, <span class="string">"9999"</span>, <span class="string">"com.zzr.testfuzz"</span>, <span class="literal">NULL</span>, envp);</span><br><span class="line">                perror(<span class="string">"execl"</span>);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">//execl("/path/to/your/program", "/path/to/your/program", NULL);</span></span><br><span class="line">            <span class="comment">//execle("./test_fuzz_deamon", "test_fuzz_deamon", NULL, envp);</span></span><br><span class="line"></span><br><span class="line">            <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="comment">// 父进程中等待子进程结束，并从管道中读取子程序的输出并打印</span></span><br><span class="line">            first_iter = <span class="number">0</span>;</span><br><span class="line">            close(pipefd[<span class="number">1</span>]);</span><br><span class="line">            <span class="keyword">char</span> buf[BUF_SIZE];</span><br><span class="line">            <span class="keyword">int</span> status;</span><br><span class="line">            <span class="keyword">while</span> (waitpid(pid, &amp;status, WNOHANG) != pid) &#123;</span><br><span class="line">                <span class="keyword">int</span> bytes_read = read(pipefd[<span class="number">0</span>], buf, BUF_SIZE);</span><br><span class="line">                <span class="keyword">if</span> (bytes_read &gt; <span class="number">0</span>) &#123;</span><br><span class="line">                    write(STDOUT_FILENO, buf, bytes_read);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">int</span> findit = findCrashInfo(<span class="string">"crash_in_try"</span>);</span><br><span class="line">            <span class="keyword">if</span>(findit)</span><br><span class="line">            &#123;</span><br><span class="line">                <span class="comment">//printf("find a crash\n");</span></span><br><span class="line">                <span class="built_in">fprintf</span>(fp, <span class="string">"find a crash\n"</span>);</span><br><span class="line">                </span><br><span class="line">                findit = findCrashInfo(<span class="string">"g_array_append_vals"</span>);</span><br><span class="line">                <span class="keyword">if</span>(findit)</span><br><span class="line">                    <span class="comment">//printf("but is g_array_append_vals");</span></span><br><span class="line">                    <span class="built_in">fprintf</span>(fp, <span class="string">"but is g_array_append_vals\n"</span>);</span><br><span class="line">                fflush(fp);</span><br><span class="line">            &#125;</span><br><span class="line">            deleteFuzzlog();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    fclose(fp);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>其实可以看作是一个daemon进程，只不过第一次启动时参数用的是正常的”-i”,”in”</p>
+<p>第二次启动时用的参数是”-i-“</p>
+<p>这里每次一轮fuzz结束时，会找一下crash的原因，如果是<strong>g_array_append_vals，</strong>就说明是glib崩溃，否则说明确实找到了crash</p>
+<p>这里用到的两个子函数,负责删除每一轮产生的fuzz.log以及在fuzz.log中查找字符串</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">deleteFuzzlog</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">char</span>* filename = <span class="string">"fuzz.log"</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 删除指定的文件</span></span><br><span class="line">    <span class="keyword">if</span> (unlink(filename) == <span class="number">-1</span>) &#123;</span><br><span class="line">        perror(<span class="string">"unlink"</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"File %s has been deleted.\n"</span>, filename);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">findCrashInfo</span><span class="params">(<span class="keyword">const</span> <span class="keyword">char</span>* const_to_find)</span></span>&#123;</span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">char</span>* filename = <span class="string">"fuzz.log"</span>;</span><br><span class="line">    <span class="comment">//const char* target_str = "crash_in_try";</span></span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">char</span>* target_str = const_to_find;</span><br><span class="line">    <span class="keyword">char</span> line[<span class="number">1024</span>];</span><br><span class="line">    <span class="keyword">int</span> findit = <span class="number">0</span>;</span><br><span class="line">    <span class="comment">// 打开文件</span></span><br><span class="line">    FILE* fp = fopen(filename, <span class="string">"r"</span>);</span><br><span class="line">    <span class="keyword">if</span> (!fp) &#123;</span><br><span class="line">        perror(<span class="string">"fopen"</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 逐行读取文件内容，并查找目标字符串</span></span><br><span class="line">    <span class="keyword">while</span> (fgets(line, <span class="keyword">sizeof</span>(line), fp)) &#123;</span><br><span class="line">        <span class="keyword">if</span> (<span class="built_in">strstr</span>(line, target_str)) &#123;</span><br><span class="line">            <span class="built_in">printf</span>(<span class="string">"File %s contains string '%s'\n"</span>, filename, target_str);</span><br><span class="line">            findit = <span class="number">1</span>;</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 关闭文件</span></span><br><span class="line">    fclose(fp);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> findit;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这里还有个小细节</p>
+<p>这个first_iter=0，不能写在子进程中，这样设置，不会同步到父进程里，所以下次first_iter还是等于1</p>
+<h2 id="屏幕唤醒器"><a href="#屏幕唤醒器" class="headerlink" title="屏幕唤醒器"></a>屏幕唤醒器</h2><p>。。本来afl在后台跑应该是支持息屏的。。但是息屏app好像就不跑了，导致fuzz这边也会卡顿，因此又写了一个息屏唤醒器，每5分钟唤醒一下，因为三星手机没办法设置一直保持唤醒，所以只要这里唤醒的间隔大于，手机最大设置的唤醒间隔就行了</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">#include &lt;stdio.h&gt;</span><br><span class="line">#include &lt;stdlib.h&gt;</span><br><span class="line">#include &lt;signal.h&gt;</span><br><span class="line">#include &lt;unistd.h&gt;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">handle_alarm</span><span class="params">(<span class="keyword">int</span> sig)</span> </span>&#123;</span><br><span class="line">    system(<span class="string">"adb shell input keyevent 26"</span>);</span><br><span class="line">    sleep(<span class="number">1</span>);</span><br><span class="line">    system(<span class="string">"adb shell input keyevent 26"</span>);</span><br><span class="line">    alarm(<span class="number">300</span>); <span class="comment">// 设置下一次定时器</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    signal(SIGALRM, handle_alarm); <span class="comment">// 注册信号处理函数</span></span><br><span class="line">    alarm(<span class="number">300</span>); <span class="comment">// 设置第一次定时器</span></span><br><span class="line">    <span class="keyword">while</span> (<span class="number">1</span>) &#123;</span><br><span class="line">        pause(); <span class="comment">// 等待信号</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>用的是adb命令，，这里要发两次keyevent，一次是息屏，第二次是开屏</p>
+<h2 id="libpng"><a href="#libpng" class="headerlink" title="libpng"></a>libpng</h2><p>自己的testFuzz基本算是测试完成了，找了个libpng测试一下</p>
+<p><a href="https://github.com/julienr/libpng-android/tree/stable" target="_blank" rel="noopener">julienr/libpng-android at stable (github.com)</a></p>
+<p><img src="/2023/03/29/FridaFuzz Summary (一)/Untitled%2041.png" alt="Untitled"></p>
+<p>直接把文件全拉过来，只不过这里编译需要zlib，不过Android NDK有zlib，find然后targetlink就行</p>
+<p><img src="/2023/03/29/FridaFuzz Summary (一)/Untitled%2042.png" alt="Untitled"></p>
+<p>测试函数</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">Java_com_zzr_testfuzz_MainActivity_testlibpng(JNIEnv *env, jclass clazz) &#123;</span><br><span class="line">    <span class="comment">// <span class="doctag">TODO:</span> implement testlibpng()</span></span><br><span class="line">    __android_log_print(ANDROID_LOG_INFO,<span class="string">"testFuzz"</span>,<span class="string">"libpng in "</span>);</span><br><span class="line">    FILE *png_file = fopen(<span class="string">"/data/local/tmp/test_libpng.png"</span>, <span class="string">"rb"</span>);</span><br><span class="line">    png_structp png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, <span class="literal">NULL</span>, <span class="literal">NULL</span>, <span class="literal">NULL</span>);</span><br><span class="line">    png_infop info_ptr = png_create_info_struct(png_ptr);</span><br><span class="line">    png_init_io(png_ptr, png_file);</span><br><span class="line">    png_read_info(png_ptr, info_ptr);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">int</span> width = png_get_image_width(png_ptr, info_ptr);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">int</span> height = png_get_image_height(png_ptr, info_ptr);</span><br><span class="line"></span><br><span class="line">    __android_log_print(ANDROID_LOG_INFO,<span class="string">"testFuzz"</span>,<span class="string">"libpng width: %d,height:%d"</span>,width,height);</span><br><span class="line">    png_byte color_type = png_get_color_type(png_ptr, info_ptr);</span><br><span class="line">    png_byte bit_depth = png_get_bit_depth(png_ptr, info_ptr);</span><br><span class="line"></span><br><span class="line">    png_bytep *row_pointers = (png_bytep*) <span class="built_in">malloc</span>(<span class="keyword">sizeof</span>(png_bytep) * height);</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> y = <span class="number">0</span>; y &lt; height; y++) &#123;</span><br><span class="line">        row_pointers[y] = (png_byte*) <span class="built_in">malloc</span>(png_get_rowbytes(png_ptr, info_ptr));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    png_read_image(png_ptr, row_pointers);</span><br><span class="line"></span><br><span class="line">    fclose(png_file);</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> y = <span class="number">0</span>; y &lt; height; y++) &#123;</span><br><span class="line">        <span class="built_in">free</span>(row_pointers[y]);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">free</span>(row_pointers);</span><br><span class="line">    __android_log_print(ANDROID_LOG_INFO,<span class="string">"testFuzz"</span>,<span class="string">"libpng success"</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>其输入是读取的<strong>“/data/local/tmp/test_libpng.png”</strong></p>
+<p>所以frida脚本fuzzInternal里传递输入要写入到这个文件里</p>
+<p>这里加上libpng的打印了，所以如果获取成功，这里是可以看到打印的</p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2022/10/10/Android Activity启动流程/" rel="next" title="Android Activity启动流程">
+                <i class="fa fa-chevron-left"></i> Android Activity启动流程
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/head.jpg" alt="zzrR0">
+            
+              <p class="site-author-name" itemprop="name">zzrR0</p>
+              <p class="site-description motion-element" itemprop="description">Why am i so cai.</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">21</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">5</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://xmzyshypnc.github.io/" title="xmzyshypnc" target="_blank">xmzyshypnc</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://wood1314.github.io/" title="Wood" target="_blank">Wood</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://blog.zeddyu.info/" title="Zedd" target="_blank">Zedd</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://kestudy.top/" title="Ke" target="_blank">Ke</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#FridaFuzz总结"><span class="nav-number">1.</span> <span class="nav-text">FridaFuzz总结</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#起始"><span class="nav-number">2.</span> <span class="nav-text">起始</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Android漏洞挖掘资料"><span class="nav-number">3.</span> <span class="nav-text">Android漏洞挖掘资料</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#stalker"><span class="nav-number">4.</span> <span class="nav-text">stalker</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Transform"><span class="nav-number">4.1.</span> <span class="nav-text">Transform</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Frida框架层"><span class="nav-number">5.</span> <span class="nav-text">Frida框架层</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#frida-gum"><span class="nav-number">5.1.</span> <span class="nav-text">frida-gum</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#gum-js"><span class="nav-number">5.2.</span> <span class="nav-text">gum-js</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#frida-core"><span class="nav-number">5.3.</span> <span class="nav-text">frida-core</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#frida-java-bridge"><span class="nav-number">5.4.</span> <span class="nav-text">frida-java-bridge</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#frida-server-主要是stalker的修复线"><span class="nav-number">5.5.</span> <span class="nav-text">frida-server(主要是stalker的修复线)</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#编译"><span class="nav-number">5.5.1.</span> <span class="nav-text">编译</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#stalker的内存bug-fix"><span class="nav-number">5.5.2.</span> <span class="nav-text">stalker的内存bug fix</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#AFL"><span class="nav-number">6.</span> <span class="nav-text">AFL++</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#编译-1"><span class="nav-number">6.1.</span> <span class="nav-text">编译</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#AOSP配置"><span class="nav-number">6.1.1.</span> <span class="nav-text">AOSP配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#afl-编译"><span class="nav-number">6.1.2.</span> <span class="nav-text">afl++编译</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#testcase"><span class="nav-number">6.2.</span> <span class="nav-text">testcase</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#源码分析"><span class="nav-number">6.3.</span> <span class="nav-text">源码分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#参数解析"><span class="nav-number">6.3.1.</span> <span class="nav-text">参数解析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Resume模式"><span class="nav-number">6.3.2.</span> <span class="nav-text">Resume模式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#共享内存的创建"><span class="nav-number">6.3.3.</span> <span class="nav-text">共享内存的创建</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#核心Fuzz逻辑"><span class="nav-number">6.3.4.</span> <span class="nav-text">核心Fuzz逻辑</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#保存状态"><span class="nav-number">6.3.5.</span> <span class="nav-text">保存状态</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#和Fpicker的通讯"><span class="nav-number">6.3.6.</span> <span class="nav-text">和Fpicker的通讯</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Libdislocator"><span class="nav-number">6.3.7.</span> <span class="nav-text">Libdislocator</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Fpicker"><span class="nav-number">7.</span> <span class="nav-text">Fpicker</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#fpicker的Android移植"><span class="nav-number">7.1.</span> <span class="nav-text">fpicker的Android移植</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#源码分析-1"><span class="nav-number">7.2.</span> <span class="nav-text">源码分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#解析参数"><span class="nav-number">7.2.1.</span> <span class="nav-text">解析参数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#配置和AFL进行覆盖率通信的SHM"><span class="nav-number">7.2.2.</span> <span class="nav-text">配置和AFL进行覆盖率通信的SHM</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#配置和Harness交流shm"><span class="nav-number">7.2.3.</span> <span class="nav-text">配置和Harness交流shm</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#frida加载"><span class="nav-number">7.2.4.</span> <span class="nav-text">frida加载</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#编译-2"><span class="nav-number">7.3.</span> <span class="nav-text">编译</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Harness-Agent"><span class="nav-number">7.4.</span> <span class="nav-text">Harness Agent</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Prepare阶段"><span class="nav-number">7.4.1.</span> <span class="nav-text">Prepare阶段</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#数组类型"><span class="nav-number">7.4.2.</span> <span class="nav-text">数组类型</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Scudo"><span class="nav-number">8.</span> <span class="nav-text">Scudo</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#内存标签"><span class="nav-number">8.1.</span> <span class="nav-text">内存标签</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Scudo-crash流程分析"><span class="nav-number">8.1.1.</span> <span class="nav-text">Scudo crash流程分析</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Fuzz测试"><span class="nav-number">9.</span> <span class="nav-text">Fuzz测试</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#testfuzz"><span class="nav-number">9.1.</span> <span class="nav-text">testfuzz</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Fuzz启动器"><span class="nav-number">9.2.</span> <span class="nav-text">Fuzz启动器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#屏幕唤醒器"><span class="nav-number">9.3.</span> <span class="nav-text">屏幕唤醒器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#libpng"><span class="nav-number">9.4.</span> <span class="nav-text">libpng</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2023</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">zzrR0</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动 v3.9.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 – <a class="theme-link" target="_blank" href="https://theme-next.org">NexT.Pisces</a> v6.3.0</div>
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv" title="总访客量">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+    </span>
+  
+
+  
+    <span class="site-pv" title="总访问量">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.3.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.3.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.3.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.3.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.3.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.3.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.3.0"></script>
+
+
+
+  
+
+  
+    <script id="dsq-count-scr" src="https://xmzyshypnc.disqus.com/count.js" async></script>
+  
+
+  
+    <script type="text/javascript">
+      var disqus_config = function () {
+        this.page.url = 'http://yoursite.com/2023/03/29/FridaFuzz Summary (一)/';
+        this.page.identifier = '2023/03/29/FridaFuzz Summary (一)/';
+        this.page.title = 'FridaFuzz Summary (一)';
+        };
+      function loadComments () {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://xmzyshypnc.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      }
+      
+        loadComments();
+      
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  
+  
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(function (item) {
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: true,
+        notify: true,
+        appId: 'YbpHIa6XHNsKv4wX2wGjnrK7-gzGzoHsz',
+        appKey: '1fjf9mQl90nKdRPfq1zhDyIE',
+        placeholder: '',
+        avatar:'mm',
+        meta:guest,
+        pageSize:'10' || 10,
+        visitor: true
+    });
+  </script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+<script type="text/javascript" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","model":{"scale":1,"hHeadPos":0.5,"vHeadPos":0.618,"jsonPath":"live2d-widget-model-hijiki"},"display":{"superSample":2,"width":150,"height":300,"position":"right","hOffset":0,"vOffset":-50},"mobile":{"show":true,"scale":0.5},"react":{"opacityDefault":0.7,"opacityOnHover":0.2},"log":false,"tagMode":false});</script></body>
+</html>

