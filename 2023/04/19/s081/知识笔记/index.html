@@ -1,0 +1,1466 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.3.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.3.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.3.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.3.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.3.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '6.3.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="Lab  Xv6 and Unix utilities文件描述符一个文件描述符是一个小的整数，它代表了一个内核管理的对象，进程对这个对象进行操作。进程可能通过如下方法获取文件描述符，打开文件、目录或设备，创建管道，复制一个已有的描述符（open，pipe，dup）。为简单起见，文件描述符指向的对象都被称为是“文件“。文件描述符抽象出来文件、管道和设备的共同点，使它们看起来都像是字节流。 每个进程都">
+<meta property="og:type" content="article">
+<meta property="og:title" content="zzrR0">
+<meta property="og:url" content="http://yoursite.com/2023/04/19/s081/知识笔记/index.html">
+<meta property="og:site_name" content="zzrR0">
+<meta property="og:description" content="Lab  Xv6 and Unix utilities文件描述符一个文件描述符是一个小的整数，它代表了一个内核管理的对象，进程对这个对象进行操作。进程可能通过如下方法获取文件描述符，打开文件、目录或设备，创建管道，复制一个已有的描述符（open，pipe，dup）。为简单起见，文件描述符指向的对象都被称为是“文件“。文件描述符抽象出来文件、管道和设备的共同点，使它们看起来都像是字节流。 每个进程都">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2023-05-26T02:58:27.492Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="zzrR0">
+<meta name="twitter:description" content="Lab  Xv6 and Unix utilities文件描述符一个文件描述符是一个小的整数，它代表了一个内核管理的对象，进程对这个对象进行操作。进程可能通过如下方法获取文件描述符，打开文件、目录或设备，创建管道，复制一个已有的描述符（open，pipe，dup）。为简单起见，文件描述符指向的对象都被称为是“文件“。文件描述符抽象出来文件、管道和设备的共同点，使它们看起来都像是字节流。 每个进程都">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2023/04/19/s081/知识笔记/">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title> | zzrR0</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">zzrR0</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+    <a href="/about/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2023/04/19/s081/知识笔记/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="zzrR0">
+      <meta itemprop="description" content="Why am i so cai.">
+      <meta itemprop="image" content="/images/head.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="zzrR0">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2023-04-19 16:02:12" itemprop="dateCreated datePublished" datetime="2023-04-19T16:02:12+08:00">2023-04-19</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2023-05-26 10:58:27" itemprop="dateModified" datetime="2023-05-26T10:58:27+08:00">2023-05-26</time>
+              
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2023/04/19/s081/知识笔记/#comments" itemprop="discussionUrl">
+                
+                  <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2023/04/19/s081/知识笔记/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2023/04/19/s081/知识笔记/" class="leancloud_visitors" data-flag-title>
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数：</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="Lab-Xv6-and-Unix-utilities"><a href="#Lab-Xv6-and-Unix-utilities" class="headerlink" title="Lab  Xv6 and Unix utilities"></a>Lab  Xv6 and Unix utilities</h2><h3 id="文件描述符"><a href="#文件描述符" class="headerlink" title="文件描述符"></a>文件描述符</h3><p>一个文件描述符是<strong>一个小的整数</strong>，它代表了一个内核管理的<strong>对象</strong>，进程对这个对象进行操作。<strong>进程</strong>可能通过如下方法获取文件描述符，<font color="#9bbb59">打开文件、目录或设备，创建管道，复制一个已有的描述符</font>（open，pipe，dup）。为简单起见，文件描述符指向的对象都被称为是“文件“。文件描述符抽象出来<font color="#9bbb59">文件、管道和设备</font>的共同点，使它们看起来都像是字节流。</p>
+<p>每个进程都有文件描述符的私有空间，具体表现为自己独立的文件描述符列表。</p>
+<h3 id="read"><a href="#read" class="headerlink" title="read"></a>read</h3><ul>
+<li>从文件描述符fd所指向的文件读取n字节，把他们复制进buf。</li>
+<li>返回值是<font color="#9bbb59">读取到的字节数</font>，为0 表示读取结束。</li>
+<li><font color="#9bbb59">每个文件描述符都记录了它在文件里的偏移位置</font>。</li>
+<li>read就是从当前偏移位置开始读取数据的。</li>
+</ul>
+<h3 id="write"><a href="#write" class="headerlink" title="write"></a>write</h3><ul>
+<li>从buf写入n个字节到文件描述符fd所指向的文件。</li>
+<li>返回写入的字节数。</li>
+<li>偏移量与read一样,write就是从当前偏移位置开始写数据的。</li>
+</ul>
+<h3 id="dup"><a href="#dup" class="headerlink" title="dup"></a>dup</h3><ul>
+<li>复制一个已有的文件描述符，返回一个新的文件描述符。</li>
+<li>这个新的文件描述符和源文件描述符指向相同的底层I/O实体。</li>
+<li>这两个文件描述符共用同一个位移</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">fd = dup(<span class="number">1</span>);</span><br><span class="line">write(<span class="number">1</span>,<span class="string">"hello"</span>,<span class="number">6</span>);</span><br><span class="line">write(fd,<span class="string">"world"</span>,<span class="number">6</span>);</span><br></pre></td></tr></table></figure>
+<p>除了<code>dup</code>和<code>fork</code>之外，<font color="#9bbb59">其他方式<strong>不能</strong>使两个I/O对象的offset相同</font>，比如同时<code>open</code>相同的文件.</p>
+<h3 id="open-todo"><a href="#open-todo" class="headerlink" title="open #todo"></a>open #todo</h3><h3 id="close"><a href="#close" class="headerlink" title="close"></a>close</h3><ul>
+<li><code>close</code>。形式是<code>int close(int fd)</code>，将打开的文件<code>fd</code>释放，使该文件描述符可以被后面的<code>open</code>、<code>pipe</code>等其他system call使用。<br>使用<code>close</code>来修改file descriptor table能够实现I/O重定向</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 实现 cat &lt; input.txt</span></span><br><span class="line"><span class="keyword">char</span>  * argv[<span class="number">2</span>];</span><br><span class="line">argv[<span class="number">0</span>] = <span class="string">"cat"</span>;</span><br><span class="line">argv[<span class="number">1</span>] = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span>(fork() == <span class="number">0</span>)</span><br><span class="line">&#123;</span><br><span class="line">	close(<span class="number">0</span>);  <span class="comment">// 关闭了文件描述符0</span></span><br><span class="line">	open(<span class="string">"input.txt"</span>,<span class="number">0</span>); <span class="comment">// 调用系统函数open，分配给input.txt的文件描述符就是刚刚关闭的0， 这样就把标准输入重定向到了文件。</span></span><br><span class="line">	exec(<span class="string">"cat"</span>,argv); <span class="comment">// 执行cat程序，这个程序会默认使用0作为输入。</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>父进程的fd table将不会被子进程fd table的变化影响，但是文件中的offset将被共享。</p>
+<h3 id="fork"><a href="#fork" class="headerlink" title="fork"></a>fork</h3><p>fork会拷贝当前进程的内存，并创建一个新的进程，这里的内存包含了<strong>进程的指令和数据</strong>。fork系统调用在两个进程中都会返回，在原始的进程中，<strong>fork系统调用会返回大于0的整数，这个是新创建进程的ID</strong>。而在新创建的进程中，fork系统调用会返回0。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> pid = fork();</span><br><span class="line"><span class="keyword">if</span>(pid &gt; <span class="number">0</span>) <span class="comment">// parent process</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">"parent: child = %d\n"</span>,pid);</span><br><span class="line">	pid = wait(<span class="number">0</span>);</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">"child %d is done\n"</span>,pid);</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">else</span> <span class="keyword">if</span> (pid == <span class="number">0</span>) <span class="comment">// child  process </span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">"child : exiting\n"</span>);</span><br><span class="line">	<span class="built_in">exit</span>(<span class="number">0</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">else</span> <span class="comment">// fork error</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">"fork error\n"</span>);</span><br><span class="line">	<span class="built_in">exit</span>(<span class="number">1</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>在fork之后，父进程和子进程将同时开始判断PID的值。哪一个进程先判断好PID的值，哪个进程先执行。</li>
+<li>尽管<code>fork</code>了之后子进程和父进程有相同的内存内容，但是内存地址和寄存器是不一样的，<strong>也就是说在一个进程中改变变量并不会影响另一个进程</strong>。</li>
+</ul>
+<h3 id="exec"><a href="#exec" class="headerlink" title="exec"></a>exec</h3><font color="#9bbb59">从指定的文件中读取并加载指令，并替代当前调用进程的指令</font>。从某种程度上来说，相当于丢弃了调用进程的内存，并开始执行新加载的指令。<br>- 第一个参数是要执行的程序。<br>- 第二个是这个程序的参数，以字符串数组的形式出现<br><br><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">		<span class="keyword">char</span> *argv[] = &#123;<span class="string">"echo"</span>,<span class="string">"hello"</span>,<span class="string">"world"</span>,<span class="number">0</span>&#125;;</span><br><span class="line">		exec(<span class="string">"echo"</span>,argv);</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">"exec failed"</span>);</span><br><span class="line">		<span class="built_in">exit</span>(<span class="number">1</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br><br>- exec<font color="#9bbb59"> 系统调用会保留当前的文件描述符table</font>，所以任何在exec系统调用之前的文件描述符，他们在新的程序中表示相同的东西。<br>- <font color="#9bbb59">通常来说exec系统调用不会返回，因为exec会完全替换当前进程的内存</font>，相当于当前进程不复存在了，所以exec系统调用已经没有地方能返回了。<br><br>&gt; 常用的写法：<strong>先调用fork，然后在子进程中调用exec</strong>。这样实际上会有点浪费，因为fork会拷贝整个父进程的内存空间，但是之后exec又把所有复制的内存空间抛弃了。<br>&gt; 一些优化：比如说copy-on-write fork，<font color="#9bbb59">这种方式会消除fork的几乎所有的明显的低效，而只拷贝执行exec所需要的内存。</font>
+
+
+<h3 id="wait"><a href="#wait" class="headerlink" title="wait"></a>wait</h3><p><code>int wait(int *status)</code><br>等待子进程退出，返回子进程PID，子进程的退出状态存储到<code>int *status</code>这个地址中。如果调用者没有子进程，<code>wait</code>将返回-1。</p>
+<ul>
+<li><p>如果当前进程有任何子进程，并且其中一个已经退出了，那么wait会返回。<strong>但是如果当前没有任何子进程，wait会立刻返回-1</strong>，表明当前的进程没有任何子进程。</p>
+</li>
+<li><p><strong>如果父进程有多个子进程，则需要多次调用wait</strong>。每个wait会在一个子进程退出时立即返回。当wait返回时，会返回子进程的进程号。</p>
+</li>
+</ul>
+<h3 id="管道"><a href="#管道" class="headerlink" title="管道"></a>管道</h3><p><strong>管道</strong>用于进程间的通信，它<font color="#9bbb59">其实是内核里一块小的缓冲区</font>，这个缓冲区<font color="#9bbb59">向进程提供了一对文件描述符</font>，一个用于读而另一个用于写。</p>
+<h3 id="文件系统-todo"><a href="#文件系统-todo" class="headerlink" title="文件系统 #todo"></a>文件系统 #todo</h3><p><a href="https://www.youtube.com/watch?v=oWuVGDese4k" target="_blank" rel="noopener">https://www.youtube.com/watch?v=oWuVGDese4k</a><br>![[截屏2023-04-19 21.18.38.png]]<br>![[截屏2023-04-19 21.18.38.png]]<br>![[截屏2023-04-20 21.12.18.png]]<br>![[截屏2023-04-20 21.13.18.png]]</p>
+<h2 id="Lab-System-Calls"><a href="#Lab-System-Calls" class="headerlink" title="Lab System Calls"></a>Lab System Calls</h2><h3 id="C-pointer"><a href="#C-pointer" class="headerlink" title="C pointer"></a>C pointer</h3><ul>
+<li>指针和数组名的区别：<strong>指针是变量</strong>，<strong>而数组名不是变量</strong>，因此<code>pointer = arrayname</code>是合法的，而<code>arrayname = pointer</code>或者<code>arrayname++;</code>是不合法的</li>
+<li>指针的运算：<br>  ++ 和 – 均 <strong>为把值加上or 减去其数据类型的字节数</strong></li>
+<li>指针的大小比较：指针可以用关系运算符进行比较，如  = =、&lt; 和 &gt;。如果 p1 和 p2 <strong>指向两个相关的变量</strong>，比如同一个数组中的不同元素，则可对 p1 和 p2 进行大小比较。</li>
+<li><code>*ip += 1</code>是将<code>ip</code>指向的变量加1，相当于<code>++*ip</code>或<code>(*ip)++</code>。注意：<strong>一元操作符从右向左结合</strong>，所以<code>*ip++</code>相当于<code>*(ip++)</code></li>
+<li><code>char*</code>和<code>char []</code>的区别：前者是指针，并不会管到字符串，后者是数组，需要一个足够大的容量来容纳整个字符串</li>
+</ul>
+<p>C程序的<strong>内存分配</strong>：</p>
+<ol>
+<li>堆(heap)：由程序员通过<code>malloc()</code>和<code>free()</code>使用和释放，如果忘记释放可能造成内存泄漏。地址从低到高增长</li>
+<li>栈(stack)：编译器自动分配释放，存放函数的参数值、局部变量的值等。在退出函数后自动释放销毁。<strong>地址从高到低增长</strong>。</li>
+<li>全局区(static)：通过<code>static</code>声明，全局都可以访问，不会在函数退出后释放</li>
+</ol>
+<h3 id="User-mode-and-supervisor-mode"><a href="#User-mode-and-supervisor-mode" class="headerlink" title="User mode and supervisor mode"></a>User mode and supervisor mode</h3><p>为了实现进程隔离，RISC-V CPU在硬件上提供3种<strong>执行命令的模式</strong>：<em>machine mode</em>, <em>supervisor mode</em>, <em>user mode</em>。</p>
+<ol>
+<li><strong>machine mode的权限最高</strong>，CPU以machine mode启动，machine mode的主要目的是为了配置电脑，之后立即切换到supervisor mode。</li>
+<li><strong>supervisor mode运行CPU执行privileged instructions</strong>，比如中断管理、对存储页表地址的寄存器进行读写操作、执行system call。运行在supervisor mode也<strong>称为在kernel space中运行</strong>。</li>
+<li>应用程序只能执行user mode指令，比如改变变量、执行util function。运行在user mode也称为在user space 中运行。要想让CPU从<strong>user mode切换到supervisor mode</strong>，<strong>RISC-V提供了一个特殊的<code>ecall</code>指令</strong>，<strong>要想从supervisor mode切换到user mode，调用<code>sret</code>指令</strong></li>
+</ol>
+<blockquote>
+<p>实际上当你运行c语言，并执行例如open或者write的系统调用时。从技术上来说，open是一个c函数，但这个函数内的指令实际上机器指令，**也就是说我们调用的open函数并不是c语言函数，而是由汇编语言实现的。组成这个系统调用的汇编语言实际上在RISC-V中被称为ecall。这个特殊的指令将控制权转给内核。之后内核检查进程的内存和寄存器，并确定相应的参数。</p>
+</blockquote>
+<p>如何更新用户态or内核态：</p>
+<ul>
+<li>在cpu中有一个flag，<strong>当cpu在解析指令时，如果指令时特殊权限指令，那么该flag会被设置为1</strong>，处理器会拒绝执行这条指令，就像在运算时不能除以0一样。</li>
+<li>在RISC-V中，如果你在用户空间（user space）尝试执行一条特殊权限指令，用户程序会通过系统调用来切换到kernel mode。当用户执行系统调用，<strong>会通过ecall触发软中断</strong>，软中断会查询操作系统预先设定的<strong>中断向量表，并执行中断向量表中包含的中断处理程序</strong>。这样就完成了user mode到kernel mode的切换，并执行用户程序想要执行的特殊权限指令。</li>
+</ul>
+<h3 id="ECAL指令"><a href="#ECAL指令" class="headerlink" title="ECAL指令"></a>ECAL指令</h3><p>ECALL<strong>接收一个数字参数</strong>，当一个用户程序想要将程序执行的控制权转移到内核，它只需要执行ECALL指令，并传入一个数字。这里的数字参数代表了应用程序想要调用的System Call。<strong>ECALL会跳转到内核中一个特定，由内核控制的位置。</strong></p>
+<ul>
+<li><p>在内核侧，<strong>有一个位于syscall.c的函数syscall</strong>，<em>每一个从应用程序发起的系统调用都会调用到这个syscall函数</em>，<strong>syscall函数会检查ECALL的参数</strong>，通过这个参数内核可以知道需要调用的是哪个系统函数。</p>
+</li>
+<li><p>用户空间和内核空间的界限是一个硬性的界限，用户不能直接调用fork，用户的应用程序执行系统调用的唯一方法就是通过这里的ECALL指令。用户空间和内核空间的界限是一个硬性的界限，用户不能直接调用fork，用户的应用程序执行系统调用的唯一方法就是通过这里的ECALL指令。</p>
+</li>
+</ul>
+<h3 id="kernel-organiztion"><a href="#kernel-organiztion" class="headerlink" title="kernel organiztion"></a>kernel organiztion</h3><ul>
+<li><strong>宏内核（Monolithic Kernel）</strong>：在操作系统kernel中，<u>所有system call都在supervisor mode下运行</u>。xv6是一个宏内核。（大部分桌面操作系统是宏内核）<pre><code>- 缺点：在一个宏内核中，任何一个操作系统的bug都有可能成为漏洞。因为我们现在在内核中运行了一个巨大的操作系统，出现Bug的可能性更大了。
+- 优点：宏内核的优势在于，因为操作系统子模块（文件系统、虚拟内存、进程管理）现在都位于同一个程序中，它们可以紧密的集成在一起，这样的集成提供很好的性能。例如Linux，它就有很不错的性能。
+</code></pre>![[截屏2023-04-22 10.48.18.png]]</li>
+<li><strong>微内核（Micro Kernel）</strong>：将需要运行在upervisor mode（内核态）下的操作系统代码压到最小，保证kernel内系统的安全性，将大部分的操作系统代码执行在user mode下。（嵌入式操作系统通常是为内核）<ul>
+<li>优点：内核中的代码数量小，意味这更少的bug</li>
+<li>缺点：<strong>微内核的（用户空间与内核空间之间的）跳转比宏内核的多</strong>。通常性能更差。</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>微内核中的模块非常少，可能只有ipc、以及对page table的支持，以及对一些分时复用cpu的支持。</p>
+</blockquote>
+<p>![[截屏2023-04-22 16.23.01.png]]</p>
+<blockquote>
+<p>文件系统是一个user level进程，它为shell提供服务时，两个进程的通信需要分别2次经过内核态。</p>
+</blockquote>
+<p>xv6 kernel source code file:<br>![[Pasted image 20230422104953.png]]</p>
+<h3 id="Process"><a href="#Process" class="headerlink" title="Process"></a>Process</h3><p>操作系统隔离的单元叫进程。一个进程不能够破坏或监听另外一个进程的内存、CPU、文件描述符，也不能破坏kernel本身。</p>
+<p>为了实现进程隔离，xv6提供了一种机制让程序认为自己拥有一个独立的机器。一<strong>个进程为一个程序</strong>提供了一个<strong>私有的内存系统</strong>，或者叫address space，其他的进程不能读/写这个内存。</p>
+<p>在xv6中，使用page table （页表）来给每个进程分配自己的address space，<strong>页表再将这些address space，也就是进程自己认为的虚拟地址(<em>virtual address</em>)映射到RISC-V实际操作的物理地址</strong>(<em>physical address</em>)。<br>![[截屏2023-04-22 11.04.25.png]]</p>
+<p>虚拟地址<strong>从0开始</strong>，往上依次是指令、全局变量、user栈、堆。RISC-V上的指针式64位的，xv6使用低38位，因此最大的地址是2的38次方-1 = MAXVA。</p>
+<p>进程最重要的内核状态：</p>
+<ol>
+<li>页表 <code>p-&gt;pagetable</code> </li>
+<li>内核堆栈<code>p-&gt;kstack</code> </li>
+<li>运行状态<code>p-&gt;state</code>，显示进程是否<strong>已经被分配、准备运行/正在运行/等待IO或退出</strong></li>
+</ol>
+<p><strong>每个进程中都有线程(<em>thread</em>)</strong>，<strong>是执行进程命令的最小单元，可以被暂停和继续</strong></p>
+<p>每个进程有两个堆栈：</p>
+<ul>
+<li>用户堆栈(<em>user stack</em>)和内核堆栈(<em>kernel stack</em>)。当进程在user space中进行时只使用用户堆栈，当进程进入了内核(比如进行了system call)使用内核堆栈</li>
+</ul>
+<h3 id="Starting-the-first-process-启动第一个进程"><a href="#Starting-the-first-process-启动第一个进程" class="headerlink" title="Starting the first process 启动第一个进程"></a>Starting the first process 启动第一个进程</h3><ul>
+<li>RISC-V启动时，先运行一个<strong>存储于ROM中的bootloader程序</strong><code>kernel.ld</code>来加载xv6 kernel到内存中，然后在machine模式下从_entry开始运行xv6。（bootloader将xv6 kernel<strong>加载到0x80000000的物理地址中</strong>，因为前面的地址中有I/O设备。）</li>
+<li>cpu开始执行_entry.s中的代码。在_entry中设置了一个初始stack，<code>stack0</code>来让xv6执行<code>kernel/start.c</code>。<br>![[截屏2023-04-22 11.28.16.png]]  </li>
+<li>在<code>start</code>函数中，首先在machine模式下做一些配置，然后通过RISC-V提供的<code>mret</code>指令切换到supervisor mode，<strong>使program counter切换到</strong><code>kernel/main.c</code></li>
+<li>在<code>main</code>函数中，首先对一些设备和子系统进行初始化，然后调用<code>kernel/proc.c</code>中定义的<code>userinit</code>来<strong>创建第一个用户进程</strong>。</li>
+<li>在第一个用户进程中，执行了一个<code>initcode.S</code>的汇编程序，这个汇编程序调用了<code>exec</code>这个system call来执行<code>/init</code>，重新进入kernel。<code>exec</code>将当前进程的内存和寄存器替换为一个新的程序(<code>/init</code>)，当kernel执行完毕<code>exec</code>指定的程序后，回到<code>/init</code>进程。<code>/init</code>(<code>user/init.c</code>)创建了一个新的console device以文件描述符0,1,2打开，然后在console device中开启了一个shell进程，至此整个系统启动了 </li>
+</ul>
+<h3 id="qemu"><a href="#qemu" class="headerlink" title="qemu"></a>qemu</h3><p>qemu用来模拟计算机主板（模拟计算机硬件体系结构）。在QEMU的主循环中，只在做一件事情：</p>
+<ul>
+<li>读取4字节或者8字节的RISC-V指令。</li>
+<li>解析RISC-V指令，并找出对应的操作码（op code）。我们之前在看kernel.asm的时候，看过一些操作码的二进制版本。通过解析，或许可以知道这是一个ADD指令，或者是一个SUB指令。</li>
+<li>之后，在软件中执行相应的指令。</li>
+</ul>
+<h2 id="Lab-Page-Tables"><a href="#Lab-Page-Tables" class="headerlink" title="Lab Page Tables"></a>Lab Page Tables</h2><p>页表让每个进程都有自己独立的虚拟地址，从而实现<strong>内存隔离</strong>。</p>
+<h3 id="Paging-Hardware"><a href="#Paging-Hardware" class="headerlink" title="Paging Hardware"></a>Paging Hardware</h3><p>页表是在硬件中通过<strong>处理器</strong>和<strong>内存管理单元</strong>（Memory Management Unit）实现。<br>![[Pasted image 20230501105611.png]]</p>
+<p>CPU中需要有一些寄存器用来存放表单在物理内存中的地址，page table保存在内存中，MMU只是会去查看page table。</p>
+<p>这里的基本想法是每个应用程序都有自己独立的表单，并且这个表单定义了应用程序的地址空间。所以当操作系统将CPU从一个应用程序切换到另一个应用程序时，同时也需要切换SATP寄存器中的内容，从而指向新的进程保存在物理内存中的地址对应表单。</p>
+<ul>
+<li>xv6运行于Sv39 RISC-V，即在64位地址中，只有最下面的39位，被使用为虚拟地址。所以对于<strong>虚拟地址</strong>，<strong>其中后12位是页内偏移，高27位是页表索引</strong>。</li>
+<li>由此可以推算出，在xv6中<strong>一个page的大小是 2的12次方</strong>，4096字节（4kb）。</li>
+<li>对于一个进程，虚拟内存中可有<strong>2的27次方 个page</strong>，对应到页表中就是2的27次方个PTE（page table entry)</li>
+<li>每个<strong>PTE</strong>有一个44位的<strong>physical page number(PPN)用来映射到物理地址</strong>。以及10位的flag。总共54位。所以一个PTE需要8个字节来存储。</li>
+<li>对于<strong>物理地址</strong>，由高44位以及低12位组成。其中高44位为页表中存储的PPN，低12位为页内偏移。</li>
+</ul>
+<p>虚拟内存最多是2^39，而物理内存最多是2^56，这样我们可以有多个进程都用光了他们的虚拟内存，但是物理内存还有剩余。<br>![[截屏2023-04-23 11.21.44.png]]</p>
+<p>这个page table最多会有2^27个条目（虚拟内存地址中的index长度为27），这是个非常大的数字。如果每个进程都使用这么大的page table，进程需要为page table消耗大量的内存，并且很快物理内存就会耗尽。</p>
+<p>在实际中，页表并不是作为一个包含了2的27次方个PTE的大列表存储在物理内存中的，而是采用了三级树状的形式进行存储，<strong>这样可以让页表分散存储</strong>。其中，<strong>每一个页表大小就是一页。</strong>  <strong>如果地址空间中大部分地址都没有使用，你不必为每一个index准备一个条目。</strong></p>
+<ul>
+<li>第一级页表是一个4096字节的页，包含了512个PTE(因为每个PTE需要8字节)，每个PTE存储了下级页表的<strong>页物理地址</strong>。</li>
+<li>第二级页表由512个页构成。？</li>
+<li>第三级页表由512 x 512个页构成。？</li>
+<li>因为每个进程虚拟地址的高27位用来确定PTE，对<strong>应到3级页表就是最高的9位确定一级页表PTE的位置，中间9位确定二级页表PTE的位置，最低9位确定三级页表PTE的位置。</strong></li>
+<li>如下图所示。第一级根页表的物理页地址存储在<code>satp</code>寄存器中，每个CPU拥有自己独立的<code>satp</code><br>![[截屏2023-04-23 11.35.41.png]]</li>
+</ul>
+<p>PTE flag可以<strong>告诉硬件这些相应的虚拟地址怎样被使用</strong>，比如<code>PTE_V</code>表明这个PTE是否存在，<code>PTE_R</code>、<code>PTE_W</code>、<code>PTE_X</code>控制<strong>这个页是否允许被读取、写入和执行</strong>，<code>PTE_U</code><strong>控制user mode是否有权访问这个页</strong>，如果<code>PTE_U</code>=0，<strong>则只有supervisor mode有权访问这个页。</strong></p>
+<h3 id="Kernel-address-space"><a href="#Kernel-address-space" class="headerlink" title="Kernel address space"></a>Kernel address space</h3><p><strong>内核地址空间</strong>，为了让内核使用物理内存和硬件资源，<strong>内核需要按照一定的规则排布内核地址空间，以能够确定哪个虚拟地址对应自己需要的硬件资源地址。</strong></p>
+<ul>
+<li>QEMU会<strong>模拟一个从0x80000000开始的RAM，一直到0x86400000</strong>。</li>
+<li>QEMU会将<strong>设备接口以控制寄存器的形式暴露给内核</strong>，这些控制寄存器在0x80000000以下。kernel对这些设备接口控制寄存器的访问是直接和这些设备而不是RAM进行交互的。<br>![[截屏2023-04-24 19.01.38.png]]</li>
+</ul>
+<p>左边和右边分别是kernel virtual address和physical address的映射关系。在虚拟地址和物理地址中，<strong>kernel都位于<code>KERNBASE=0x80000000</code>的位置，这叫做直接映射</strong>。<br>在内核未启用页表的时候，访问RAM以及经过内存映射的设备控制寄存器时，内核的虚拟地址将采用<strong>直接映射</strong>的方式进行转换，即虚拟地址与实际物理地址相同。这种直接映射，也会在初始化内核页表的过程中（kernel/vm.c的kvminit），记录到内核页表中，即使内核开始使用页表，这种直接映射的布局也被保留了下来。</p>
+<ul>
+<li>使用直接映射，<strong>内核对物理内存的读或写变简单了</strong>。例如在进行系统调用fork时，fork会为子进程分配内存，内存分配器因此返回指向一块物理内存的物理地址，因为是直接映射，所以fork直接把返回的物理地址当成虚拟地址用（指令对虚拟地址进行操作），然后通过一系列指令将父进程的用户内存复制到子进程。</li>
+</ul>
+<p><strong>用户空间的地址分配在free memory中</strong></p>
+<ul>
+<li>XV6使用这段free memory来存放用户<font color="#9bbb59">进程的page table</font>，text和data。</li>
+<li>但<font color="#9bbb59">从本质上来说，两边的虚拟地址空间大小是一样的。但是用户进程的虚拟地址空间使用率会更低</font>。</li>
+<li>当kernel创建了一个进程，<font color="#9bbb59">针对这个进程的page table也会从Free memory中分配出来</font>。内核会为用户进程的page table分配几个page，并填入PTE。在某个时间点，当内核运行了这个进程，内核会将进程的根page table的地址加载到SATP中。<font color="#9bbb59">从那个时间点开始，处理器会使用内核为那个进程构建的虚拟地址空间。</font></li>
+<li>（用户进程的虚拟地址空间分布，与内核地址空间一样，<font color="#9bbb59">它也是从0到MAXVA</font>。）<br>![[截屏2023-05-05 17.00.14.png]]<br>![[截屏2023-05-08 17.19.51.png]]</li>
+</ul>
+<p><strong>内核的虚拟地址空间中，也有一些不是直接映射的内核虚拟地址：</strong></p>
+<ul>
+<li>trampoline page<ul>
+<li>它被映射到虚拟地址空间的顶端，<strong>用户和内核的页表里都有这一项映射，摆放的位置相同</strong>，trampoline页被映射了两次，一次映射到虚拟地址空间的顶端，一次是直接映射（trampoline页位于RAM中）。</li>
+<li>和user pagetable在同一个虚拟地址，以便在user space和kernel space之间跳转时切换进程仍然能够使用相同的映射，真实的物理地址位于kernel text中的<code>trampoline.S</code>）</li>
+</ul>
+</li>
+<li>kernel stack page：每个进程有一个自己的内核栈kstack，每个kstack下面有一个没有被映射的guard page，guard page的作用是防止kstack溢出影响其他kstack。<strong>当进程运行在内核态时使用内核栈，运行在用户态时使用用户栈</strong>。<strong>注意</strong>：还有一个内核线程，这个线程只运行在内核态，不会使用其他进程的kstack，内核线程没有独立的地址空间。</li>
+</ul>
+<h3 id="页表缓存-Translation-Lookaside-buffer"><a href="#页表缓存-Translation-Lookaside-buffer" class="headerlink" title="页表缓存 Translation Lookaside buffer"></a>页表缓存 Translation Lookaside buffer</h3><p>当处理器从内存加载或存储数据时，基本上要做3次内存查找。第一次在最高级的page directory，第二次在中间级的page directory，最后一次在最低级的 page directory。所以对于一个虚拟内存地址的寻址，代价很高。因此，几乎所有处理器都会对<strong>最近使用过的虚拟地址的翻译结果有缓存</strong>。基本上来说，这就是Page Table Entry的缓存，也就是PTE的缓存。</p>
+<p>如果你<strong>切换了page table</strong>，操作系统需要告诉处理器当前正在切换page table，处理器会清空TLB。否则地址翻译可能会出错。在<strong>RISC-V中，清空TLB的指令是sfence_vma</strong>。</p>
+<h3 id="Code-creating-an-address-space"><a href="#Code-creating-an-address-space" class="headerlink" title="Code: creating an address space"></a>Code: creating an address space</h3><ul>
+<li><p>vm.c 与页表相关的代码</p>
+<ul>
+<li>pte_t *  walk (pagetable_t pagetable, uint64 va, int alloc) 给定页表，虚拟地址，返回一个PTE的指针。<strong>（在软件中实现了与mmu硬件相同的功能）</strong></li>
+<li>void kvmmap(pagetable_t kpgtbl, uint64 va, uint64 sz, uint64 pa, int perm)在<font color="#9bbb59">kernel 页表</font>中增加一个映射。</li>
+<li>int mappages (pagetable_t pagetable, uint64 va, uint64 size, uint64 pa, int perm) 给定一个页表、一个虚拟地址和物理地址，创建一个PTE以实现相应的映射</li>
+</ul>
+</li>
+<li><p>kalloc.c 为用户进程、kernel栈、页表以及管道 分配一页（4kb）<strong>物理内存</strong>。</p>
+</li>
+</ul>
+<p>每个进程有自己的用户空间下的虚拟地址，这些虚拟地址由每个进程自己的页表维护，用户空间下的虚拟地址从0到MAXVA。<br>当进程向xv6索要更多用户内存时，xv6先用<strong>kalloc</strong>来分配物理页，然后向这个进程的页表增加指向这个新的物理页的PTE，同时设置这些PTE的flag。</p>
+<h3 id="Code-kvminit、kvminithart、walk函数"><a href="#Code-kvminit、kvminithart、walk函数" class="headerlink" title="Code: kvminit、kvminithart、walk函数"></a>Code: kvminit、kvminithart、walk函数</h3><p>boot流程：</p>
+<ul>
+<li>bootloader将内核代码load到0x80000000,然后在machine模式下从_entry开始运行xv6。</li>
+<li>cpu开始执行_entry.s中的代码。在_entry中设置了一个初始stack，<code>stack0</code>来让xv6执行<code>kernel/start.c</code>。</li>
+<li><p>在<code>start</code>函数中，首先在machine模式下做一些配置，然后通过RISC-V提供的<code>mret</code>指令切换到supervisor mode，<strong>使program counter切换到</strong>`kernel/main.c</p>
+</li>
+<li><p>在main函数中调用<strong>kvminit函数</strong><br>（将物理地址映射到相同的虚拟地址）<br>![[Pasted image 20230505115005.png]]</p>
+</li>
+</ul>
+<p>![[Pasted image 20230505115033.png]]</p>
+<ul>
+<li><strong>kvminithart函数</strong><ul>
+<li>首先设置satp寄存器。此时实际上是内核告诉mmu来使用刚刚由kvminit设置好的pagetable。</li>
+<li>这条指令的执行时刻是一个非常重要的时刻。因为<font color="#9bbb59">整个地址翻译从这条指令之后开始生效</font>，之后的每一个使用的内存地址都可能对应到与之不同的物理内存地址。因为在这条指令之前，我们使用的都是物理内存地址，这条指令之后page table开始生效，所有的内存地址都变成了另一个含义，也就是虚拟内存地址。<br>![[截屏2023-05-05 16.38.52.png]]</li>
+</ul>
+</li>
+</ul>
+<p>![[截屏2023-05-05 16.45.51.png]]</p>
+<ul>
+<li>walk函数<br>![[截屏2023-05-05 16.47.13.png]]</li>
+</ul>
+<p>![[截屏2023-05-05 17.17.07.png]]</p>
+<h2 id="TA-Calling-conventions-and-stack-frams-riscv"><a href="#TA-Calling-conventions-and-stack-frams-riscv" class="headerlink" title="TA Calling conventions and stack frams riscv"></a>TA Calling conventions and stack frams riscv</h2><h3 id="risc-v寄存器"><a href="#risc-v寄存器" class="headerlink" title="risc-v寄存器"></a>risc-v寄存器</h3><ul>
+<li><p>Caller Saved寄存器在函数调用的时候不会保存 ra  a0 - a7</p>
+</li>
+<li><p>Callee Saved寄存器在函数调用的时候会保存 s0-s11</p>
+</li>
+</ul>
+<p>![[Pasted image 20230523180049.png]]</p>
+<h3 id="stack"><a href="#stack" class="headerlink" title="stack"></a>stack</h3><p>栈从高地址向低地址生长，每当有函数被调用时，一个新的<font color="#9bbb59">函数调用帧</font>将被压入调用栈的顶部。在整个栈帧的调用过程中，<font color="#9bbb59">栈顶由称为esp的寄存器定位</font>，<font color="#9bbb59">栈底由ebp进行定位</font>。</p>
+<ul>
+<li>第一个进栈的是，<font color="#9bbb59">函数返回地址</font>，即函数调用后的下一条指令。</li>
+<li>然后是函数的各个<font color="#9bbb59">参数</font>，在大多数c编译器中，参数<font color="#9bbb59">由右往左入栈</font>。</li>
+<li>然后函数的<font color="#9bbb59">局部变量</font>。</li>
+<li>上一栈帧的ebp<br>![[Pasted image 20230523181421.png]]<br><a href="https://bbs.kanxue.com/thread-257246.htm" target="_blank" rel="noopener">https://bbs.kanxue.com/thread-257246.htm</a><br>![[Pasted image 20230508183508.png]]</li>
+</ul>
+<h2 id="Lab-traps"><a href="#Lab-traps" class="headerlink" title="Lab traps"></a>Lab traps</h2><h3 id="trap机制"><a href="#trap机制" class="headerlink" title="trap机制"></a>trap机制</h3><p>三种情况<font color="#9bbb59">暂停cpu对正常指令</font>的执行(<font color="#9bbb59">用户空间和内核空间的切换</font>)：</p>
+<ul>
+<li>程序执行系统调用 syscall</li>
+<li>程序出现类似page fault 、除0错误等错误 exception</li>
+<li>一个设备触发了中断使得当前程序运行需要响应内核设备驱动</li>
+</ul>
+<p>xv6对trap的处理分为4个阶段：</p>
+<ul>
+<li>cpu的硬件的一些动作</li>
+<li>汇编文件为了kernel c文件进行的准备 （调整到内核堆栈？）</li>
+<li>用c实现的trap handler</li>
+<li>system call / device - driver service routine</li>
+</ul>
+<h4 id="硬件准备操作"><a href="#硬件准备操作" class="headerlink" title="硬件准备操作"></a>硬件准备操作</h4><p>1） 寄存器介绍</p>
+<ul>
+<li><font color="#9bbb59">32个用户寄存器</font>（a0 a1…. 其中包括stack pointer）</li>
+<li>pc 程序计数寄存器</li>
+<li>表明当前mode的标志位  supervisor mode or user mode</li>
+<li>控制cpu工作方式的寄存器。比如<font color="#9bbb59"> satp寄存器</font>，保存页表的物理内存地址。</li>
+<li><font color="#9bbb59">stvec（supervisor trap vector base address register）</font>，它指向了内核中处理trap的指令的起始地址。</li>
+<li><font color="#9bbb59">sepc（supervisor exception program counter）</font>，在trap的过程中保存程序计数器的值。</li>
+<li><font color="#9bbb59">ssratch（supervisor scratch register）</font>sscratch points to where the process’s p-&gt;trapframe is mapped into user space, at TRAPFRAME.</li>
+</ul>
+<p>2） 操作</p>
+<ul>
+<li>保存32个用户寄存器</li>
+<li><font color="#9bbb59">保存程序计数</font><font color="#9bbb59">器</font></li>
+<li>修改mode</li>
+<li>修改satp，使其指向kernel page table</li>
+<li><font color="#9bbb59">将堆栈寄存器指向位于内核的一个地址</font>。因为我们需要一个堆栈来调用内核的C函数。</li>
+<li>一旦我们设置好了，并且所有的硬件状态都适合在内核中使用， 我们需要跳入内核的C代码。</li>
+</ul>
+<p>3） supervisor mode的权限</p>
+<ul>
+<li><font color="#9bbb59">读写某些寄存器 </font>satp stvec sepc sscratch</li>
+<li><font color="#9bbb59">使用pte_u = 0 的页</font></li>
+<li><font color="#9bbb59">不能读写任意物理地址</font>，和普通用户代码一样，需要通过page table进行转换。</li>
+</ul>
+<h3 id="trap代码执行流程"><a href="#trap代码执行流程" class="headerlink" title="trap代码执行流程"></a>trap代码执行流程</h3><p>![[Pasted image 20230505194514.png]]</p>
+<h3 id="进入ecall-指令之前的状态"><a href="#进入ecall-指令之前的状态" class="headerlink" title="进入ecall 指令之前的状态"></a>进入ecall 指令之前的状态</h3><ul>
+<li>作为用户代码的Shell调用write时，实际上调用的是关联到Shell的一个库函数。你可以查看这个库函数的源代码，在usys.s。<br>![[Pasted image 20230505203248.png]]</li>
+</ul>
+<p>上面这几行代码就是实际被调用的write函数的实现。这是个非常短的函数，它首先将SYS_write加载到a7寄存器，SYS_write是常量16。这里告诉内核，我想要运行第16个系统调用，而这个系统调用正好是write。之后这个函数中执行了ecall指令，从这里开始代码执行跳转到了内核。内核完成它的工作之后，代码执行会返回到用户空间，继续执行ecall之后的指令，也就是ret，最终返回到Shell中。所以ret从write库函数返回到了Shell中。</p>
+<h3 id="进入ecall指令之后的状态"><a href="#进入ecall指令之后的状态" class="headerlink" title="进入ecall指令之后的状态"></a>进入ecall指令之后的状态</h3><h4 id="1）刚进入ecall指令之后："><a href="#1）刚进入ecall指令之后：" class="headerlink" title="1）刚进入ecall指令之后："></a>1）刚进入ecall指令之后：</h4><ul>
+<li>进入supervisor mode</li>
+<li>pc寄存器变化，<font color="#9bbb59">指向trampoline page的最开始</font>。（ecall从<font color="#9bbb59">stvec寄存器</font>读取的开始位置）</li>
+<li>pagetable没有改变，仍然是指向user page table（<font color="#9bbb59">因为此时并没有切换到kernel page table，所以在每一个user page table中都需要有一个 trampoline page，这个固定的trampoline 地址是在<code>stvec</code>寄存器中保存的</font>）</li>
+<li>寄存器的值没有变化，仍然是用户程序拥有的寄存器内容 （此时必须非常小心，不能修改寄存器中的数据。因为此时并没有对其进行备份，一旦修改则无法恢复）</li>
+<li>虽然trampoline page是在用户地址空间的user page table完成的映射，用户代码不能写它，因为这些page对应的PTE并没有设置PTE_u标志位。这也是为什么trap机制是安全的。</li>
+</ul>
+<p><strong>ecall实际上只会改变三件事情：</strong></p>
+<ul>
+<li>ecall将代码从user mode 改到 supervisor mode</li>
+<li>ecall将<font color="#9bbb59">程序计数器</font>的值<font color="#9bbb59">保存在sepc寄存器</font></li>
+<li>ecall会<font color="#9bbb59">跳转到stvec寄存器</font>指向的指令</li>
+</ul>
+<p><strong>为什么不让ecall完成所有的操作？</strong></p>
+<p>RISC-V秉持了这样一个观点：ecall只完成尽量少必须要完成的工作，其他的工作都交给软件完成。这里的原因是，RISC-V设计者想要为软件和操作系统的程序员提供最大的灵活性，这样他们就能按照他们想要的方式开发操作系统。</p>
+<ul>
+<li><p>举个例子，因为这里的ecall是如此的简单，或许某些操作系统可以在不切换page table的前提下，执行部分系统调用。切换page table的代价比较高，如果ecall打包完成了这部分工作，那就不能对一些系统调用进行改进，使其不用在不必要的场景切换page table。</p>
+</li>
+<li><p>某些操作系统同时将user和kernel的虚拟地址映射到一个page table中，这样在user和kernel之间切换时根本就不用切换page table。对于这样的操作系统来说，如果ecall切换了page table那将会是一种浪费，并且也减慢了程序的运行。</p>
+</li>
+<li><p>或许在一些系统调用过程中，一些寄存器不用保存，而哪些寄存器需要保存，哪些不需要，取决于于软件，编程语言，和编译器。通过不保存所有的32个寄存器或许可以节省大量的程序运行时间，所以你不会想要ecall迫使你保存所有的寄存器。</p>
+</li>
+<li><p>最后，对于某些简单的系统调用或许根本就不需要任何stack，所以对于一些非常关注性能的操作系统，ecall不会自动为你完成stack切换是极好的。</p>
+</li>
+</ul>
+<h4 id="2）trampoline-S-uservec函数"><a href="#2）trampoline-S-uservec函数" class="headerlink" title="2）trampoline.S uservec函数"></a>2）trampoline.S uservec函数</h4><p> <strong>保存32个用户寄存器的内容</strong></p>
+<ul>
+<li><p>你可以看到很多槽位的名字都对应了特定的寄存器。在最开始还有5个数据，<font color="#9bbb59">这些是内核事先存放在trapframe中的数据</font>。比如第一个数据保存了kernel page table地址，这将会是trap处理代码将要加载到SATP寄存器的数值。<br>trapframe page ：（start at va 0x3ffffffe000）<br>![[Pasted image 20230507171428.png]]</p>
+</li>
+<li><p>在进入到user space之前，内核会将trapframe page的地址保存在sscratch寄存器中，也就是0x3fffffe000这个地址。在trampoline.S代码中，第一件事情就是执行csrrw指令，这个指令交换了a0和sscratch两个寄存器的内容。<br>![[截屏2023-05-07 17.17.59.png]]</p>
+</li>
+<li>将<font color="#9bbb59">trapframe page地址保存到a0之后，使用sd命令，通过固定偏移，将寄存器中的内容保存到对应的槽位中</font>。<br>![[Pasted image 20230508113052.png]]</li>
+</ul>
+<p><strong>改变sp寄存器，使其指向内核栈</strong></p>
+<ul>
+<li>load kernel stack pointer（这个是kernel在进入用户空间之前就设置好的，他的值是这个进程的kernel stack的最顶端） 到sp寄存器<br>![[截屏2023-05-08 15.57.21.png]]<br><strong>改变tp寄存器</strong></li>
+<li>向tp寄存器写入数据。因为在RISC-V中，没有一个直接的方法来确认当前运行在多核处理器的哪个核上，XV6会将CPU核的编号也就是hartid保存在tp寄存器。在内核中好几个地方都会使用了这个值，例如，内核可以通过这个值确定某个CPU核上运行了哪些进程<br>![[截屏2023-05-08 15.59.18.png]]<br><strong>指定跳转地址</strong>（跳转到内核中的c代码）</li>
+<li>向t0寄存器写入数据，这里写入的是我们将要执行的第一个C函数的指针，也就是函数usertrap的指针。<br>![[截屏2023-05-08 16.01.13.png]]<br><strong>切换到kernel page table</strong></li>
+<li>向t1寄存器写入数据，这里写入的是kernel page table的地址。<br>![[截屏2023-05-08 16.01.34.png]]</li>
+</ul>
+<h4 id="3）trap-c-usertrap函数"><a href="#3）trap-c-usertrap函数" class="headerlink" title="3）trap.c usertrap函数"></a>3）trap.c usertrap函数</h4><p>usertrap某种程度上存储并恢复硬件状态，但是它<strong>也需要检查触发trap的原因</strong>，以确定相应的处理方式，有很多原因可以让程序运行到usertrap函数中来。<br>比如：系统调用、除0、使用一个未被映射的虚拟地址、设备中断</p>
+<ul>
+<li><p>第一件事更改stvec寄存器：来自用户空间和内核空间，xv6在处理trap的方法是不一样的。如果trap是从内核发起的话，程序已经在使用kernel page table，并不需要页表切换。所以在内核中执行任何操作之前，usertrap中先将<font color="#9bbb59">STVEC指向了kernelvec变量</font>，这是<font color="#9bbb59">内核空间trap处理代码</font>的位置，如果此时再发生trap，就会交给kernelvec处理。<br>![[截屏2023-05-08 16.17.36.png]]</p>
+</li>
+<li><p>保存用户程序计数器<br>![[截屏2023-05-15 11.37.24.png]]</p>
+</li>
+<li><p>根据不同触发trap的原因，RISC-V的SCAUSE寄存器会有不同的数字。<font color="#9bbb59">数字8表明，我们现在在trap代码中是因为系统调用。</font><br>![[截屏2023-05-15 11.38.27.png]]<br>-接下来第一件事情是检查是不是有其他的进程杀掉了当前进程。<br>-在RISC-V中，存储在SEPC寄存器中的程序计数器，<font color="#9bbb59">是用户程序中触发trap的指令的地址。</font>但是当我们恢复用户程序时，我们<font color="#9bbb59">希望在下一条指令恢复</font>，也就是ecall之后的一条指令。所以对于系统调用，<font color="#9bbb59">我们对于保存的用户程序计数器加4，这样我们会在ecall的下一条指令恢复</font>，而不是重新执行ecall指令。<br>=XV6会在处理系统调用的时候使能中断，这样中断可以更快的服务，有些系统调用需要许多时间处理。中断总是会被RISC-V的trap硬件关闭，所以在这个时间点，我们需要显式的打开中断。</p>
+<ul>
+<li>进入syscall函数之后，从syscall表单之后，根据系统调用的编号查找相应的系统调用函数。<br>![[截屏2023-05-15 11.40.52.png]]</li>
+</ul>
+</li>
+</ul>
+<h4 id="4）usertrapret函数"><a href="#4）usertrapret函数" class="headerlink" title="4）usertrapret函数"></a>4）usertrapret函数</h4><p>设置在返回用户空间之前，内核需要做的工作。</p>
+<ul>
+<li>回到user space的第一步是调用<code>usertrapret()</code>，这个函数将把<code>stvec</code>指向<code>uservec</code>，从而当回到user space再出现trap的时候可以跳转到<code>uservec</code>。<br>![[截屏2023-05-15 12.05.16.png]]</li>
+<li>同时设置<code>p-&gt;trapframe</code>的一些值为下一次trap作准备，比如设置<code>p-&gt;trapframe-&gt;kernel_sp = p-&gt;kstack + PGSIZE</code>。<br>![[截屏2023-05-15 12.05.33.png]]</li>
+<li>清除<code>SPP</code>为从而使得调用<code>sret</code>后能够回到user mode。<br>![[截屏2023-05-15 12.05.59.png]]</li>
+<li>设置回到user space后的program counter为<code>p-&gt;trapframe-&gt;epc</code><br>![[截屏2023-05-15 12.06.09.png]]</li>
+<li>最后调用跳转到TRAMPOLINE页上的<code>userret</code>回到trampoline.S。<br>![[截屏2023-05-15 12.06.42.png]]<h4 id="5）userret函数"><a href="#5）userret函数" class="headerlink" title="5）userret函数"></a>5）userret函数</h4></li>
+<li>加载user page table，sfence.vma是清空页表缓存<br>![[截屏2023-05-15 12.08.16.png]]</li>
+<li><code>userret</code>被<code>userrapret</code>调用返回时a0寄存器中保存了TRAPFRAME，因此可以通过这个TRAPFRAME地址来恢复之前所有寄存器的值(包括a0)，最后把TRAPFRAME保存在sscratch中</li>
+<li>用<code>sret</code>回到user space<br>![[截屏2023-05-15 12.10.54.png]]</li>
+</ul>
+<h3 id="sret指令"><a href="#sret指令" class="headerlink" title="sret指令"></a>sret指令</h3><p>sret是我们在kernel中的最后一条指令，当我执行完这条指令：</p>
+<ul>
+<li>程序会切换回user mode</li>
+<li>SEPC寄存器的数值会被拷贝到PC寄存器（程序计数器）</li>
+<li>重新打开中断</li>
+</ul>
+<p>系统调用被刻意设计的看起来像是函数调用，但是背后的user/kernel转换比函数调用要复杂的多。之所以这么复杂，很大一部分原因是要保持user/kernel之间的隔离性，内核不能信任来自用户空间的任何内容。</p>
+<h2 id="Lab-copy-on-write-fork"><a href="#Lab-copy-on-write-fork" class="headerlink" title="Lab copy-on-write fork"></a>Lab copy-on-write fork</h2><h3 id="page-fault-basics"><a href="#page-fault-basics" class="headerlink" title="page fault basics"></a>page fault basics</h3><p>当发生page fault时，内核需要什么样的信息才能够响应page fault</p>
+<ul>
+<li><font color="#9bbb59">出错的虚拟地址</font>（STVAL）。当出现page fault的时候，XV6内核会打印出错的虚拟地址，并且这个地址会被保存在STVAL寄存器中。此时，程序运行切换到内核。引起page fault的内存地址。</li>
+<li><font color="#9bbb59">出错的原因</font>（SCAUSE）。对不同场景的page fault有不同的响应。比如因为load，store，jump指令触发的page fault。比如，13表示是因为load引起的page fault；15表示是因为store引起的page fault；12表示是因为指令执行引起的page fault。引起page fault的原因类型</li>
+<li><font color="#9bbb59">触发page fault的指令的地址</font>（SEPC）。作为trap处理代码的一部分，这个地址存放在<font color="#9bbb59">SEPC（Supervisor Exception Program Counter）寄存器</font>中，并同时会保存在<font color="#9bbb59">trapframe-&gt;epc</font>（注，详见lec06）中。引起page fault时的程序计数器值，这表明了page fault在用户空间发生的位置。<br>![[Pasted image 20230515164652.png]]<h3 id="lazy-page-allocation"><a href="#lazy-page-allocation" class="headerlink" title="lazy page allocation"></a>lazy page allocation</h3></li>
+</ul>
+<h4 id="sbrk系统调用"><a href="#sbrk系统调用" class="headerlink" title="sbrk系统调用"></a>sbrk系统调用</h4><ul>
+<li><p>使得用户应用程序能扩大自己的heap。当一个应用程序启动的时候，<span style="background:#b1ffff">sbrk指向的是heap的最底端，同时也是stack的最顶端</span>。这个位置通过代表进程的数据结构中的sz字段表示，这里以_p-&gt;sz表示。</p>
+</li>
+<li><p>当调用sbrk时，它的参数是整数，代表了你想要申请的page数量（注，原视频说的是page，但是根据Linux <a href="https://man7.org/linux/man-pages/man2/sbrk.2.html" target="_blank" rel="noopener">man page</a>，<span style="background:#b1ffff">实际中sbrk的参数是字节数</span>）这意味着，当sbrk实际发生或者被调用的时候，内核会分配一些物理内存，并将这些内存映射到用户应用程序的地址空间，然后将内存内容初始化为0，再返回sbrk系统调用。<br>![[Pasted image 20230515163732.png]]</p>
+</li>
+</ul>
+<h4 id="lazy-allocation"><a href="#lazy-allocation" class="headerlink" title="lazy allocation"></a>lazy allocation</h4><ul>
+<li>eager ellocation 一旦调用了sbrk，<font color="#9bbb59">内核会立即分配应用程序所需要的物理内存这表示了，</font>但是实际上，对于应用程序来说很难预测自己需要多少内存，所以通常来说，应用程序倾向于申请多于自己所需要的内存。这意味着，进程的内存消耗会增加许多，但是有部分内存永远也不会被应用程序所使用到。</li>
+<li><p>lazy allocation 核心思想非常简单，sbrk系统调基本上不做任何事情<font color="#9bbb59">，唯一需要做的事情就是提升p-&gt;sz，将p-&gt;sz增加n</font>，其中n是需要新分配的内存page数量。<span style="background:#b1ffff">但是内核在这个时间点并不会分配任何物理内存。</span>之后在某个时间点，应用程序使用到了新申请的那部分内存，<span style="background:#b1ffff">这时会触发page fault</span>，因为我们还没有将新的内存映射到page table。所以，<font color="#9bbb59">如果我们解析一个大于旧的p-&gt;sz，但是又小于新的p-&gt;sz（注，也就是旧的p-&gt;sz + n）的虚拟地址，</font>我们希望内核能够分配一个内存page，并且重新执行指令。</p>
+</li>
+<li><p>所以，当我们看到了一个page fault，相应的虚拟地址小于当前p-&gt;sz，同时大于stack，<font color="#9bbb59">那么我们就知道这是一个来自于heap的地址</font>，但是内核还没有分配任何物理内存。所以对于这个page fault的响应也理所当然的直接明了：在page fault handler中，<font color="#9bbb59">通过kalloc函数分配一个内存page；初始化这个page内容为0；将这个内存page映射到user page table中</font>；最后重新执行指令。</p>
+</li>
+</ul>
+<h4 id="copy-on-write-fork"><a href="#copy-on-write-fork" class="headerlink" title="copy on write fork"></a>copy on write fork</h4><ul>
+<li>设置<font color="#9bbb59">子进程的PTE</font>指向父进程对应的<font color="#9bbb59">物理内存page</font>。在这里为了保证父进程和子进程之间有强隔离性，将父进程和子进程的pte标志设为只读。</li>
+<li>因为父进程和子进程都会继续运行，而父进程或者子进程都可能会执行store指令来更新一些全局变量，这时就会触发page fault，因为现在在向一个只读的PTE写数据。<br>-![[截屏2023-05-16 08.43.08.png]]</li>
+<li>在得到page fault之后，我们需要拷贝相应的物理page。假设现在是子进程在执行store指令，那么我们<font color="#9bbb59">会分配一个新的物理内存page，</font>然后将page fault相关的物理内存page<font color="#9bbb59">拷贝</font>到新分配的物理内存page中，<font color="#9bbb59">并将新分配的物理内存page映射到子进程。这时，新分配的物理内存page只对子进程的地址空间可见</font>，所以我们可以将<font color="#9bbb59">相应的PTE设置成可读写</font>，并且我们可以<font color="#9bbb59">重新执行store指令</font>。</li>
+</ul>
+<p>![[截屏2023-05-16 08.54.20.png]]</p>
+<ul>
+<li>需要注意的是，在cow fork中，由多个用户进程或者说多个地址空间都指向了相同的物理内存page。所以，当父进程退出时，我们需要更加小心，<font color="#9bbb59">因为我们要判断是否能立即释放相应的物理page</font>。如果有子进程还在使用这些物理page，而内核又释放了这些物理page，将会出问题。</li>
+<li>我们需要对于每一个物理内存page的引用进行计数，<font color="#9bbb59">当我们释放虚拟page时，我们将物理内存page的引用数减1</font>，如果引用数等于0，那么我们就能释放物理内存page。</li>
+</ul>
+<h4 id="zero-fill-on-demand"><a href="#zero-fill-on-demand" class="headerlink" title="zero fill on demand"></a>zero fill on demand</h4><ul>
+<li>在bss段中保存了<font color="#9bbb59">未被初始化或者初始化为0的全局或静态变量</font>，这里或许有很多个page，并且这些page的值为0。</li>
+<li>在物理内存中，我只需要分配一个page，这个page的内容全是0。然后将所有虚拟地址空间的全0的page都map到这一个物理page上。<br>![[Pasted image 20230516120207.png]]</li>
+<li>当然这里的mapping需要非常的小心，我们不能允许对于这个page执行写操作，<font color="#9bbb59">因为所有的虚拟地址空间page都期望page的内容是全0，所以这里的PTE都是只读的</font>。之后在某个时间点，应用程序尝试写BSS中的一个page时，比如说需要更改一两个变量的值，我们会得到page fault。</li>
+<li>发生page fault之后，我们创建一个新的page，将其内容设置为0，并重新建立映射关系。</li>
+</ul>
+<h4 id="demand-paging"><a href="#demand-paging" class="headerlink" title="demand paging"></a>demand paging</h4><p>在exec执行中，不需要将整个程序的二进制文件全部从磁盘加载到内存。</p>
+<ul>
+<li>可以在虚拟地址空间中，我们为text和data分配好地址段，但是相应的PTE并不对应任何物理内存page。</li>
+<li>当触发page fault之后，需要在某个地方记录了这些page对应的程序文件，我们在page fault handler中需要从程序文件中读取page数据，加载到内存中；之后将内存page映射到page table；最后再重新执行指令。</li>
+<li>如果用户程序并没有使用所有的text区域或者data区域，那么我们一方面可以节省一些物理内存，另一方面我们可以让exec运行的更快（注，因为不需要为整个程序分配内存）</li>
+<li>如果内存耗尽，需要选择撤回page。一般选择 non-dirty page。</li>
+</ul>
+<p><strong>LRU算法</strong><br>   任何时候一个page被读或者被写了，Access bit会被设置。<br>   如果你想知道page最近是否被使用过，你需要定时比如每100毫秒或者每秒清除Access bit，如果在下一个100毫秒这个page被访问过，那你就知道这个page在上一个100毫秒中被使用了。而Access bit为0的page在上100毫秒未被使用。这样你就可以统计每个内存page使用的频度，这是一个成熟的LRU实现的基础。（注，可以通过Access bit来决定内存page 在LRU中的排名）[[lab笔记#detecting which pages have been accessed|lab有关实验]]</p>
+<h2 id="Interrupts"><a href="#Interrupts" class="headerlink" title="Interrupts"></a>Interrupts</h2><p>设备会产生中断，xv6处理设备中断的代码位于kernel/trap.c中的<code>devintr</code>。</p>
+<p>进程的内核态中执行top half，中断时间中执行bottom half。</p>
+<ul>
+<li>top half是通过<code>read</code>或<code>write</code>这样的system call来进行调用的，从而能让这个设备执行I/O操作。</li>
+<li>当<font color="#9bbb59">设备执行完I/O操作之后，将产生一个设备中断</font>，这个<font color="#9bbb59">设备驱动的interrupt handler</font>作为bottom half执行相应的操作。</li>
+<li><p>interrupt handler中没有任何用户进程的上下文，因此无法进行<code>copyin</code>或<code>copyout</code>，只有top half才能和用户进程进行交互。</p>
+</li>
+<li><p><code>PLIC</code>: Platform-Level Interrupt Controller，负责对从外部设备产生的中断进行管理</p>
+</li>
+<li><code>CLINT</code>: Core-Local Interrupter，负责定时器相关的中断</li>
+</ul>
+<p><strong>uart设备：</strong><br>    UART设备是一种硬件设备，它实现了UART通信协议（它允许不同的电子设备通过<font color="#9bbb59">串行通信方式进行数据传输</font>），并提供了物理接口，<font color="#9bbb59">用于将数据从一个电子设备传输到另一个电子设备</font>。在嵌入式系统和单片机应用中，UART设备通常被用来<font color="#9bbb59">连接</font>微控制器、传感器、执行器、显示屏等外设，<font color="#9bbb59">以实现数据的传输和控制</font>。</p>
+<h3 id="在xv6中设置中断"><a href="#在xv6中设置中断" class="headerlink" title="在xv6中设置中断"></a>在xv6中设置中断</h3><p><strong>与中断相关的寄存器</strong></p>
+<ul>
+<li><font color="#9bbb59">SIE（Supervisor Interrupt Enable）寄存器</font>。这个寄存器中有一个bit（E）专门针对例如UART的外部设备的中断；有一个bit（S）专门针对软件中断，软件中断可能由一个CPU核触发给另一个CPU核；还有一个bit（T）专门针对定时器中断。</li>
+<li><font color="#9bbb59">SSTATUS（Supervisor Status）寄存器</font>。这个寄存器中有一个<font color="#9bbb59">bit来打开或者关闭中断</font>。</li>
+<li>SCAUSE寄存器，它会表明当前中断的原因。</li>
+<li>STVEC寄存器，# todo<br>-<font color="#9bbb59"> SIP (supervisor interrupt pending)寄存器</font>，可以观察这个寄存器来判断有哪些中断在pending</li>
+</ul>
+<p><strong>对寄存器进行编程，使得CPU处于一个能接受中断的状态</strong></p>
+<ul>
+<li>在start.c中，这里将所有的中断都设置在Supervisor mode，<font color="#9bbb59">然后设置SIE寄存器来接收External，软件和定时器中断</font>，之后初始化定时器。<br>![[截屏2023-05-19 15.32.18.png]]</li>
+<li>在main.c中，调用consoleinit()，然后在consoleinit中调用了uartinit（配置好uart芯片使其可以被使用）。这里的流程是<font color="#9bbb59">先关闭中断</font>，之后<font color="#9bbb59">设置波特率</font>（串口线的传输速率），<font color="#9bbb59">设置字符长度为8bit，重置FIFO</font>，最后再重新打开中断。<br>![[截屏2023-05-19 15.33.59.png]] </li>
+<li>运行完uartinit函数之后，原则上<font color="#9bbb59">UART就可以生成中断</font>了。但是因为我们还<font color="#9bbb59">没有对PLIC编程，所以中断不能被CPU感知</font>。最终，在main函数中，需要调用plicinit函数。</li>
+<li>PLIC与外设一样，也占用了一个I/O地址（0xC000_0000）。<font color="#9bbb59">代码的第一行使能了UART的中断，这里实际上就是设置PLIC会接收哪些中断</font>，进而将中断路由到CPU。类似的，代码的第二行设置PLIC接收来自IO磁盘的中断，<br>![[截屏2023-05-19 15.36.55.png]]</li>
+<li>plicinit之后就是plicinithart函数。<font color="#9bbb59">plicinit是由0号CPU运行</font>，之后，<font color="#9bbb59">每个CPU的核都需要调用plicinithart函数</font>表明对于哪些外设中断感兴趣。所以在plicinithart函数中，每个CPU的核都表明自己对来自于UART和VIRTIO的中断感兴趣。因为我们忽略中断的优先级，所以我们将优先级设置为0。<br>![[截屏2023-05-19 15.44.02.png]]</li>
+<li>我们有了<font color="#9bbb59">生成中断的外部设备</font>，<font color="#9bbb59">我们有了PLIC可以传递中断到单个的CPU</font>。但是CPU自己还没有设置好接收中断，因为我们还没有设置好SSTATUS寄存器。在main函数的最后，程序调用了scheduler函数。</li>
+<li>scheduler函数主要是运行进程。但是在实际运行进程之前，会执行intr_on函数来使得CPU能接收中断。<br>![[截屏2023-05-19 15.46.22.png]]</li>
+<li>intr_on函数只完成一件事情，就是设置SSTATUS寄存器，打开中断标志位。</li>
+</ul>
+<p>在这个时间点，中断被完全打开了。如果PLIC正好有pending的中断，那么这个CPU核会收到中断。</p>
+<h3 id="console-ouput"><a href="#console-ouput" class="headerlink" title="console ouput"></a>console ouput</h3><h4 id="uart"><a href="#uart" class="headerlink" title="uart"></a>uart</h4><p>xv6中使用的UART是QEMU模拟的16550芯片。UART硬件对于进程来说是一组memory-mapped寄存器，即RISC-V上有一些物理地址是直接和UART设备相连的。UART的地址从0x10000000或<code>UART0</code>开始，每个UART控制寄存器的大小为1字节，其位置定义在kernel/uart.c中。</p>
+<ul>
+<li><code>LSR</code>寄存器：line status register，<font color="#9bbb59">用来指示输入的字节是否准备好被用户进程读取</font></li>
+<li><code>RHR</code>寄存器：receive holding register，<font color="#9bbb59">用来放置可以被用户进程读取的字节</font>。当RHR中的一个字节被读取时，UART硬件将其从内部的FIFO硬盘中删除，当FIFO中为空时，<code>LSR</code>寄存器被置0</li>
+<li><code>THR</code>寄存器：transmit holding register，当用户进程向<code>THR</code>写入一个字节时，UART将传输这个字节<br>![[截屏2023-05-18 17.32.05.png]]</li>
+</ul>
+<p>console driver(kernel/console.c)是一个<font color="#9bbb59">设备驱动</font>，通过UART串口接受输入的符号。用户进程通过<code>read</code> system call来从console中一行行读取输入。下一节代码分析，主要分析，如何从<strong>shell程序</strong>输出提示符“$”<strong>到console</strong>的过程。</p>
+<h4 id="代码分析"><a href="#代码分析" class="headerlink" title="代码分析"></a>代码分析</h4><h5 id="uart驱动的top部分"><a href="#uart驱动的top部分" class="headerlink" title="uart驱动的top部分"></a>uart驱动的top部分</h5><ul>
+<li>init.c的main函数：[[#^005494 | 启动流程]]<br>这里通过mknod操作创建了<br>console设备。因为这是第一个打开的文件，所以这里的文件描述符0。之后通过dup创建stdout和stderr。这里实际上通过复制文件描述符0，得到了另外两个文件描述符1，2。最终文件描述符0，1，2都用来代表Console。<br>![[截屏2023-05-19 13.19.43.png]]<br>Shell程序首先打开文件描述符0，1，2。之后Shell向文件描述符2打印提示符$<br>![[截屏2023-05-19 13.23.05.png]]</li>
+</ul>
+<p>尽管Console背后是UART设备，但是从应用程序来看，它就像是一个普通的文件。Shell程序只是向文件描述符2写了数据，它并不知道文件描述符2对应的是什么。</p>
+<ul>
+<li>在syswrite函数中，会对文件描述符的种类进行分类处理，mknod生成的文件描述符属于设备（FD_DEVICE），而对于设备类型的文件描述符，我们会为这个特定的设备执行设备相应的write函数。<br>![[Pasted image 20230519160727.png]]</li>
+<li>在filewrite函数中首先会判断文件描述符的类型。mknod生成的文件描述符属于设备（FD_DEVICE），而对于设备类型的文件描述符，<font color="#9bbb59">我们会为这个特定的设备执行设备相应的write函数</font>。因为我们现在的设备是Console，所以我们知道这里会调用console.c中的consolewrite函数。<br>![[Pasted image 20230519160749.png]]</li>
+<li>这里先通过either_copyin将字符拷入，之后调用uartputc函数。<font color="#9bbb59">uartputc函数将字符写入给UART设备，所以你可以认为consolewrite是一个UART驱动的top部分。</font>uart.c文件中的uartputc函数会实际的打印字符。<br>![[Pasted image 20230519161638.png]]</li>
+<li>在UART的内部会有一个buffer用来发送数据，buffer的大小是32个字符。同时还有一个为consumer提供的读指针和为producer提供的写指针，来构建一个环形的buffer（注，或者可以认为是环形队列）。<br>![[Pasted image 20230519162412.png]]</li>
+</ul>
+<blockquote>
+<p>在我们的例子中，<font color="#9bbb59">Shell是producer</font>，所以需要调用uartputc函数。在函数中第一件事情是判断环形buffer是否已经满了。如果读写指针相同，那么buffer是空的，如果写指针加1等于读指针，那么buffer满了。当buffer是满的时候，向其写入数据是没有意义的，所以这里会sleep一段时间，将CPU出让给其他进程。当然，对于我们来说，buffer必然不是满的，因为提示符“$”是我们送出的第一个字符。所以代码会走到else，字符会被送到buffer中，更新写指针，之后再调用uartstart函数。</p>
+</blockquote>
+<ul>
+<li>uartstart就是<font color="#9bbb59">通知设备执行操作</font>。首先是检查当前设备是否空闲，如果空闲的话，<font color="#9bbb59">我们会从buffer中读出数据，然后将数据写入到THR（Transmission Holding Register）发送寄存器</font>。这里相当于告诉设备，我这里有一个字节需要你来发送。一旦数据送到了设备，系统调用会返回，用户应用程序Shell就可以继续执行。这里从内核返回到用户空间的机制与lec06的trap机制是一样的。[[#trap机制]]<br>![[Pasted image 20230519162502.png]]</li>
+<li>与此同时，UART设备会将数据送出。在某个时间点，cpu会收到中断</li>
+</ul>
+<h5 id="uart驱动的bottom部分"><a href="#uart驱动的bottom部分" class="headerlink" title="uart驱动的bottom部分"></a>uart驱动的bottom部分</h5><h2 id="Multiprocessors-and-locking"><a href="#Multiprocessors-and-locking" class="headerlink" title="Multiprocessors and locking"></a>Multiprocessors and locking</h2><p><strong>为什么需要锁：</strong><br>    并行的访问数据结构时，需要使用锁来控制并确保共享的数据是正确的。从性能方面来说，我们想要通过并行来提高性能，但是锁的使用会使线程串行执行，反过来又会限制性能。</p>
+<p><strong>什么是race condition：</strong><br>    当两个或多个线程可以访问共享数据并试图同时更改该数据时，会发生条件竞争。</p>
+<ul>
+<li>“check then act” 情况<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (x == <span class="number">5</span>) <span class="comment">// The "Check"</span></span><br><span class="line">&#123;</span><br><span class="line">   y = x * <span class="number">2</span>; <span class="comment">// The "Act"</span></span><br><span class="line"></span><br><span class="line">   <span class="comment">// If another thread changed x in between "if (x == 5)" and "y = x * 2" above,</span></span><br><span class="line">   <span class="comment">// y will not be equal to 10.</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p><strong>什么是锁：</strong><br>    锁就是一个对象，就像其他在内核中的对象一样。有一个<font color="#9bbb59">结构体叫做lock</font>，它包含了一些字段，这些字段中维护了锁的状态。锁有非常直观的API：</p>
+<pre><code>- acquire，&lt;font color=&quot;#9bbb59&quot;&gt;接收指向lock的指针&lt;/font&gt;作为参数。acquire确保了在任何时间，只会有一个进程能够成功的获取锁。
+- release，也&lt;font color=&quot;#9bbb59&quot;&gt;接收指向lock的指针&lt;/font&gt;作为参数。在同一时间尝试获取锁的其他进程需要等待，直到持有锁的进程对锁调用release。
+</code></pre><p><strong>critical section:</strong><br>    acquire 和 release之间的代码，通常在这里会以<font color="#9bbb59">原子</font>的方式（<font color="#9bbb59">要么一起执行，要么一条也不会执行，即无法分割</font>）执行共享数据的更新。所以我们永远也不会看到位于临界区域的代码，如同race condition中一样在多个cpu中交织的执行。</p>
+<p><strong>什么时候使用锁：</strong></p>
+<ul>
+<li>保守原则：如果两个进程访问了一个共享的数据结构，并且其中的一个进程会更新共享的数据结构，那么就需要对这个共享的数据结构加锁。</li>
+<li>直接为每个共享对象自动分配一个锁会带来错误的结果。锁应该与操作而不是数据关联。</li>
+</ul>
+<h3 id="锁的特性和死锁"><a href="#锁的特性和死锁" class="headerlink" title="锁的特性和死锁"></a>锁的特性和死锁</h3><p><strong>锁的作用：</strong></p>
+<ul>
+<li>避免丢失更新</li>
+<li>打包多个操作，使他们具有原子性</li>
+<li>维护共享数据结构的不变性</li>
+</ul>
+<p><strong>锁可能带来的问题：</strong></p>
+<ul>
+<li><p>死锁（Deadlock）<br>一个死锁的最简单的场景就是：首先acquire一个锁，然后进入到critical section；在critical section中，再acquire同一个锁；第二个acquire必须要等到第一个acquire状态被release了才能继续执行，但是不继续执行的话又走不到第一个release，所以程序就一直卡在这了。这就是一个死锁。</p>
+</li>
+<li><p>deadly embrace：</p>
+</li>
+</ul>
+<p>假设现在我们有两个CPU，一个是CPU1，另一个是CPU2。CPU1执行rename将文件d1/x移到d2/y，CPU2执行rename将文件d2/a移到d1/b。这里CPU1将文件从d1移到d2，CPU2正好相反将文件从d2移到d1。我们假设我们按照参数的顺序来acquire锁，那么CPU1会先获取d1的锁，如果程序是真正的并行运行，CPU2同时也会获取d2的锁。<span style="background:#d2cbff">之后CPU1需要获取d2的锁，这里不能成功，因为CPU2现在持有锁，所以CPU1会停在这个位置等待d2的锁释放。而另一个CPU2，接下来会获取d1的锁，它也不能成功，因为CPU1现在持有锁</span>。这也是死锁的一个例子，有时候这种场景也被称为deadly embrace。这里的死锁就没那么容易探测了。</p>
+<p>可能的解决方案：如果你有多个锁，你需要对锁进行排序，所有的操作都必须以相同的顺序获取锁。</p>
+<h3 id="自旋锁的实现"><a href="#自旋锁的实现" class="headerlink" title="自旋锁的实现"></a>自旋锁的实现</h3><p>在acquire里面有一个<font color="#9bbb59">死循环</font>，循环中判断<font color="#9bbb59">锁对象的locked字段</font>是否为0，如果为0那表明当前锁没有持有者，当前对于acquire的调用可以获取锁。之后我们通过设置锁对象的locked字段为1来获取锁。最后返回。如果锁的locked字段不为0，那么当前对于acquire的调用就不能获取锁，程序会一直spin。对locked字段存在 check then act的情况，所以有可能出现条件竞争。</p>
+<p><strong>amoswap：</strong></p>
+<ul>
+<li>atomic memory swap， risc-v的特殊的硬件指令保证一次 test and set操作的原子性。</li>
+<li>这个指令接收3个参数，分别是address，寄存器r1，寄存器r2。<font color="#9bbb59">这条指令会先锁定住address</font>，将address中的数据保存在一个临时变量中（tmp），之后将r1中的数据写入到地址中，之后再将保存在临时变量中的数据写入到r2中，<font color="#9bbb59">最后再对于地址解锁。</font>通过这里的加锁，可以确保<span style="background:#d2cbff">address中的数据存放于r2，而r1中的数据存放于address中。</span></li>
+<li>这一系列的指令打包具备原子性。软件锁转变为硬件锁。</li>
+</ul>
+<h2 id="Thread-switching"><a href="#Thread-switching" class="headerlink" title="Thread switching"></a>Thread switching</h2><h3 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h3><p>线程可以认为是一种在有多个任务时简化编程的抽象。一个线程可以认为是串行执行代码的单元，它只占用一个CPU并且以普通的方式一个接一个的执行指令。</p>
+<p><strong>为什么需要多线程：</strong></p>
+<ul>
+<li>人们希望他们的计算机在同一时间不是只执行一个任务。</li>
+<li>多线程让程序结构变得简单</li>
+<li>多线程实现<font color="#9bbb59">并行运算</font>。</li>
+</ul>
+<p><strong>线程的状态：</strong></p>
+<ul>
+<li>程序计数器 pc，表示当前线程执行指令的位置</li>
+<li>保存变量的寄存器</li>
+<li>程序的stack</li>
+</ul>
+<p>xv6 支持线程共享内存：</p>
+<ul>
+<li>对于每个用户进程都有一个内核线程来执行用户进程的系统调用。所有的<font color="#9bbb59">内核线程</font>都共享了内核内存。</li>
+<li>每一个用户进程都有独立的内存地址空间[[#Kernel address space| 详见]]，并且包含了一个线程，但是<font color="#9bbb59">用户线程</font>之间没有共享内存。</li>
+</ul>
+<p>在linux中：允许在一个用户进程中<font color="#9bbb59">包含多个线程</font>，进程中的<font color="#9bbb59">多个线程共享进程的地址空间。</font></p>
+<h3 id="线程调度"><a href="#线程调度" class="headerlink" title="线程调度"></a>线程调度</h3><p>停止一个线程的运行并启动另一个线程的过程通常被称为线程调度。XV6为每个CPU核都创建了一个线程调度器（Scheduler）。</p>
+<p><strong>处理compute bound thread（pre-emptive scheduling）：</strong></p>
+<ul>
+<li>在每个cpu核上，<font color="#9bbb59">都存在一个硬件设备，它会定时产生中断</font>。XV6与其他所有的操作系统一样，将这个中断传输到了内核中。所以即使我们正在用户空间计算π的前100万位，定时器中断仍然能在例如每隔10ms的某个时间触发，并将程序运行的控制权从用户空间代码切换到内核中的中断处理程序。</li>
+<li>位于内核的定时器中断处理程序，<font color="#9bbb59">会自愿的将CPU出让（yield）给线程调度器</font>，并告诉线程调度器说，你可以让一些其他的线程运行了。<font color="#9bbb59">这里的出让其实也是一种线程切换</font>，它会保存当前线程的状态，并在稍后恢复。</li>
+<li>总结来说，定时器中断将cpu控制权给到内核，内核再自愿让出cpu。</li>
+</ul>
+<h3 id="线程切换"><a href="#线程切换" class="headerlink" title="线程切换"></a>线程切换</h3><h4 id="context-switching"><a href="#context-switching" class="headerlink" title="context switching"></a>context switching</h4><ul>
+<li><p>进程的上下文切换涉及到用户空间和内核空间之间的来回转换。当进程需要切换时，首先通过system call或中断陷入内核态，进入该进程的内核线程，然后将<strong>内核线程</strong>的上下文（<font color="#9bbb59">注意不是用户进程的上下文，用户进程的上下文已经保存在了trapframe里面</font>）切换到<font color="#9bbb59">当前CPU的scheduler线程</font>，再将上下文切换到需要运行的进程的内核线程，最后返回用户空间。</p>
+</li>
+<li><p>从一个内核线程切换到另一个线程需要<span style="background:#b1ffff">保存旧线程</span>的寄存器，<span style="background:#b1ffff">恢复新线程</span>之前保存的寄存器。</p>
+</li>
+<li>sp和pc寄存器在此过程中被保存和切换。<code>swtch</code>可以实现这种寄存器组状态(也叫上下文)的保存和切换。当进程需要<code>yield</code>CPU时，这个进程的内核线程将调用<code>swtch</code>来<span style="background:#b1ffff">保存上下文并切换到scheduler的上下文</span>，所有的上下文都保存在<code>struct context</code>中。<code>swtch</code>的传入参数为<code>struct context *old</code>和<code>struct context *new</code></li>
+<li><p><code>yield()</code>函数切换了进程的状态为RUNNABLE，调用了<code>sched()</code>。<code>sched</code>调用了<code>swtch(&amp;p-&gt;context, &amp;mycpu()-&gt;context)</code>来将上下文切换到<code>cpu-&gt;scheduler</code></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">void</span></span><br><span class="line">yield(<span class="keyword">void</span>)</span><br><span class="line">&#123;</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">proc</span> *<span class="title">p</span> = <span class="title">myproc</span>();</span></span><br><span class="line">  acquire(&amp;p-&gt;lock);</span><br><span class="line">  p-&gt;state = RUNNABLE;</span><br><span class="line">  sched();</span><br><span class="line">  release(&amp;p-&gt;lock);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>想要<code>yield</code>CPU的进程首先要获取自己进程的锁<code>p-&gt;lock</code>（防止其他CPU获取这个进程），修改当前的状态到<code>RUNNABLE</code>，<code>release</code>掉自己获取的其他锁，加载<code>cpu-&gt;scheduler</code>的上下文，返回到<code>scheduler()</code>之后，<code>release</code>掉自己的进程锁。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">sched(<span class="keyword">void</span>)</span><br><span class="line">&#123;</span><br><span class="line">  <span class="keyword">int</span> intena;</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">proc</span> *<span class="title">p</span> = <span class="title">myproc</span>();</span></span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span>(!holding(&amp;p-&gt;lock))</span><br><span class="line">    panic(<span class="string">"sched p-&gt;lock"</span>);</span><br><span class="line">  <span class="keyword">if</span>(mycpu()-&gt;noff != <span class="number">1</span>)</span><br><span class="line">    panic(<span class="string">"sched locks"</span>);</span><br><span class="line">  <span class="keyword">if</span>(p-&gt;state == RUNNING)</span><br><span class="line">    panic(<span class="string">"sched running"</span>);</span><br><span class="line">  <span class="keyword">if</span>(intr_get())</span><br><span class="line">    panic(<span class="string">"sched interruptible"</span>);</span><br><span class="line"></span><br><span class="line">  intena = mycpu()-&gt;intena;</span><br><span class="line">  swtch(&amp;p-&gt;context, &amp;mycpu()-&gt;context);</span><br><span class="line">  mycpu()-&gt;intena = intena;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>首先检查是否获取<code>p-&gt;lock</code>，防止其他CPU的scheduler看见<code>p-&gt;state==RUNNABLE</code>的情况下试图去运行这个进程。</p>
+</li>
+<li>通过检查<code>mycpu()-&gt;noff</code>来检查是否还获取着除了<code>p-&gt;lock</code>之外的其他锁，否则当切换到其他进程之后<font color="#9bbb59">其他进程可能会</font><code>acquire</code>这个锁，而<font color="#9bbb59">原先的进程由于没有在运行，因此一直无法释放掉这个锁，造成死锁</font>。</li>
+<li><p>swtch函数会将<span style="background:#b1ffff">当前的内核线程的寄存器</span>保存到p-&gt;context中。swtch函数的另一个参数c-&gt;context，c表示当前CPU的结构体。CPU结构体中的context保存了<span style="background:#d2cbff">当前CPU核的调度器线程</span>的寄存器。所以swtch函数在<span style="background:#d2cbff">保存完</span>当前内核线程的内核寄存器之后，就会<span style="background:#d2cbff">恢复</span>当前CPU核的调度器线程的寄存器，并<span style="background:#d2cbff">继续执行当前CPU核的调度器线程。</span></p>
+</li>
+<li><p><code>swtch</code>只保存callee saved寄存器，<font color="#9bbb59">caller saved寄存器在栈中被调用的代码保存</font>。<br>![[截屏2023-05-23 21.26.33.png]]</p>
+</li>
+</ul>
+<h4 id="scheduling"><a href="#scheduling" class="headerlink" title="scheduling"></a>scheduling</h4><p>调度器(scheduler)是每个CPU中都会运行的一个<span style="background:#d2cbff">特殊的线程</span>，这个线程中不断运行<code>scheduler</code>函数，来选取下一个需要运行的进程。</p>
+<ul>
+<li>在<code>scheduler</code>调用<code>swtch</code>到新的进程之前，<code>scheduler</code><font color="#9bbb59">需要已经获取这个进程的锁，并且将对这个进程的锁传递给被切换到的这个新的进程中</font>，<font color="#9bbb59">让新进程来</font><code>release</code><font color="#9bbb59">这个锁</font>。一般来说，一个锁应该由<code>acquire</code>它的进程来进行<code>release</code>，但是由于一个进程的<code>p-&gt;state</code>是在<code>scheduler</code>中被改变的，需要对其进行保护，因此需要在<code>scheduler</code>中就获取这个进程的锁</li>
+<li>当一个新的进程是<span style="background:#d2cbff">第一次被</span><code>scheduler</code>调度的时候，<span style="background:#d2cbff">不返回到</span><code>sched</code>，而是返回到<code>forkret</code>（因为之前并没有从<code>sched</code>中调用过<code>swtch</code>）。<code>forkret</code>将<code>p-&gt;lock</code>释放掉，然后回到<code>usertrapret</code>。</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Per-CPU process scheduler.</span></span><br><span class="line"><span class="comment">// Each CPU calls scheduler() after setting itself up.</span></span><br><span class="line"><span class="comment">// Scheduler never returns.  It loops, doing:</span></span><br><span class="line"><span class="comment">//  - choose a process to run.</span></span><br><span class="line"><span class="comment">//  - swtch to start running that process.</span></span><br><span class="line"><span class="comment">//  - eventually that process transfers control</span></span><br><span class="line"><span class="comment">//    via swtch back to the scheduler.</span></span><br><span class="line"><span class="keyword">void</span></span><br><span class="line">scheduler(<span class="keyword">void</span>)</span><br><span class="line">&#123;</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">proc</span> *<span class="title">p</span>;</span></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">cpu</span> *<span class="title">c</span> = <span class="title">mycpu</span>();</span></span><br><span class="line">  </span><br><span class="line">  c-&gt;proc = <span class="number">0</span>;</span><br><span class="line">  <span class="keyword">for</span>(;;)&#123;</span><br><span class="line">    <span class="comment">// Avoid deadlock by ensuring that devices can interrupt.</span></span><br><span class="line">    intr_on();</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">int</span> nproc = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">for</span>(p = proc; p &lt; &amp;proc[NPROC]; p++) &#123;</span><br><span class="line">      acquire(&amp;p-&gt;lock);</span><br><span class="line">      <span class="keyword">if</span>(p-&gt;state != UNUSED) &#123;</span><br><span class="line">        nproc++;</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">if</span>(p-&gt;state == RUNNABLE) &#123;</span><br><span class="line">        <span class="comment">// Switch to chosen process.  It is the process's job</span></span><br><span class="line">        <span class="comment">// to release its lock and then reacquire it</span></span><br><span class="line">        <span class="comment">// before jumping back to us.s</span></span><br><span class="line">        p-&gt;state = RUNNING;</span><br><span class="line">        c-&gt;proc = p;</span><br><span class="line">        swtch(&amp;c-&gt;context, &amp;p-&gt;context);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// Process is done running for now.</span></span><br><span class="line">        <span class="comment">// It should have changed its p-&gt;state before coming back.</span></span><br><span class="line">        c-&gt;proc = <span class="number">0</span>;</span><br><span class="line">      &#125;</span><br><span class="line">      release(&amp;p-&gt;lock);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span>(nproc &lt;= <span class="number">2</span>) &#123;   <span class="comment">// only init and sh exist</span></span><br><span class="line">      intr_on();</span><br><span class="line">      <span class="function"><span class="keyword">asm</span> <span class="title">volatile</span><span class="params">(<span class="string">"wfi"</span>)</span></span>;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="File-systems"><a href="#File-systems" class="headerlink" title="File systems"></a>File systems</h2><h3 id="xv6文件系统概述"><a href="#xv6文件系统概述" class="headerlink" title="xv6文件系统概述"></a>xv6文件系统概述</h3><p><strong>数据结构</strong><br>1）inode:<br>    结构体，代表一个文件的对象，不依赖文件名，通过自身的编号来进行区分。所以文件系统内部通过一个数字，而不是通过文件路径名引用inode。一个inode是64byte。<br>xv6结构：</p>
+<ul>
+<li>type字段，表示inode是<font color="#9bbb59">文件</font>还是<font color="#9bbb59">目录</font></li>
+<li>nlink字段，用来跟踪究竟有多少<font color="#9bbb59">文件名指向</font>了当前的<font color="#9bbb59">inode</font></li>
+<li>size字段，表明文件数据有多少字节</li>
+<li>direct block</li>
+<li>indirect block number，对应磁盘上的一个block，这个block包含了256个block number，这256个block number包含了文件的数据。</li>
+<li>以上的结构，完全足够用来实现read/write系统调用，可以找到对应的disk block。<br>![[Pasted image 20230525155455.png]]<blockquote>
+<p>可以通过构建双重indirect block number来增加最大文件长度。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">dinode</span> &#123;</span></span><br><span class="line">  short type;           <span class="comment">// File type</span></span><br><span class="line">  short major;          <span class="comment">// Major device number (T_DEVICE only)</span></span><br><span class="line">  short minor;          <span class="comment">// Minor device number (T_DEVICE only)</span></span><br><span class="line">  short nlink;          <span class="comment">// Number of links to inode in file system</span></span><br><span class="line">  uint size;            <span class="comment">// Size of file (bytes)</span></span><br><span class="line">  uint addrs[NDIRECT+<span class="number">1</span>];   <span class="comment">// Data block addresses</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+</blockquote>
+</li>
+</ul>
+<p>2）file descriptor：<br>    主要与用户进程进行交互。</p>
+<p><strong>目录：</strong><br>    一个目录本质上是一个文件加上一些文件系统能够理解的结构。在xv6中，每一个目录包含了directory entries ，每一条entry都有固定的格式：</p>
+<ul>
+<li>前2个字节包含了<font color="#9bbb59">目录中文件或者子目录</font>的<font color="#9bbb59">inode编号</font>。</li>
+<li>接下来的14个字节包含了<font color="#9bbb59">文件或者子目录名</font>。</li>
+</ul>
+<p><strong>文件系统分层：</strong><br>![[Pasted image 20230525172321.png]]</p>
+<ul>
+<li>磁盘，提高持久化存储。</li>
+<li>buffer cache 或者说是block cache。避免频繁的读写磁盘，将磁盘的数据保存在内存中。</li>
+<li>logging 层</li>
+<li>inode cache</li>
+<li>inode</li>
+<li>文件名，文件描述符操作</li>
+</ul>
+<p><strong>block and sectors:</strong></p>
+<ul>
+<li>sector 是磁盘驱动可以读写的最小单元</li>
+<li>block是操作系统或者文件系统视角的数据。它由文件系统定义，在xv6中为1024字节（1kb）。通常说一个block对应了多个sector。多个inode(64 byte)会打包存在一个block中。</li>
+</ul>
+<p><strong>block结构：</strong></p>
+<p>从文件系统角度来看，可以把磁盘看作是一个巨大的block数组。而文件系统的工作就是将所有的数据结构以一种能够在重启之后，重新构建文件系统的方式，存放在磁盘上。<br>![[Pasted image 20230525172359.png]]</p>
+<ul>
+<li>boot block。block0要么没有用，要么被用作boot sector来启动操作系统。</li>
+<li>super block。block1通常被称为super block，它描述了文件系统。它可能<font color="#9bbb59">包含磁盘上有多少个block共同构成了文件系统</font>这样的信息。我们之后会看到XV6在里面会存更多的信息，你可以通过block1构造出大部分的文件系统信息。</li>
+<li>log block。在XV6中，log从block2开始，到block32结束。实际上log的大小可能不同，这里在super block中会定义log就是30个block。</li>
+<li>inode block。接下来在<font color="#9bbb59">block32到block45之间，XV6存储了inode</font>。<font color="#9bbb59">多个inode会打包存在一个block中</font>，一个inode是64字节。</li>
+<li>bitmap block。之后是bitmap block，这是我们构建文件系统的默认方法，它只占据一个block。<font color="#9bbb59">它记录了数据block是否空闲</font>。</li>
+<li>data block。之后就全是数据block了，<font color="#9bbb59">数据block</font>存储了<font color="#9bbb59">文件</font>的内容和<font color="#9bbb59">目录</font>的内容</li>
+</ul>
+<p>从inode编号找到对应block：<br>    32 + (node x 64）/ 1024</p>
+<h3 id="File-system-工作示例"><a href="#File-system-工作示例" class="headerlink" title="File system 工作示例"></a>File system 工作示例</h3>
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2023/04/19/s081/lab笔记/" rel="next" title>
+                <i class="fa fa-chevron-left"></i> 
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2023/05/04/s081/总结/" rel="prev" title>
+                 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/head.jpg" alt="zzrR0">
+            
+              <p class="site-author-name" itemprop="name">zzrR0</p>
+              <p class="site-description motion-element" itemprop="description">Why am i so cai.</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">4</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                    <span class="site-state-item-count">1</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://xmzyshypnc.github.io/" title="xmzyshypnc" target="_blank">xmzyshypnc</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://wood1314.github.io/" title="Wood" target="_blank">Wood</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://blog.zeddyu.info/" title="Zedd" target="_blank">Zedd</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://kestudy.top/" title="Ke" target="_blank">Ke</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Lab-Xv6-and-Unix-utilities"><span class="nav-number">1.</span> <span class="nav-text">Lab  Xv6 and Unix utilities</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#文件描述符"><span class="nav-number">1.1.</span> <span class="nav-text">文件描述符</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#read"><span class="nav-number">1.2.</span> <span class="nav-text">read</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#write"><span class="nav-number">1.3.</span> <span class="nav-text">write</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#dup"><span class="nav-number">1.4.</span> <span class="nav-text">dup</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#open-todo"><span class="nav-number">1.5.</span> <span class="nav-text">open #todo</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#close"><span class="nav-number">1.6.</span> <span class="nav-text">close</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#fork"><span class="nav-number">1.7.</span> <span class="nav-text">fork</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#exec"><span class="nav-number">1.8.</span> <span class="nav-text">exec</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#wait"><span class="nav-number">1.9.</span> <span class="nav-text">wait</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#管道"><span class="nav-number">1.10.</span> <span class="nav-text">管道</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#文件系统-todo"><span class="nav-number">1.11.</span> <span class="nav-text">文件系统 #todo</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Lab-System-Calls"><span class="nav-number">2.</span> <span class="nav-text">Lab System Calls</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#C-pointer"><span class="nav-number">2.1.</span> <span class="nav-text">C pointer</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#User-mode-and-supervisor-mode"><span class="nav-number">2.2.</span> <span class="nav-text">User mode and supervisor mode</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ECAL指令"><span class="nav-number">2.3.</span> <span class="nav-text">ECAL指令</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#kernel-organiztion"><span class="nav-number">2.4.</span> <span class="nav-text">kernel organiztion</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Process"><span class="nav-number">2.5.</span> <span class="nav-text">Process</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Starting-the-first-process-启动第一个进程"><span class="nav-number">2.6.</span> <span class="nav-text">Starting the first process 启动第一个进程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#qemu"><span class="nav-number">2.7.</span> <span class="nav-text">qemu</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Lab-Page-Tables"><span class="nav-number">3.</span> <span class="nav-text">Lab Page Tables</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Paging-Hardware"><span class="nav-number">3.1.</span> <span class="nav-text">Paging Hardware</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Kernel-address-space"><span class="nav-number">3.2.</span> <span class="nav-text">Kernel address space</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#页表缓存-Translation-Lookaside-buffer"><span class="nav-number">3.3.</span> <span class="nav-text">页表缓存 Translation Lookaside buffer</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Code-creating-an-address-space"><span class="nav-number">3.4.</span> <span class="nav-text">Code: creating an address space</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Code-kvminit、kvminithart、walk函数"><span class="nav-number">3.5.</span> <span class="nav-text">Code: kvminit、kvminithart、walk函数</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#TA-Calling-conventions-and-stack-frams-riscv"><span class="nav-number">4.</span> <span class="nav-text">TA Calling conventions and stack frams riscv</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#risc-v寄存器"><span class="nav-number">4.1.</span> <span class="nav-text">risc-v寄存器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#stack"><span class="nav-number">4.2.</span> <span class="nav-text">stack</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Lab-traps"><span class="nav-number">5.</span> <span class="nav-text">Lab traps</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#trap机制"><span class="nav-number">5.1.</span> <span class="nav-text">trap机制</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#硬件准备操作"><span class="nav-number">5.1.1.</span> <span class="nav-text">硬件准备操作</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#trap代码执行流程"><span class="nav-number">5.2.</span> <span class="nav-text">trap代码执行流程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#进入ecall-指令之前的状态"><span class="nav-number">5.3.</span> <span class="nav-text">进入ecall 指令之前的状态</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#进入ecall指令之后的状态"><span class="nav-number">5.4.</span> <span class="nav-text">进入ecall指令之后的状态</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1）刚进入ecall指令之后："><span class="nav-number">5.4.1.</span> <span class="nav-text">1）刚进入ecall指令之后：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2）trampoline-S-uservec函数"><span class="nav-number">5.4.2.</span> <span class="nav-text">2）trampoline.S uservec函数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3）trap-c-usertrap函数"><span class="nav-number">5.4.3.</span> <span class="nav-text">3）trap.c usertrap函数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4）usertrapret函数"><span class="nav-number">5.4.4.</span> <span class="nav-text">4）usertrapret函数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#5）userret函数"><span class="nav-number">5.4.5.</span> <span class="nav-text">5）userret函数</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#sret指令"><span class="nav-number">5.5.</span> <span class="nav-text">sret指令</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Lab-copy-on-write-fork"><span class="nav-number">6.</span> <span class="nav-text">Lab copy-on-write fork</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#page-fault-basics"><span class="nav-number">6.1.</span> <span class="nav-text">page fault basics</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#lazy-page-allocation"><span class="nav-number">6.2.</span> <span class="nav-text">lazy page allocation</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#sbrk系统调用"><span class="nav-number">6.2.1.</span> <span class="nav-text">sbrk系统调用</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#lazy-allocation"><span class="nav-number">6.2.2.</span> <span class="nav-text">lazy allocation</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#copy-on-write-fork"><span class="nav-number">6.2.3.</span> <span class="nav-text">copy on write fork</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#zero-fill-on-demand"><span class="nav-number">6.2.4.</span> <span class="nav-text">zero fill on demand</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#demand-paging"><span class="nav-number">6.2.5.</span> <span class="nav-text">demand paging</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Interrupts"><span class="nav-number">7.</span> <span class="nav-text">Interrupts</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#在xv6中设置中断"><span class="nav-number">7.1.</span> <span class="nav-text">在xv6中设置中断</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#console-ouput"><span class="nav-number">7.2.</span> <span class="nav-text">console ouput</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#uart"><span class="nav-number">7.2.1.</span> <span class="nav-text">uart</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#代码分析"><span class="nav-number">7.2.2.</span> <span class="nav-text">代码分析</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#uart驱动的top部分"><span class="nav-number">7.2.2.1.</span> <span class="nav-text">uart驱动的top部分</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#uart驱动的bottom部分"><span class="nav-number">7.2.2.2.</span> <span class="nav-text">uart驱动的bottom部分</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Multiprocessors-and-locking"><span class="nav-number">8.</span> <span class="nav-text">Multiprocessors and locking</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#锁的特性和死锁"><span class="nav-number">8.1.</span> <span class="nav-text">锁的特性和死锁</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#自旋锁的实现"><span class="nav-number">8.2.</span> <span class="nav-text">自旋锁的实现</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Thread-switching"><span class="nav-number">9.</span> <span class="nav-text">Thread switching</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#概述"><span class="nav-number">9.1.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#线程调度"><span class="nav-number">9.2.</span> <span class="nav-text">线程调度</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#线程切换"><span class="nav-number">9.3.</span> <span class="nav-text">线程切换</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#context-switching"><span class="nav-number">9.3.1.</span> <span class="nav-text">context switching</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#scheduling"><span class="nav-number">9.3.2.</span> <span class="nav-text">scheduling</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#File-systems"><span class="nav-number">10.</span> <span class="nav-text">File systems</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#xv6文件系统概述"><span class="nav-number">10.1.</span> <span class="nav-text">xv6文件系统概述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#File-system-工作示例"><span class="nav-number">10.2.</span> <span class="nav-text">File system 工作示例</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2023</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">zzrR0</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动 v3.9.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 – <a class="theme-link" target="_blank" href="https://theme-next.org">NexT.Pisces</a> v6.3.0</div>
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv" title="总访客量">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+    </span>
+  
+
+  
+    <span class="site-pv" title="总访问量">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.3.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.3.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.3.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.3.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.3.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.3.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.3.0"></script>
+
+
+
+  
+
+  
+    <script id="dsq-count-scr" src="https://xmzyshypnc.disqus.com/count.js" async></script>
+  
+
+  
+    <script type="text/javascript">
+      var disqus_config = function () {
+        this.page.url = 'http://yoursite.com/2023/04/19/s081/知识笔记/';
+        this.page.identifier = '2023/04/19/s081/知识笔记/';
+        this.page.title = '';
+        };
+      function loadComments () {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://xmzyshypnc.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      }
+      
+        loadComments();
+      
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  
+  
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(function (item) {
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: true,
+        notify: true,
+        appId: 'YbpHIa6XHNsKv4wX2wGjnrK7-gzGzoHsz',
+        appKey: '1fjf9mQl90nKdRPfq1zhDyIE',
+        placeholder: '',
+        avatar:'mm',
+        meta:guest,
+        pageSize:'10' || 10,
+        visitor: true
+    });
+  </script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+<script type="text/javascript" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","model":{"scale":1,"hHeadPos":0.5,"vHeadPos":0.618,"jsonPath":"live2d-widget-model-hijiki"},"display":{"superSample":2,"width":150,"height":300,"position":"right","hOffset":0,"vOffset":-50},"mobile":{"show":true,"scale":0.5},"react":{"opacityDefault":0.7,"opacityOnHover":0.2},"log":false,"tagMode":false});</script></body>
+</html>
