@@ -1,0 +1,1076 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.3.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.3.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.3.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.3.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.3.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '6.3.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="Lab：Xv6 and Unix utilitiespingpong使用unix系统调用函数编写一个程序，这个程序在两个进程之间通过一对pipe进行数据交换。![[截屏2023-04-19 15.03.10.png]]  进程双向通信使用一对pipe，各自负责不同的数据流动。  primes使用pipe写一个并行版本的素数筛。  父进程传入2，3，4 …. 1000进入pipeline的最左端。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="zzrR0">
+<meta property="og:url" content="http://yoursite.com/2023/04/19/lab笔记/index.html">
+<meta property="og:site_name" content="zzrR0">
+<meta property="og:description" content="Lab：Xv6 and Unix utilitiespingpong使用unix系统调用函数编写一个程序，这个程序在两个进程之间通过一对pipe进行数据交换。![[截屏2023-04-19 15.03.10.png]]  进程双向通信使用一对pipe，各自负责不同的数据流动。  primes使用pipe写一个并行版本的素数筛。  父进程传入2，3，4 …. 1000进入pipeline的最左端。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2023-05-24T02:26:39.794Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="zzrR0">
+<meta name="twitter:description" content="Lab：Xv6 and Unix utilitiespingpong使用unix系统调用函数编写一个程序，这个程序在两个进程之间通过一对pipe进行数据交换。![[截屏2023-04-19 15.03.10.png]]  进程双向通信使用一对pipe，各自负责不同的数据流动。  primes使用pipe写一个并行版本的素数筛。  父进程传入2，3，4 …. 1000进入pipeline的最左端。">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2023/04/19/lab笔记/">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title> | zzrR0</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">zzrR0</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+    <a href="/about/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2023/04/19/lab笔记/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="zzrR0">
+      <meta itemprop="description" content="Why am i so cai.">
+      <meta itemprop="image" content="/images/head.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="zzrR0">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2023-04-19 15:00:34" itemprop="dateCreated datePublished" datetime="2023-04-19T15:00:34+08:00">2023-04-19</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2023-05-24 10:26:39" itemprop="dateModified" datetime="2023-05-24T10:26:39+08:00">2023-05-24</time>
+              
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2023/04/19/lab笔记/#comments" itemprop="discussionUrl">
+                
+                  <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2023/04/19/lab笔记/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2023/04/19/lab笔记/" class="leancloud_visitors" data-flag-title>
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数：</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="Lab：Xv6-and-Unix-utilities"><a href="#Lab：Xv6-and-Unix-utilities" class="headerlink" title="Lab：Xv6 and Unix utilities"></a>Lab：Xv6 and Unix utilities</h2><h3 id="pingpong"><a href="#pingpong" class="headerlink" title="pingpong"></a>pingpong</h3><p>使用unix系统调用函数编写一个程序，这个程序在两个进程之间通过一对pipe<br>进行数据交换。<br>![[截屏2023-04-19 15.03.10.png]]</p>
+<ul>
+<li>进程双向通信使用一对pipe，各自负责不同的数据流动。</li>
+</ul>
+<h3 id="primes"><a href="#primes" class="headerlink" title="primes"></a>primes</h3><p>使用pipe写一个并行版本的素数筛。</p>
+<ul>
+<li>父进程传入2，3，4 …. 1000进入pipeline的最左端。</li>
+<li>最左端的进程消除了2的倍数</li>
+<li>第二个进程消除了3 的倍数</li>
+<li>…</li>
+</ul>
+<p>![[截屏2023-04-19 15.12.28.png]]</p>
+<p>从主进程开始，不断新建子进程，每个子进程执行一次筛选，<strong>并将使用的基（base）认为是质数</strong>，并返回，直到全部的数都被筛去或被返回。</p>
+<p>编写时易错点：</p>
+<ul>
+<li>及时<font color="#9bbb59">关闭进程不需要的文件描述符</font>，如果不及时关闭的话，很有可能会耗尽系统的文件描述符。除此之外，<font color="#9bbb59">如果不及时关闭管道的写端，可能会导致管道的读端一直处于阻塞状态。</font></li>
+<li>当第一个进程达到35的时候，<font color="#9bbb59">它需要等待所有的pipeline结束</font>。因此，<strong>主进程</strong>只有<font color="#9bbb59">在所有输出打印出来之后</font>，并且在所有其他素数进程退出之后，才能退出。</li>
+</ul>
+<blockquote>
+<p>当管道里没有数据的时候，管道上的<code>read</code>要么等数据写入，要么<font color="#9bbb59">等写入端的文件描述符被关闭</font>；在后一种情况下，<code>read</code>将返回0，就像到达了数据文件的尾部一样。如果新数据不可能再到来，<code>read</code>就会一直阻塞。</p>
+</blockquote>
+<h3 id="find-todo"><a href="#find-todo" class="headerlink" title="find #todo"></a>find #todo</h3><p>写一个简单的find程序，找到用户指定目录下，所有具有指定名字的文件路径。参考<code>user\ls.c</code>的实现方法。</p>
+<h3 id="xargs"><a href="#xargs" class="headerlink" title="xargs"></a>xargs</h3><p>写一个简单的xargs程序，从标准输入读取数据，并且以每一行的数据作为参数，运行xargs指定的command。</p>
+<p><code>echo &quot;1\n2&quot;| xargs echo line</code>   </p>
+<ul>
+<li>｜ 管道符，将两个命令分隔开。｜左边命令的输入就会作为右边命令的输入。此命令可以连续使用，依次类推。</li>
+<li>等价于分别执行命令 xargs echo line “1” 和 xargs echo line “2”</li>
+</ul>
+<p>编写时易错点：</p>
+<ul>
+<li><code>exec(char * path, char ** argv )</code>函数，其中里面的argv是指针数组，与main函数的参数argv是一样的。</li>
+<li>使用fork起一个子进程，在子进程中使用exec执行相应命令。父进程<code>wait</code>。对标准输入每次读一个char，若读到<code>\n</code>需要执行命令。</li>
+</ul>
+<h2 id="Lab-2-System-Calls"><a href="#Lab-2-System-Calls" class="headerlink" title="Lab 2 : System Calls"></a>Lab 2 : System Calls</h2><h3 id="system-call-tracing"><a href="#system-call-tracing" class="headerlink" title="system call tracing"></a>system call tracing</h3><p><code>trace [tracing_mask] [commad]</code> 当调用了给定tracing mask所对应的system call时，打印输出调用<strong>system call 的进程PID,system call的名称、system call的返回值</strong>。已经给出了user space下的user/trace.c，需要<strong>注册</strong>并<strong>实现</strong><code>trace</code>这一system call。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">trace 32 grep hello README</span><br><span class="line">3: syscall read -&gt; 1023</span><br><span class="line">3: syscall read -&gt; 966</span><br><span class="line">3: syscall read -&gt; 70</span><br><span class="line">3: syscall read -&gt; 0</span><br></pre></td></tr></table></figure>
+<p>  grep [options] pattern [files]<br>  grep 指令用于<strong>查找内容包含指定的范本样式的文件</strong>，如果发现某文件的内容符合所指定的范本样式，预设 grep 指令会把<strong>含有范本样式的那一行显示出来</strong>。若不指定任何文件名称，或是所给予的文件名为 -，则 grep 指令会从标准输入设备读取数据。</p>
+<ul>
+<li>在user.h中注册trace这一user function。<code>int trace(int)</code></li>
+<li>在user.pl注册一个ecall到kernel的kernel态的trace的入口： <code>entry(&quot;trace&quot;)</code></li>
+<li>在kernel/sysproc.c中实现一个sys_trace()，将system call的传入参数，也就是tracing mask保存到 kernel/proc.h中的proc结构体中新注册的int变量中。</li>
+<li>修改kernel/proc.c中的fork()来把trace mask从父进程复制到子进程。</li>
+<li>修改kernel/syscall.c中的syscall()来打印输出，注意需要注册一个<code>extern uint 64 sys_trace(void)</code>和<code>[SYS_ trace] sys_trace</code>。注意sys call的返回值是保存在进程的trapframe中的a0寄存器的</li>
+</ul>
+<h3 id="sysinfo"><a href="#sysinfo" class="headerlink" title="sysinfo"></a>sysinfo</h3><h2 id="Lab-3-page-tables"><a href="#Lab-3-page-tables" class="headerlink" title="Lab 3 : page tables"></a>Lab 3 : page tables</h2><h3 id="speed-up-system-calls"><a href="#speed-up-system-calls" class="headerlink" title="speed up system calls"></a>speed up system calls</h3><p>在页表中插入一段映射。</p>
+<ul>
+<li>当每一个进程创建的时候，在地址USYSCALL映射一段只读page。 并且将其初始化</li>
+<li>ugetpid()函数直接从固定地址查找pid，由此加速![[截屏2023-05-05 11.25.50.png]]<br>![[截屏2023-05-05 11.17.38.png]]<br>分配物理内存：<br>![[截屏2023-05-05 11.22.17.png]]</li>
+</ul>
+<p>在页表中添加映射<br>![[截屏2023-05-05 11.22.40.png]]<br>![[截屏2023-05-05 11.22.55.png]]</p>
+<p>添加对页表free之后的处理<br>![[截屏2023-05-05 11.23.12.png]]</p>
+<h3 id="print-a-page-table"><a href="#print-a-page-table" class="headerlink" title="print a page table"></a>print a page table</h3><p>按一定的格式打印第一个进程的页表。</p>
+<ul>
+<li>vmprint定义在vm.c中，并且需要在defs.h中进行声明。</li>
+<li>参考freewalk里对pte的遍历方式以及递归调用方法。</li>
+<li>打印地址%p</li>
+<li>使用riscv.h中的函数宏进行pte中的pa地址获取。</li>
+</ul>
+<p>&amp; 是位操作<br>&amp;&amp; 是逻辑操作</p>
+<p>![[截屏2023-05-04 16.43.53.png]]</p>
+<h3 id="detecting-which-pages-have-been-accessed"><a href="#detecting-which-pages-have-been-accessed" class="headerlink" title="detecting which pages have been accessed"></a>detecting which pages have been accessed</h3><p>完成syscall pgaccess，该系统调用可以通过bitmap，返回有哪些page被（access）读或写了。</p>
+<ul>
+<li>该系统调用接受三个参数，第一个参数代表第一个需要check的page的va；第二个参数代表需要check的所有page的个数；第三个参数指向一个buffer，这个buffer中以bitmask的形式保存，一个bit代表一个page是否被access。</li>
+<li>PTE_A由硬件赋值，所以我们只需要对该位进行检测即可</li>
+<li>使用copyout，把内核栈中的数据复制到用户栈。<br>![[截屏2023-05-05 11.11.04.png]]</li>
+</ul>
+<h2 id="Lab-4：traps"><a href="#Lab-4：traps" class="headerlink" title="Lab 4：traps"></a>Lab 4：traps</h2><h3 id="risc-v-assembly"><a href="#risc-v-assembly" class="headerlink" title="risc-v assembly"></a>risc-v assembly</h3><p>![[截屏2023-05-07 15.18.22.png]]</p>
+<ol>
+<li>哪些寄存器保存函数的参数？ 比如，哪个寄存器保存的是printf函数 ”13“这个参数？</li>
+</ol>
+<ul>
+<li>寄存器a0、a1、a2 …. a7这8个寄存器保存函数参数。</li>
+<li>a2寄存器保存的是“13”</li>
+</ul>
+<ol start="2">
+<li>在main函数的汇编代码中，调用函数f和函数g的代码在哪？</li>
+</ol>
+<ul>
+<li>没有调用，编译器直接优化了，把f(8)+1的值直接计算出来传入printf中。</li>
+</ul>
+<ol start="3">
+<li>函数printf的地址是多少？<ul>
+<li>630</li>
+</ul>
+</li>
+<li>当在main中执行<code>jalr</code>命令，跳转到printf函数之后，ra寄存器的值为多少？<ul>
+<li>ra的值应该为38</li>
+</ul>
+</li>
+</ol>
+<p>![[截屏2023-05-07 15.44.02.png]]</p>
+<h3 id="backtrace"><a href="#backtrace" class="headerlink" title="backtrace"></a>backtrace</h3><p>自己实现一个backtrace系统调用，打印stack中所有函数的虚拟地址。</p>
+<ul>
+<li>通过内嵌函数 r_fp获取到 fp寄存器的值。（fp寄存器指向的是栈帧底部）</li>
+<li>return addr = fp - 8 （根据xv6 stack结构计算出来）</li>
+<li>prev frame fp =  fp - 16</li>
+<li>PGROUNDDOWN PGROUNDUP  可以理解为，<font color="#9bbb59">对地址进行以页单位的round</font>（取整），因为在xv6中，系统对stack只分配一页大小，所以可以通过这两个宏来计算是否fp已经不指向该栈。</li>
+</ul>
+<p>![[截屏2023-05-09 20.09.38.png]]</p>
+<h3 id="alarm"><a href="#alarm" class="headerlink" title="alarm"></a>alarm</h3><p>添加一个新的系统调用 sigalarm(interval, handler)。cpu每经过 interval个 “ticks”，就会调用一次handler。</p>
+<ul>
+<li>首先需要注册系统调用，并且在user.h中include ，详情可以看[[#Lab 2 : System Calls]]</li>
+<li>为了实现alarm功能，需要在process结构体中增加如下变量<br>![[截屏2023-05-10 10.58.11.png]]</li>
+<li>并且在proc.c中的allocproc 和 freeproc进行初始化和释放（注意在这里需要对trapframe进行kalloc）<br>alloc：<br>![[截屏2023-05-10 11.01.16.png]]![[截屏2023-05-10 11.00.47.png]]<br> free：<br>![[截屏2023-05-10 11.00.36.png]]<br>![[截屏2023-05-10 11.00.47.png]]</li>
+<li>在sysfile中定义sys_sigalarm和sys_sigreturn<br>![[截屏2023-05-10 11.03.03.png]]<blockquote>
+<p>ps： *p-&gt;trapframe 的运算顺序，-&gt;的优先级比星号大，所以不需要加括号</p>
+</blockquote>
+</li>
+<li>usertrap函数中，定义处理tick的逻辑<br>![[截屏2023-05-10 11.04.26.png]]</li>
+</ul>
+<h2 id="lab5-copy-on-write-fork-for-xv6"><a href="#lab5-copy-on-write-fork-for-xv6" class="headerlink" title="lab5: copy-on-write fork for xv6"></a>lab5: copy-on-write fork for xv6</h2><h3 id="implement-copy-on-wirte-写时复制"><a href="#implement-copy-on-wirte-写时复制" class="headerlink" title="implement copy-on-wirte 写时复制"></a>implement copy-on-wirte 写时复制</h3><p><a href="https://blog.miigon.net/posts/s081-lab6-copy-on-write-fork/" target="_blank" rel="noopener">https://blog.miigon.net/posts/s081-lab6-copy-on-write-fork/</a></p>
+<ul>
+<li><p><strong>fork存在的问题</strong><br>先调用fork，然后在子进程中调用exec。这样实际上会有点浪费，因为fork会拷贝整个父进程的内存空间，但是之后exec又把所有复制的内存空间抛弃了。</p>
+</li>
+<li><p><strong>copy-on-write的原理</strong><br>直到<font color="#9bbb59">被copy的page真正被使用的时候</font>，才为child process <font color="#9bbb59">分配和复制</font>phsycial memory pages.<br>1) cow fork 只为child 创建一个页表，这个页表中的pte与parent的相同，<font color="#9bbb59">都映射到相同的物理page。</font><br>2) cow fork把在child 和 parent中的所有pte <font color="#9bbb59">都改为不可写</font>。当这两个进程尝试写这些cow pages时，cpu会生成一个page fault<br>3) kernel page-fault handler 检测到这个case，然后<font color="#9bbb59">分配一页物理内存给发生fault的进程，将原有的page 拷贝到新的page</font>中，然后修改相关的pte，使其映射到新的page，并修改为可写。<br>4) 当fault handler 返回时，用户进程可以对copy of the page 进行写操作。</p>
+</li>
+<li><p><strong>实现需要注意的问题</strong><br>  1）在uvmcopy中，<font color="#9bbb59">对于只读页面</font>，如果也将它作为cow页面进行处理，那么就会在uvmcowcopy的时候，将这个制只读页面修改为可写。</p>
+</li>
+<li><p>**代码实现</p>
+<p>1）修改 uvmcopy()，设置<font color="#9bbb59">子进程的PTE</font>指向父进程对应的<font color="#9bbb59">物理内存page</font>，而不是直接allocate新的物理page。对于只读页面，仅为其映射到同一物理页并增加引用计数。<br>![[截屏2023-05-23 10.28.56.png]]</p>
+<p>2）修改usertrap()，设置cow fork page handler。</p>
+<ul>
+<li>判断是否为cowpage</li>
+<li>进行cowpage copy<br>![[截屏2023-05-23 10.29.47.png]]</li>
+</ul>
+</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// kernel/vm.c</span></span><br><span class="line"><span class="comment">// 检查一个地址指向的页是否是懒复制页</span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">uvmcheckcowpage</span><span class="params">(uint64 va)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">pte_t</span> *pte;</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">proc</span> *<span class="title">p</span> = <span class="title">myproc</span>();</span></span><br><span class="line">  </span><br><span class="line">  <span class="keyword">return</span> va &lt; p-&gt;sz <span class="comment">// 在进程内存范围内</span></span><br><span class="line">    &amp;&amp; ((pte = walk(p-&gt;pagetable, va, <span class="number">0</span>))!=<span class="number">0</span>)</span><br><span class="line">    &amp;&amp; (*pte &amp; PTE_V) <span class="comment">// 页表项存在</span></span><br><span class="line">    &amp;&amp; (*pte &amp; PTE_COW); <span class="comment">// 页是一个懒复制页</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 实复制一个懒复制页，并重新映射为可写</span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">uvmcowcopy</span><span class="params">(uint64 va)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">pte_t</span> *pte;</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">proc</span> *<span class="title">p</span> = <span class="title">myproc</span>();</span></span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span>((pte = walk(p-&gt;pagetable, va, <span class="number">0</span>)) == <span class="number">0</span>)</span><br><span class="line">    panic(<span class="string">"uvmcowcopy: walk"</span>);</span><br><span class="line">  </span><br><span class="line">  <span class="comment">// 调用 kalloc.c 中的 kcopy_n_deref 方法，复制页</span></span><br><span class="line">  <span class="comment">// (如果懒复制页的引用已经为 1，则不需要重新分配和复制内存页，只需清除 PTE_COW 标记并标记 PTE_W 即可)</span></span><br><span class="line">  uint64 pa = PTE2PA(*pte);</span><br><span class="line">  uint64 <span class="keyword">new</span> = (uint64)kcopy_n_deref((<span class="keyword">void</span>*)pa); <span class="comment">// 将一个懒复制的页引用变为一个实复制的页</span></span><br><span class="line">  <span class="keyword">if</span>(<span class="keyword">new</span> == <span class="number">0</span>)</span><br><span class="line">    <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">  </span><br><span class="line">  <span class="comment">// 重新映射为可写，并清除 PTE_COW 标记</span></span><br><span class="line">  uint64 flags = (PTE_FLAGS(*pte) | PTE_W) &amp; ~PTE_COW;</span><br><span class="line">  uvmunmap(p-&gt;pagetable, PGROUNDDOWN(va), <span class="number">1</span>, <span class="number">0</span>);</span><br><span class="line">  <span class="keyword">if</span>(mappages(p-&gt;pagetable, va, <span class="number">1</span>, <span class="keyword">new</span>, flags) == <span class="number">-1</span>) &#123;</span><br><span class="line">    panic(<span class="string">"uvmcowcopy: mappages"</span>);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p> 3）物理页生命周期以及引用计数</p>
+<ul>
+<li>kalloc(): 分配物理页，将其引用计数置为 1</li>
+<li>krefpage(): 物理页对应的引用计数加 1</li>
+<li>kcopy_n_deref():<font color="#9bbb59"> 将物理页的一个引用实复制到一个新物理页上（引用计数为 1），返回得到的副本页；并将本物理页的引用计数减 1</font></li>
+<li>kfree(): 释放物理页的一个引用，引用计数减 1；如果计数变为 0，则释放回收物理页</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// kernel/kalloc.c</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 用于访问物理页引用计数数组</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> PA2PGREF_ID(p) (((p)-KERNBASE)/PGSIZE)</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> PGREF_MAX_ENTRIES PA2PGREF_ID(PHYSTOP)</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">spinlock</span> <span class="title">pgreflock</span>;</span> <span class="comment">// 用于 pageref 数组的锁，防止竞态条件引起内存泄漏</span></span><br><span class="line"><span class="keyword">int</span> pageref[PGREF_MAX_ENTRIES]; <span class="comment">// 从 KERNBASE 开始到 PHYSTOP 之间的每个物理页的引用计数</span></span><br><span class="line"><span class="comment">// note:  reference counts are incremented on fork, not on mapping. this means that</span></span><br><span class="line"><span class="comment">//        multiple mappings of the same physical page within a single process are only</span></span><br><span class="line"><span class="comment">//        counted as one reference.</span></span><br><span class="line"><span class="comment">//        this shouldn't be a problem, though. as there's no way for a user program to map</span></span><br><span class="line"><span class="comment">//        a physical page twice within it's address space in xv6.</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 通过物理地址获得引用计数</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> PA2PGREF(p) pageref[PA2PGREF_ID((uint64)(p))]</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">void</span></span><br><span class="line">kinit()</span><br><span class="line">&#123;</span><br><span class="line">  initlock(&amp;kmem.lock, <span class="string">"kmem"</span>);</span><br><span class="line">  initlock(&amp;pgreflock, <span class="string">"pgref"</span>); <span class="comment">// 初始化锁</span></span><br><span class="line">  freerange(end, (<span class="keyword">void</span>*)PHYSTOP);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">void</span></span><br><span class="line">kfree(<span class="keyword">void</span> *pa)</span><br><span class="line">&#123;</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">run</span> *<span class="title">r</span>;</span></span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span>(((uint64)pa % PGSIZE) != <span class="number">0</span> || (<span class="keyword">char</span>*)pa &lt; end || (uint64)pa &gt;= PHYSTOP)</span><br><span class="line">    panic(<span class="string">"kfree"</span>);</span><br><span class="line"></span><br><span class="line">  acquire(&amp;pgreflock);</span><br><span class="line">  <span class="keyword">if</span>(--PA2PGREF(pa) &lt;= <span class="number">0</span>) &#123;</span><br><span class="line">    <span class="comment">// 当页面的引用计数小于等于 0 的时候，释放页面</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// Fill with junk to catch dangling refs.</span></span><br><span class="line">    <span class="comment">// pa will be memset multiple times if race-condition occurred.</span></span><br><span class="line">    <span class="built_in">memset</span>(pa, <span class="number">1</span>, PGSIZE);</span><br><span class="line"></span><br><span class="line">    r = (struct run*)pa;</span><br><span class="line"></span><br><span class="line">    acquire(&amp;kmem.lock);</span><br><span class="line">    r-&gt;next = kmem.freelist;</span><br><span class="line">    kmem.freelist = r;</span><br><span class="line">    release(&amp;kmem.lock);</span><br><span class="line">  &#125;</span><br><span class="line">  release(&amp;pgreflock);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">void</span> *</span><br><span class="line">kalloc(<span class="keyword">void</span>)</span><br><span class="line">&#123;</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">run</span> *<span class="title">r</span>;</span></span><br><span class="line"></span><br><span class="line">  acquire(&amp;kmem.lock);</span><br><span class="line">  r = kmem.freelist;</span><br><span class="line">  <span class="keyword">if</span>(r)</span><br><span class="line">    kmem.freelist = r-&gt;next;</span><br><span class="line">  release(&amp;kmem.lock);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span>(r)&#123;</span><br><span class="line">    <span class="built_in">memset</span>((<span class="keyword">char</span>*)r, <span class="number">5</span>, PGSIZE); <span class="comment">// fill with junk</span></span><br><span class="line">    <span class="comment">// 新分配的物理页的引用计数为 1</span></span><br><span class="line">    <span class="comment">// (这里无需加锁)</span></span><br><span class="line">    PA2PGREF(r) = <span class="number">1</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  <span class="keyword">return</span> (<span class="keyword">void</span>*)r;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Decrease reference to the page by one if it's more than one, then</span></span><br><span class="line"><span class="comment">// allocate a new physical page and copy the page into it.</span></span><br><span class="line"><span class="comment">// (Effectively turing one reference into one copy.)</span></span><br><span class="line"><span class="comment">// </span></span><br><span class="line"><span class="comment">// Do nothing and simply return pa when reference count is already</span></span><br><span class="line"><span class="comment">// less than or equal to 1.</span></span><br><span class="line"><span class="comment">// </span></span><br><span class="line"><span class="comment">// 当引用已经小于等于 1 时，不创建和复制到新的物理页，而是直接返回该页本身</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> *<span class="title">kcopy_n_deref</span><span class="params">(<span class="keyword">void</span> *pa)</span> </span>&#123;</span><br><span class="line">  acquire(&amp;pgreflock);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span>(PA2PGREF(pa) &lt;= <span class="number">1</span>) &#123; <span class="comment">// 只有 1 个引用，无需复制</span></span><br><span class="line">    release(&amp;pgreflock);</span><br><span class="line">    <span class="keyword">return</span> pa;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 分配新的内存页，并复制旧页中的数据到新页</span></span><br><span class="line">  uint64 newpa = (uint64)kalloc();</span><br><span class="line">  <span class="keyword">if</span>(newpa == <span class="number">0</span>) &#123;</span><br><span class="line">    release(&amp;pgreflock);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>; <span class="comment">// out of memory</span></span><br><span class="line">  &#125;</span><br><span class="line">  memmove((<span class="keyword">void</span>*)newpa, (<span class="keyword">void</span>*)pa, PGSIZE);</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 旧页的引用减 1</span></span><br><span class="line">  PA2PGREF(pa)--;</span><br><span class="line"></span><br><span class="line">  release(&amp;pgreflock);</span><br><span class="line">  <span class="keyword">return</span> (<span class="keyword">void</span>*)newpa;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 为 pa 的引用计数增加 1</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">krefpage</span><span class="params">(<span class="keyword">void</span> *pa)</span> </span>&#123;</span><br><span class="line">  acquire(&amp;pgreflock);</span><br><span class="line">  PA2PGREF(pa)++;</span><br><span class="line">  release(&amp;pgreflock);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p> 4）修改copyout()：同时 copyout() 由于是<font color="#9bbb59">软件访问页表</font>，不会触发缺页异常，所以需要手动添加同样的监测代码（同 lab5），检测接收的页是否是一个懒复制页，若是，执行实复制操作。</p>
+<p>![[截屏2023-05-23 10.50.43.png]]</p>
+<p>5）实现懒复制页的检测和实复制</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 检查一个地址指向的页是否是懒复制页</span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">uvmcheckcowpage</span><span class="params">(uint64 va)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">pte_t</span> *pte;</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">proc</span> *<span class="title">p</span> = <span class="title">myproc</span>();</span></span><br><span class="line">  </span><br><span class="line">  <span class="keyword">return</span> va &lt; p-&gt;sz <span class="comment">// 在进程内存范围内</span></span><br><span class="line">    &amp;&amp; ((pte = walk(p-&gt;pagetable, va, <span class="number">0</span>))!=<span class="number">0</span>)</span><br><span class="line">    &amp;&amp; (*pte &amp; PTE_V) <span class="comment">// 页表项存在</span></span><br><span class="line">    &amp;&amp; (*pte &amp; PTE_COW); <span class="comment">// 页是一个懒复制页</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 实复制一个懒复制页，并重新映射为可写</span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">uvmcowcopy</span><span class="params">(uint64 va)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">pte_t</span> *pte;</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">proc</span> *<span class="title">p</span> = <span class="title">myproc</span>();</span></span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span>((pte = walk(p-&gt;pagetable, va, <span class="number">0</span>)) == <span class="number">0</span>)</span><br><span class="line">    panic(<span class="string">"uvmcowcopy: walk"</span>);</span><br><span class="line">  </span><br><span class="line">  <span class="comment">// 调用 kalloc.c 中的 kcopy_n_deref 方法，复制页</span></span><br><span class="line">  <span class="comment">// (如果懒复制页的引用已经为 1，则不需要重新分配和复制内存页，只需清除 PTE_COW 标记并标记 PTE_W 即可)</span></span><br><span class="line">  uint64 pa = PTE2PA(*pte);</span><br><span class="line">  uint64 <span class="keyword">new</span> = (uint64)kcopy_n_deref((<span class="keyword">void</span>*)pa); <span class="comment">// 将一个懒复制的页引用变为一个实复制的页</span></span><br><span class="line">  <span class="keyword">if</span>(<span class="keyword">new</span> == <span class="number">0</span>)</span><br><span class="line">    <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">  </span><br><span class="line">  <span class="comment">// 重新映射为可写，并清除 PTE_COW 标记</span></span><br><span class="line">  uint64 flags = (PTE_FLAGS(*pte) | PTE_W) &amp; ~PTE_COW;</span><br><span class="line">  uvmunmap(p-&gt;pagetable, PGROUNDDOWN(va), <span class="number">1</span>, <span class="number">0</span>);</span><br><span class="line">  <span class="keyword">if</span>(mappages(p-&gt;pagetable, va, <span class="number">1</span>, <span class="keyword">new</span>, flags) == <span class="number">-1</span>) &#123;</span><br><span class="line">    panic(<span class="string">"uvmcowcopy: mappages"</span>);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br></pre></td></tr></table></figure>
+<h2 id="lab6-multithreading"><a href="#lab6-multithreading" class="headerlink" title="lab6: multithreading"></a>lab6: multithreading</h2><h3 id="uthread：switching-between-threads"><a href="#uthread：switching-between-threads" class="headerlink" title="uthread：switching between threads"></a>uthread：switching between threads</h3><p>补全uthread.c，实现用户层面的线程系统。</p>
+<p>这里的线程相比现代操作系统中的线程而言，更接近一些语言中的“协程”（coroutine）。<font color="#9bbb59">原因是这里的“线程”是完全用户态实现的，多个线程也只能运行在一个 CPU 上，并且没有时钟中断来强制执行调度，需要线程函数本身在合适的时候主动 yield 释放 CPU</font>。这样实现起来的线程并不对线程函数透明，所以比起操作系统的线程而言更接近 coroutine。</p>
+<p>![[截屏2023-05-23 18.19.36.png]]</p>
+<ul>
+<li>将线程的栈指针指向其独立的栈，注意到栈的生长是从高地址到低地址，所以要将 sp 设置为指向 stack 的最高地址。<br>![[截屏2023-05-23 18.19.51.png]]</li>
+</ul>
+<p>![[截屏2023-05-23 18.20.13.png]]</p>
+<blockquote>
+<p>引申：内核调度器无论是通过时钟中断进入（usertrap），还是线程自己主动放弃 CPU（sleep、exit），最终都会调用到 yield 进一步调用 swtch。 由于上下文切换永远都发生在函数调用的边界（swtch 调用的边界），<font color="#9bbb59">恢复执行相当于是 swtch 的返回过程，会从堆栈中恢复 caller-saved 的寄存器，</font> <font color="#9bbb59">所以用于保存上下文的 context 结构体只需保存 callee-saved 寄存器，以及 返回地址 ra、栈指针 sp 即可</font>。<font color="#9bbb59">恢复后执行到哪里是通过 ra 寄存器来决定的（swtch 末尾的 ret 转跳到 ra）</font><br>而 trapframe 则不同，一个中断可能在任何地方发生，不仅仅是函数调用边界，也有可能在函数执行中途，<font color="#9bbb59">所以恢复的时候需要靠 pc 寄存器来定位</font>。 并且由于切换位置不一定是函数调用边界，<font color="#9bbb59">所以几乎所有的寄存器都要保存</font>（无论 caller-saved 还是 callee-saved），才能保证正确的恢复执行。 这也是内核代码中 <code>struct trapframe</code> 中保存的寄存器比 <code>struct context</code> 多得多的原因。<br>另外一个，无论是程序主动 sleep，还是时钟中断，都是通过 trampoline 跳转到内核态 usertrap（保存 trapframe），然后再到达 swtch 保存上下文的。 <font color="#9bbb59">恢复上下文都是恢复到 swtch 返回前（依然是内核态）</font>，然后返回跳转回 usertrap，再继续运行直到 usertrapret 跳转到 trampoline 读取 trapframe，并返回用户态。 也就是上下文恢复并不是直接恢复到用户态，而是恢复到内核态 swtch 刚执行完的状态。负责恢复用户态执行流的其实是 trampoline 以及 trapframe</p>
+</blockquote>
+<h3 id="using-threads"><a href="#using-threads" class="headerlink" title="using threads"></a>using threads</h3><p>分析并解决一个哈希表操作的例子内，由于条件竞争导致的数据丢失问题。<br>多线程并行向同一个哈希表写入以及读取数据，尝试使用线程提速。</p>
+<h4 id="hashmap-bucket"><a href="#hashmap-bucket" class="headerlink" title="hashmap bucket"></a>hashmap bucket</h4><p>![[Pasted image 20230523222707.png]]</p>
+<h4 id="问题分析"><a href="#问题分析" class="headerlink" title="问题分析"></a>问题分析</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">[假设键 k1、k2 属于同个 bucket]</span><br><span class="line"></span><br><span class="line">thread 1: 尝试设置 k1</span><br><span class="line">thread 1: 发现 k1 不存在，尝试在 bucket 末尾插入 k1</span><br><span class="line">--- scheduler 切换到 thread 2</span><br><span class="line">thread 2: 尝试设置 k2</span><br><span class="line">thread 2: 发现 k2 不存在，尝试在 bucket 末尾插入 k2</span><br><span class="line">thread 2: 分配 entry，在桶末尾插入 k2</span><br><span class="line">--- scheduler 切换回 thread 1</span><br><span class="line">thread 1: 分配 entry，没有意识到 k2 的存在，在其认为的 “桶末尾”（实际为 k2 所处位置）插入 k1</span><br><span class="line"></span><br><span class="line">[k1 被插入，但是由于被 k1 覆盖，k2 从桶中消失了，引发了键值丢失]</span><br></pre></td></tr></table></figure>
+<h4 id="解决方法"><a href="#解决方法" class="headerlink" title="解决方法"></a>解决方法</h4><ul>
+<li><p>为put 和 get操作加上锁。加锁后多线程的性能变得比单线程还要低了，虽然不会出现数据丢失，但是失去了多线程并行计算的意义：提升性能。</p>
+<blockquote>
+<p>我们为整个操作加上了互斥锁，意味着每一时刻只能有一个线程在操作哈希表，这里实际上等同于将哈希表的操作变回单线程了，又由于锁操作（加锁、解锁、锁竞争）是有开销的，所以性能甚至不如单线程版本。</p>
+</blockquote>
+</li>
+<li><p>优化思路：降低锁的粒度。由于哈希表中，不同的 bucket 是互不影响的，<span style="background:#d2cbff">一个 bucket 处于修改未完全的状态并不影响 put 和 get 对其他 bucket 的操作，</span>所以实际上只需要<font color="#9bbb59">确保两个线程不会同时操作同一个 bucket 即可</font>，并不需要确保不会同时操作整个哈希表。</p>
+</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// ph.c</span></span><br><span class="line"><span class="keyword">pthread_mutex_t</span> locks;</span><br><span class="line"></span><br><span class="line"><span class="keyword">int</span></span><br><span class="line">main(<span class="keyword">int</span> argc, <span class="keyword">char</span> *argv[])</span><br><span class="line">&#123;</span><br><span class="line">  <span class="keyword">pthread_t</span> *tha;</span><br><span class="line">  <span class="keyword">void</span> *value;</span><br><span class="line">  <span class="keyword">double</span> t1, t0;</span><br><span class="line">  </span><br><span class="line">  <span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">0</span>;i&lt;NBUCKET;i++) &#123;</span><br><span class="line">    pthread_mutex_init(&amp;locks[i], <span class="literal">NULL</span>); </span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// ......</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">static</span> </span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">put</span><span class="params">(<span class="keyword">int</span> key, <span class="keyword">int</span> value)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="keyword">int</span> i = key % NBUCKET;</span><br><span class="line"></span><br><span class="line">  pthread_mutex_lock(&amp;locks[i]);</span><br><span class="line">  </span><br><span class="line">  <span class="comment">// ......</span></span><br><span class="line"></span><br><span class="line">  pthread_mutex_unlock(&amp;locks[i]);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">static</span> <span class="class"><span class="keyword">struct</span> <span class="title">entry</span>*</span></span><br><span class="line"><span class="class"><span class="title">get</span>(<span class="title">int</span> <span class="title">key</span>)</span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">  <span class="keyword">int</span> i = key % NBUCKET;</span><br><span class="line"></span><br><span class="line">  pthread_mutex_lock(&amp;locks[i]);</span><br><span class="line">  </span><br><span class="line">  <span class="comment">// ......</span></span><br><span class="line"></span><br><span class="line">  pthread_mutex_unlock(&amp;locks[i]);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> e;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>[]下标运算符，下标运算符需要两个操作数，表达式 x[y] 等效于 ![[截屏2023-05-23 22.38.01.png]]</p>
+</blockquote>
+<h3 id="barrier"><a href="#barrier" class="headerlink" title="barrier"></a>barrier</h3><p>同步屏障机制</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// barrier.c</span></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">void</span> </span><br><span class="line">barrier()</span><br><span class="line">&#123;</span><br><span class="line">  pthread_mutex_lock(&amp;bstate.barrier_mutex);</span><br><span class="line">  <span class="keyword">if</span>(++bstate.nthread &lt; nthread) &#123;</span><br><span class="line">    pthread_cond_wait(&amp;bstate.barrier_cond, &amp;bstate.barrier_mutex);</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    bstate.nthread = <span class="number">0</span>;</span><br><span class="line">    bstate.round++;</span><br><span class="line">    pthread_cond_broadcast(&amp;bstate.barrier_cond);</span><br><span class="line">  &#125;</span><br><span class="line">  pthread_mutex_unlock(&amp;bstate.barrier_mutex);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>线程进入同步屏障 barrier 时，将已进入屏障的线程数量增加 1，然后再判断是否已经达到总线程数。<br>如果未达到，则进入睡眠，等待其他线程。<br>如果已经达到，则唤醒所有在 barrier 中等待的线程，所有线程继续执行；屏障轮数 + 1；</p>
+<p>「将已进入屏障的线程数量增加 1，然后再判断是否已经达到总线程数」这一步并不是原子操作，并且这一步和后面的两种情况中的操作「睡眠」和「唤醒」之间也不是原子的，<span style="background:#d2cbff">如果在这里发生 race-condition</span>，<font color="#9bbb59">则会导致出现 「lost wake-up 问题」（线程 1 即将睡眠前，线程 2 调用了唤醒，然后线程 1 才进入睡眠，导致线程 1 本该被唤醒而没被唤醒，</font>详见 <a href="https://pdos.csail.mit.edu/6.S081/2020/xv6/book-riscv-rev1.pdf" target="_blank" rel="noopener">xv6 book</a> 中的第 72 页，Sleep and wakeup）</p>
+<blockquote>
+<p>原子操作：<strong>不会被线程调度打断的操作</strong>，这种操作一旦开始，就一直运行到结束，中间不会有任何context switch</p>
+</blockquote>
+<p>解决方法是，「屏障的线程数量增加 1；判断是否已经达到总线程数；进入睡眠」这三步必须原子。所以使用一个互斥锁 barrier_mutex 来保护这一部分代码。pthread_cond_wait 会在进入睡眠的时候原子性的释放 barrier_mutex，从而允许后续线程进入 barrier，防止死锁。</p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2022/04/18/2022D3CTF/" rel="next" title="2022D3CTF">
+                <i class="fa fa-chevron-left"></i> 2022D3CTF
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2023/04/19/知识笔记/" rel="prev" title>
+                 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/head.jpg" alt="zzrR0">
+            
+              <p class="site-author-name" itemprop="name">zzrR0</p>
+              <p class="site-description motion-element" itemprop="description">Why am i so cai.</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">4</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                    <span class="site-state-item-count">1</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://xmzyshypnc.github.io/" title="xmzyshypnc" target="_blank">xmzyshypnc</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://wood1314.github.io/" title="Wood" target="_blank">Wood</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://blog.zeddyu.info/" title="Zedd" target="_blank">Zedd</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://kestudy.top/" title="Ke" target="_blank">Ke</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Lab：Xv6-and-Unix-utilities"><span class="nav-number">1.</span> <span class="nav-text">Lab：Xv6 and Unix utilities</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#pingpong"><span class="nav-number">1.1.</span> <span class="nav-text">pingpong</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#primes"><span class="nav-number">1.2.</span> <span class="nav-text">primes</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#find-todo"><span class="nav-number">1.3.</span> <span class="nav-text">find #todo</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#xargs"><span class="nav-number">1.4.</span> <span class="nav-text">xargs</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Lab-2-System-Calls"><span class="nav-number">2.</span> <span class="nav-text">Lab 2 : System Calls</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#system-call-tracing"><span class="nav-number">2.1.</span> <span class="nav-text">system call tracing</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#sysinfo"><span class="nav-number">2.2.</span> <span class="nav-text">sysinfo</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Lab-3-page-tables"><span class="nav-number">3.</span> <span class="nav-text">Lab 3 : page tables</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#speed-up-system-calls"><span class="nav-number">3.1.</span> <span class="nav-text">speed up system calls</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#print-a-page-table"><span class="nav-number">3.2.</span> <span class="nav-text">print a page table</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#detecting-which-pages-have-been-accessed"><span class="nav-number">3.3.</span> <span class="nav-text">detecting which pages have been accessed</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Lab-4：traps"><span class="nav-number">4.</span> <span class="nav-text">Lab 4：traps</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#risc-v-assembly"><span class="nav-number">4.1.</span> <span class="nav-text">risc-v assembly</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#backtrace"><span class="nav-number">4.2.</span> <span class="nav-text">backtrace</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#alarm"><span class="nav-number">4.3.</span> <span class="nav-text">alarm</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#lab5-copy-on-write-fork-for-xv6"><span class="nav-number">5.</span> <span class="nav-text">lab5: copy-on-write fork for xv6</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#implement-copy-on-wirte-写时复制"><span class="nav-number">5.1.</span> <span class="nav-text">implement copy-on-wirte 写时复制</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#lab6-multithreading"><span class="nav-number">6.</span> <span class="nav-text">lab6: multithreading</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#uthread：switching-between-threads"><span class="nav-number">6.1.</span> <span class="nav-text">uthread：switching between threads</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#using-threads"><span class="nav-number">6.2.</span> <span class="nav-text">using threads</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#hashmap-bucket"><span class="nav-number">6.2.1.</span> <span class="nav-text">hashmap bucket</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#问题分析"><span class="nav-number">6.2.2.</span> <span class="nav-text">问题分析</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#解决方法"><span class="nav-number">6.2.3.</span> <span class="nav-text">解决方法</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#barrier"><span class="nav-number">6.3.</span> <span class="nav-text">barrier</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2023</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">zzrR0</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动 v3.9.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 – <a class="theme-link" target="_blank" href="https://theme-next.org">NexT.Pisces</a> v6.3.0</div>
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv" title="总访客量">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+    </span>
+  
+
+  
+    <span class="site-pv" title="总访问量">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.3.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.3.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.3.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.3.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.3.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.3.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.3.0"></script>
+
+
+
+  
+
+  
+    <script id="dsq-count-scr" src="https://xmzyshypnc.disqus.com/count.js" async></script>
+  
+
+  
+    <script type="text/javascript">
+      var disqus_config = function () {
+        this.page.url = 'http://yoursite.com/2023/04/19/lab笔记/';
+        this.page.identifier = '2023/04/19/lab笔记/';
+        this.page.title = '';
+        };
+      function loadComments () {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://xmzyshypnc.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      }
+      
+        loadComments();
+      
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  
+  
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(function (item) {
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: true,
+        notify: true,
+        appId: 'YbpHIa6XHNsKv4wX2wGjnrK7-gzGzoHsz',
+        appKey: '1fjf9mQl90nKdRPfq1zhDyIE',
+        placeholder: '',
+        avatar:'mm',
+        meta:guest,
+        pageSize:'10' || 10,
+        visitor: true
+    });
+  </script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+<script type="text/javascript" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","model":{"scale":1,"hHeadPos":0.5,"vHeadPos":0.618,"jsonPath":"live2d-widget-model-hijiki"},"display":{"superSample":2,"width":150,"height":300,"position":"right","hOffset":0,"vOffset":-50},"mobile":{"show":true,"scale":0.5},"react":{"opacityDefault":0.7,"opacityOnHover":0.2},"log":false,"tagMode":false});</script></body>
+</html>
