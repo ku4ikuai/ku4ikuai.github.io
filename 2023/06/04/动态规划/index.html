@@ -1,0 +1,1235 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.3.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.3.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.3.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.3.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.3.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '6.3.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="1. 什么是动态规划某一问题有多个重叠子问题。    💡 与贪心不同之处在于：贪心没有状态推导，而是从局部直接选最优的。而动态规划中每个状态一定是由之前的状态推导出来。  2. 解题步骤 确定dp数组（dp table）以及下标的含义 确定递推公式 dp数组如何初始化 确定遍历顺序 举例推导dp数组  背包问题https://programmercarl.com/%E8%83%8C%E5%8C">
+<meta property="og:type" content="article">
+<meta property="og:title" content="动态规划">
+<meta property="og:url" content="http://yoursite.com/2023/06/04/动态规划/index.html">
+<meta property="og:site_name" content="kuaikuai">
+<meta property="og:description" content="1. 什么是动态规划某一问题有多个重叠子问题。    💡 与贪心不同之处在于：贪心没有状态推导，而是从局部直接选最优的。而动态规划中每个状态一定是由之前的状态推导出来。  2. 解题步骤 确定dp数组（dp table）以及下标的含义 确定递推公式 dp数组如何初始化 确定遍历顺序 举例推导dp数组  背包问题https://programmercarl.com/%E8%83%8C%E5%8C">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://yoursite.com/2023/06/04/动态规划/Pasted%20image%2020230402165135.png">
+<meta property="og:image" content="http://yoursite.com/2023/06/04/动态规划/截屏2023-04-06%2010.56.41.png">
+<meta property="og:image" content="http://yoursite.com/2023/06/04/动态规划/Pasted%20image%2020230416112652.png">
+<meta property="og:updated_time" content="2023-06-04T01:59:15.260Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="动态规划">
+<meta name="twitter:description" content="1. 什么是动态规划某一问题有多个重叠子问题。    💡 与贪心不同之处在于：贪心没有状态推导，而是从局部直接选最优的。而动态规划中每个状态一定是由之前的状态推导出来。  2. 解题步骤 确定dp数组（dp table）以及下标的含义 确定递推公式 dp数组如何初始化 确定遍历顺序 举例推导dp数组  背包问题https://programmercarl.com/%E8%83%8C%E5%8C">
+<meta name="twitter:image" content="http://yoursite.com/2023/06/04/动态规划/Pasted%20image%2020230402165135.png">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2023/06/04/动态规划/">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>动态规划 | kuaikuai</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">kuaikuai</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+    <a href="/about/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2023/06/04/动态规划/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="kuaikuai">
+      <meta itemprop="description" content="super block power!">
+      <meta itemprop="image" content="/images/head.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="kuaikuai">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">动态规划
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2023-06-04 09:53:36 / 修改时间：09:59:15" itemprop="dateCreated datePublished" datetime="2023-06-04T09:53:36+08:00">2023-06-04</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/算法/" itemprop="url" rel="index"><span itemprop="name">算法</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2023/06/04/动态规划/#comments" itemprop="discussionUrl">
+                
+                  <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2023/06/04/动态规划/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2023/06/04/动态规划/" class="leancloud_visitors" data-flag-title="动态规划">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数：</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p><img src="/2023/06/04/动态规划/Pasted image 20230402165135.png" alt="[not found]"></p>
+<h4 id="1-什么是动态规划"><a href="#1-什么是动态规划" class="headerlink" title="1. 什么是动态规划"></a>1. 什么是动态规划</h4><p>某一问题有多个<span style="background:#fff88f">重叠子问题</span>。</p>
+   <aside><br>💡 与贪心不同之处在于：<font color="#938953">贪心没有状态推导，而是从局部直接选最优的。而动态规划中每个状态一定是由之前的状态推导出来</font>。<br></aside>
+
+<h4 id="2-解题步骤"><a href="#2-解题步骤" class="headerlink" title="2. 解题步骤"></a>2. 解题步骤</h4><ul>
+<li>确定dp数组（dp table）以及下标的含义</li>
+<li>确定递推公式</li>
+<li>dp数组如何初始化</li>
+<li>确定<strong>遍历顺序</strong></li>
+<li>举例推导dp数组</li>
+</ul>
+<h3 id="背包问题"><a href="#背包问题" class="headerlink" title="背包问题"></a>背包问题</h3><p><a href="https://programmercarl.com/%E8%83%8C%E5%8C%85%E6%80%BB%E7%BB%93%E7%AF%87.html" target="_blank" rel="noopener">https://programmercarl.com/%E8%83%8C%E5%8C%85%E6%80%BB%E7%BB%93%E7%AF%87.html</a><br><strong>讲最关键的两步<font color="#9bbb59">：递推公式和遍历顺序</font></strong></p>
+<h4 id="1）01背包"><a href="#1）01背包" class="headerlink" title="1）01背包"></a>1）01背包</h4><p>一件物品只能放入一次</p>
+<h5 id="1-二维dp数组01背包"><a href="#1-二维dp数组01背包" class="headerlink" title="1. 二维dp数组01背包"></a>1. 二维dp数组01背包</h5><p>1）dp定义：<code>dp[i][j]</code>表示从下标为<code>[0-i]</code>的物品里<font color="#4bacc6">任意取</font>，<font color="#4bacc6">放进容量为<code>j</code>的背包里</font>，<font color="#4bacc6">价值总和</font>最大是多少。 <em>（此时的j表示的下一个物品能放的最大容量）</em></p>
+<p>2）递推公式：</p>
+<ul>
+<li>第i个，不放物品：<code>dp[i][j] = dp[i-1][j]</code></li>
+<li>第i个，放物品：<code>dp[i][j] = dp[i-1][j-weight[i]] + value[i]</code><br>所以递归公式：<code>dp[i][j] = max(dp[i-1][j],dp[i-1][j-weight[i] + value[i])</code></li>
+</ul>
+<p>3）初始化：<br> 从递推公式来看，需要初始化 i = 0 ，以及 j = 0 的情况</p>
+<ul>
+<li>j = 0：无论选什么物品，<code>dp[i][0] = 0</code>，因为不能放入包中。</li>
+<li><p>i = 0：表示放入下标为0的物品，<code>dp[0][j] = dp[0][j-weight[0]</code><br> 当 j &gt;= weight[0] 时  <code>dp[0][j] = value[0]</code><br> 当 j &lt; weight[0]时 <code>dp[0][j] = 0</code></p>
+<p>其他下标的初始化：<br>可以由左上方的数值推测出，可以均赋值为0</p>
+</li>
+</ul>
+<p><img src="/2023/06/04/动态规划/截屏2023-04-06 10.56.41.png" alt="[not found]"></p>
+<p>4）确定遍历顺序：</p>
+<p>两个遍历的维度：<span style="background:#b1ffff">物品与背包重量，对于二维dp数组来说都可以</span></p>
+<ul>
+<li><p>先遍历物品：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">1</span> ; i &lt; weight.size();i++)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">int</span> j = <span class="number">0</span> ; j &lt;= bagweight ; j++)</span><br><span class="line">    &#123;</span><br><span class="line">		<span class="keyword">if</span>(j &lt; weight[i]) dp[i][j] = dp[i<span class="number">-1</span>][j];</span><br><span class="line">		<span class="keyword">else</span> dp[i][j] = max(dp[i<span class="number">-1</span>][j],dp[i<span class="number">-1</span>][j-weight[[i]] + value[i])</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>先遍历背包：</p>
+</li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span>(<span class="keyword">int</span> j = <span class="number">0</span> ; j &lt;= bagweight ;j++)</span><br><span class="line">&#123;</span><br><span class="line">	<span class="keyword">for</span>(<span class="keyword">int</span> i  = <span class="number">1</span>; i &lt; weight.size() ; i++)</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="keyword">if</span>(j &lt; weight[i]) dp[i][j] = dp[i<span class="number">-1</span>][j];</span><br><span class="line">		<span class="keyword">else</span> dp[i][j] = max(dp[i<span class="number">-1</span>][j],dp[i<span class="number">-1</span>][j-weight[[i]] + value[i])</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>虽然两个for循环遍历的次序不同，但是dp所需要的数据就是左上角，根本不影响dp公式的推导！</strong></p>
+<h5 id="2-一维dp数组（滚动数组）"><a href="#2-一维dp数组（滚动数组）" class="headerlink" title="2. 一维dp数组（滚动数组）"></a>2. 一维dp数组（滚动数组）</h5><p><code>dp[i][j] = max(dp[i-1][j],dp[i][j-weight[i]] + value[i])</code><br><strong>其实可以发现如果把dp[i - 1]那一层拷贝到dp[i]上，表达式完全可以是：</strong><code>dp[i][j] = max(dp[i][j],dp[i][j-weight[i]]+value[i])</code></p>
+<blockquote>
+<p>这样的话，i之间不存在差别，所以考虑去掉i这个维度，只保留dp[j]</p>
+</blockquote>
+<p>滚动数组：需要满足的条件是上一层可以重复利用，直接拷贝到当前层。</p>
+<p>1）dp定义<br>     dp[j] 表示：<span style="background:#b1ffff">容量为j的背包，所背的物品价值可以最大为</span>dp[j]。</p>
+<p>2）递推公式<br>     dp[j] = max(dp[j],dp[j-weight[i]] + value[i])  不放物品i，放物品i<br>     相对于二维dp数组的写法，<span style="background:#b1ffff">把i维度去掉了。</span></p>
+<p>3）初始化<br>      dp[0] = 0<br>      如果题目给的价值都是正整数，那么非0下标都初始化为0即可</p>
+<p>4）遍历顺序</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">0</span> ; i &lt; weight.size();i++). <span class="comment">// 遍历物品</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="keyword">for</span>(<span class="keyword">int</span> j = bagWeight ; i&gt;=  weight[i] ; j--). <span class="comment">// 遍历背包容量</span></span><br><span class="line">	&#123;</span><br><span class="line">	      dp[j] = max(dp[j],dp[j-weight[i]]+value[i]);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><p>背包<span style="background:#b1ffff">倒序遍历</span><br>   保证物品i只被放入一次<font color="#9bbb59">（倒序的时候，前面的状态还是初始状态）</font><br>   为什么在二维数组中可以正序遍历：因为在二维数组的推导过程中，前一个的结果不会影响后一个的结果，即不会重复放入。</p>
+</li>
+<li><p>先遍历物品嵌套遍历背包容量</p>
+<pre><code>如果遍历背包容量放在上一层，那么每个dp[j]就&lt;span style=&quot;background:#b1ffff&quot;&gt;只会放入一个物品&lt;/span&gt;。
+</code></pre></li>
+</ul>
+<h5 id="3-01-背包在不同场景下的应用"><a href="#3-01-背包在不同场景下的应用" class="headerlink" title="3. 01 背包在不同场景下的应用"></a>3. 01 背包在不同场景下的应用</h5><ul>
+<li>重量和价值均为nums[i]，求背包是否能正好装满<ul>
+<li>分割等和子集</li>
+<li>最后一块石头的重量 （尽量划分为相等的两块）</li>
+</ul>
+</li>
+<li>dp[j]表示装满容量为j的背包，有几种装法（组合）<ul>
+<li>目标和  dp[j] = dp[j] + dp[j-nums[i]]</li>
+</ul>
+</li>
+<li>两个维度的01背包问题<ul>
+<li>一和零</li>
+</ul>
+</li>
+</ul>
+<h4 id="2）完全背包"><a href="#2）完全背包" class="headerlink" title="2）完全背包"></a>2）完全背包</h4><p>每个物品可以使用无数次</p>
+<p>01背包和**完全背包唯一不同就是体现在遍历顺序上，省略动归五部曲。</p>
+<p>1）核心代码</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">0</span> ; i  &lt; weight.size();i++) <span class="comment">// 遍历物品</span></span><br><span class="line">&#123;</span><br><span class="line">      <span class="keyword">for</span>(<span class="keyword">int</span> j = nums[i] ; j &lt;= bagweight ; j++ ). <span class="comment">// 遍历背包大小，正序遍历，可以模拟多次放入</span></span><br><span class="line">      &#123;</span><br><span class="line">	      dp[j] = max(dp[j],dp[j-weight[i]]+value[i]);  </span><br><span class="line">      &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>2）遍历顺序</p>
+<p><font color="#9bbb59">对于纯完全背包问题，</font>完全背包中，两个for循环的先后循序，都不影响计算dp[j]所需要的值（这个值就是下标j之前所对应的dp[j]）。</p>
+<p>完全背包的应用：</p>
+<ol>
+<li><p><strong>组合数（1，5）</strong></p>
+<ul>
+<li>必须外层for遍历物品，内层for遍历背包。 </li>
+<li>外层物品遍历，<font color="#9bbb59">控制了在背包中加入物品的顺序</font></li>
+<li>如果把遍历nums（物品）放在外循环，遍历target的作为内循环的话，举一个例子：计算dp[4]的时候，结果集只有 {1,3} 这样的集合，不会有{3,1}这样的集合，<strong>因为nums遍历放在外层，3只能出现在1后面</strong>！</li>
+</ul>
+<ol start="2">
+<li><strong>排列数（1，5）（5，1）</strong></li>
+</ol>
+<ul>
+<li>外层for遍历背包，内层for遍历物品</li>
+<li><strong>背包容量的每一个值，都是经过 1 和 5 的计算</strong>，包含了{1, 5} 和 {5, 1}两种情况。</li>
+</ul>
+</li>
+<li><p>求最小个数 （顺序都可以）</p>
+</li>
+</ol>
+<ul>
+<li><strong>有顺序和没有顺序都可以，都不影响最小个数</strong>。</li>
+</ul>
+<h4 id="3）多重背包"><a href="#3）多重背包" class="headerlink" title="3）多重背包"></a>3）多重背包</h4><p>有N种物品和一个容量为V 的背包。第i种物品最多有Mi件可用，每件耗费的空间是Ci ，价值是Wi 。求解将哪些物品装入背包可使这些物品的耗费的空间 总和不超过背包容量，且价值总和最大。</p>
+<p><font color="#9bbb59">每件物品最多有Mi件可用，把Mi件摊开，其实就是一个01背包问题了。</font><br><img src="/2023/06/04/动态规划/Pasted image 20230416112652.png" alt="[not found]"></p>
+<h4 id="4）总结"><a href="#4）总结" class="headerlink" title="4）总结"></a>4）总结</h4><h5 id="递推公式-🌟"><a href="#递推公式-🌟" class="headerlink" title="递推公式 🌟"></a>递推公式 🌟</h5><ol>
+<li><p>问能否能装满包（或者最多能装多少）：<br>dp[j] = max(dp[j] , dp[j-nums[i] + nums[i]])</p>
+</li>
+<li><p>问装满背包有几种方法：<br>dp[j] = dp[j] + dp[j-nums[i]]</p>
+</li>
+<li><p>问背包装满的最大价值：<br>dp[j] = max(dp[j] ,dp[j-weight[i]] + value[i])</p>
+</li>
+<li><p>问装满背包所有物品的最小个数：<br>dp[j] = min(dp[j] , dp[j-coin[i]]+1)</p>
+</li>
+</ol>
+<h5 id="遍历顺序-🌟"><a href="#遍历顺序-🌟" class="headerlink" title="遍历顺序 🌟"></a>遍历顺序 🌟</h5><ol>
+<li>01背包<br>二维dp数组01背包<font color="#9bbb59">先遍历物品还是先遍历背包都是可以的</font>，且<font color="#9bbb59">第二层for循环是从小到大遍历。</font><br>一维dp数组01背包只能<font color="#9bbb59">先遍历物品再遍历背包容量</font>，且<font color="#9bbb59">第二层for循环是从大到小遍历。</font></li>
+<li>完全背包<br>一维dp数组实现<font color="#9bbb59">，先遍历物品还是先遍历背包都是可以的</font>，且第二层for循环是<font color="#9bbb59">从小到大遍历</font>。</li>
+</ol>
+<ul>
+<li><strong>如果求组合数就是外层for循环遍历物品，内层for遍历背包</strong>。</li>
+<li><strong>如果求排列数就是外层for遍历背包，内层for循环遍历物品</strong>。</li>
+</ul>
+<h3 id="打家劫舍问题"><a href="#打家劫舍问题" class="headerlink" title="打家劫舍问题"></a>打家劫舍问题</h3><p>1) 如果两间相邻的房屋在同一晚上被小偷闯入，系统会自动报警。</p>
+<ul>
+<li>dp[i] 表示考虑偷下标为i的房屋，能获得最大的金额</li>
+<li>dp[i] = max(dp[i-2]+value[i],dp[i-1]);</li>
+<li>dp[0] = value[0]</li>
+<li>dp[1] = max(value[0],value[1]);</li>
+</ul>
+<p>2) 这个地方所有的房屋都 围成一圈 ，这意味着第一个房屋和最后一个房屋是紧挨着的。同时，相邻的房屋装有相互连通的防盗系统，如果两间相邻的房屋在同一晚上被小偷闯入，系统会自动报警 。</p>
+<p>如何考虑成环的情况：<br>（因为首元素和尾元素不可能同时被偷，所以分成两种情况讨论）</p>
+<ul>
+<li>考虑偷首元素，不包含尾元素</li>
+<li>考虑偷尾元素，不包含首元素</li>
+<li>取以上两种情况的最大值</li>
+</ul>
+<p>3）地区只有一个入口，我们称之为“根”。 除了“根”之外，每栋房子有且只有一个“父“房子与之相连。一番侦察之后，聪明的小偷意识到“这个地方的所有房屋的排列类似于一棵二叉树”。 如果两个直接相连的房子在同一天晚上被打劫，房屋将自动报警。<br><strong>树形dp # todo</strong></p>
+<h3 id="买卖股票的最佳时机"><a href="#买卖股票的最佳时机" class="headerlink" title="买卖股票的最佳时机"></a>买卖股票的最佳时机</h3><p>1）你只能选择 某一天 买入这只股票，并选择在 未来的某一个不同的日子 卖出该股票。设计一个算法来计算你所能获取的最大利润。</p>
+<p><strong>状态分析</strong>：持有股票（当天购入/ 之前购入） 不持有股票（之前卖出/当天卖出）</p>
+<ul>
+<li><code>dp[i][0]</code> 表示在第i天持有股票所能获得的最大利润</li>
+<li><code>dp[i][1]</code> 表示在第i天不持有股票所能获得的最大利润</li>
+<li><code>dp[i][0] = max(dp[i-1][0],-prices[i]);</code></li>
+<li><code>dp[i][1] = max(dp[i-1][1],dp[i-1][0]+prices[i]);</code></li>
+</ul>
+<p>2) 在题一的基础上，加上可以多次交易的条件。</p>
+<p>贪心：<em>考虑到最终利润是可以分解的，把利润分解为每天为单位的维度</em>，而不是以整体去考虑，这样就可以从局部最优推导到全局最优。</p>
+<p>动态规划：</p>
+<p><strong>状态分析</strong>：持有股票（当天购入/ 之前购入） 不持有股票（之前卖出/当天卖出）</p>
+<ul>
+<li><code>dp[i][0]</code> 表示在第i天持有股票所能获得的最大利润</li>
+<li><code>dp[i][1]</code> 表示在第i天不持有股票所能获得的最大利润</li>
+<li><code>dp[i][0] = max(dp[i-1][0],dp[i-1][1]-prices[i]);</code></li>
+<li>`dp[i][1] = max(dp[i-1][1],dp[i-1][0]+prices[i]);</li>
+</ul>
+<p>3）在题一的基础上，限制只能交易两次</p>
+<p><strong>状态分析</strong>：<br>第一次持有股票（当天购入/ 之前购入）<br>第一次不持有股票（之前卖出/当天卖出）<br>第二次持有股票（当天购入/ 之前购入）<br>第二次不持有股票（之前卖出/当天卖出）</p>
+<ul>
+<li><code>dp[i][1]</code> 表示在第i天第一次持有股票所能获得的最大利润</li>
+<li><code>dp[i][2]</code> 表示在第i天第一次不持有股票所能获得的最大利润</li>
+<li><code>dp[i][3]</code> 表示在第i天第二次持有股票所能获得的最大利润</li>
+<li><code>dp[i][4]</code> 表示在第i天第二次不持有股票所能获得的最大利润</li>
+<li><code>dp[i][1] = max(dp[i-1][0],dp[i-1][0]-prices[i]);</code></li>
+<li>`dp[i][2] = max(dp[i-1][1],dp[i-1][1]+prices[i]);</li>
+</ul>
+<p>4) 在题一的基础上，限制只能交易k次</p>
+<p>5) 在题二的基础上，增加买卖冷冻期（1天）</p>
+<p><strong>状态分析</strong>：<br>0 持有股票 （当天购入/之前购入）<br>不持有股票（不处于冷冻期）</p>
+<ul>
+<li>1 两天前卖出</li>
+<li>2 今天卖出<br>3 处于冷冻期</li>
+</ul>
+<p><strong>递推公式</strong>：</p>
+<ul>
+<li>操作一：前一天就是持有股票状态（状态一）</li>
+<li>操作二：今天买入了，有两种情况<ul>
+<li>前一天是冷冻期（状态四）</li>
+<li>前一天是保持卖出股票状态（状态二）<br><code>dp[i][0] = max(dp[i-1][0],dp[i-1][1]-prices[i],dp[i-1][3]-prices[i])</code><br>达到保持卖出股票状态（状态二）有两个具体操作：</li>
+</ul>
+</li>
+<li>操作一：前一天就是状态二</li>
+<li>操作二：前一天是冷冻期（状态四）<br><code>dp[i][1] =max( dp[i-1][3],dp[i-1][1]))</code></li>
+<li>操作一：昨天一定是买入股票状态（状态一），今天卖出<br><code>dp[i][2] = dp[i-1][0]+prices[i]</code></li>
+<li>操作一：昨天卖出了股票（状态三）<br><code>dp[i][3] = dp[i-1][2]</code></li>
+</ul>
+<p>6) 在题二的基础上，增加交易费</p>
+<h3 id="不连续子序列"><a href="#不连续子序列" class="headerlink" title="不连续子序列"></a>不连续子序列</h3><p><strong>1）最长严格递增子序列</strong></p>
+<p><strong>解题关键：</strong></p>
+<ul>
+<li>递归关系：当前下标i的递增子序列长度，<strong>应该是和i之前的，下标j的子序列长度有关</strong></li>
+<li><strong>dp[i]的定义</strong>：<strong>表示以nums[i]结尾的最长严格递增子序列的长度。</strong><ul>
+<li>为什么一定要以nums[i]结尾，因为我们在 做 递增比较的时候，如果比较 nums[j] 和 nums[i] 的大小，那么两个递增子序列一定分别以nums[j]为结尾 和 nums[i]为结尾， 要不然这个比较就没有意义了，不是尾部元素的比较那么 如何算递增呢。</li>
+</ul>
+</li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">1</span>; i &lt; nums.size(); i++) &#123;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; i; j++) &#123;</span><br><span class="line">        <span class="keyword">if</span> (nums[i] &gt; nums[j]) dp[i] = max(dp[i], dp[j] + <span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (dp[i] &gt; result) result = dp[i]; <span class="comment">// 取长的子序列</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>2）最长公共子序列</strong></p>
+<p>给定两个字符串 <code>text1</code> 和 <code>text2</code>，返回这两个字符串的最长 <strong>公共子序列</strong> 的长度。如果不存在 <strong>公共子序列</strong> ，返回 <code>0</code> 。</p>
+<ul>
+<li><code>dp[i][j]</code> 定义：以<strong>下标i-1为结尾</strong>的text1 ，和以<strong>下标j-1为结尾</strong>的text2，最长的公共子序列长度为`dp[i][j]</li>
+<li>递推公式</li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span>(text1[i<span class="number">-1</span>] == text2[j<span class="number">-1</span>])</span><br><span class="line">	dp[i][j] = dp[i<span class="number">-1</span>][j<span class="number">-1</span>]+<span class="number">1</span>;</span><br><span class="line"><span class="keyword">else</span></span><br><span class="line">	dp[i][j] = max(dp[i<span class="number">-1</span>][j],dp[i][j<span class="number">-1</span>]);</span><br></pre></td></tr></table></figure>
+<p><strong>3）不相交的线</strong></p>
+<h3 id="连续子序列"><a href="#连续子序列" class="headerlink" title="连续子序列"></a>连续子序列</h3><p><strong>1）最长连续递增序列</strong></p>
+<ul>
+<li>dp[i]的定义：<strong>以下标i为结尾的连续递增的子序列长度为dp[i]</strong>。</li>
+<li>因为本题要求连续递增子序列，<strong>所以就只要比较nums[i]与nums[i - 1]</strong>，<strong>而不用去比较nums[j]与nums[i]</strong> （j是在0到i之间遍历）。</li>
+</ul>
+<p><strong>2）</strong> <strong>最长重复子数组</strong></p>
+<p>给两个整数数组nums1和nums2，返回两个数组公共的、长度最长的<strong>子数组</strong>的长度。</p>
+<ul>
+<li><code>dp[i][j]</code>定义：以<strong>下标i-1为结尾</strong>的nums1 ，和以<strong>下标j-1为结尾</strong>的nums2，最长的重复子数组长度为<code>dp[i][j]</code></li>
+<li>递推公式：</li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span>(nums[i<span class="number">-1</span>] == nums[j<span class="number">-1</span>])</span><br><span class="line">	dp[i][j] = dp[i<span class="number">-1</span>][j<span class="number">-1</span>]+<span class="number">1</span>;</span><br></pre></td></tr></table></figure>
+<p><strong>3）最大子数组和</strong></p>
+<h3 id="编辑距离"><a href="#编辑距离" class="headerlink" title="编辑距离"></a>编辑距离</h3><p><strong>1）判断子序列</strong></p>
+<p>给定字符串 s 和 t ，<strong>判断 s 是否为 t 的子序列 -&gt; 转化为相同子序列长度是否为t的长度</strong> （这道题也可用双指针和贪心做）</p>
+<ul>
+<li><code>dp[i][j]</code>定义：<code>dp[i][j]</code>表示以下标i-1为结尾的字符串s，和以下标j-1为结尾的字符串t，<strong>相同子序列的长度</strong>。</li>
+<li>递推公式：<br>在确定递推公式的时候，首先要考虑如下两种操作，整理如下：<ul>
+<li>if (s[i - 1] == t[j - 1])<ul>
+<li>t中找到了一个字符在s中也出现了</li>
+<li><code>dp[i][j] = dp[i-1][j-1]+1</code></li>
+</ul>
+</li>
+<li>if (s[i - 1] != t[j - 1])<ul>
+<li>相当于<strong>t要删除元素</strong>，继续匹配</li>
+<li><code>dp[i][j] = dp[i][j-1]</code></li>
+</ul>
+</li>
+</ul>
+</li>
+<li>初始化：<br>  从递推公式可以看出<code>dp[i][j]</code>都是依赖于<code>dp[i-1][j-1</code>和 <code>dp[i][j-1]</code>，所以<code>dp[0][0]</code>和<code>dp[i][0]</code>是一定要初始化的。</li>
+</ul>
+<p><strong>2）不同子序列</strong>  🌟</p>
+<p>给定一个字符串 s 和一个字符串 t ，计算在 s 的子序列中 t 出现的个数。<br>（这道题目如果不是子序列，而是要求连续序列的，那就可以考虑用KMP。）</p>
+<ul>
+<li><code>dp[i][j]</code>定义：<code>dp[i][j]</code>表示以下标i-1为结尾的字符串s中出现以下标j-1为结尾的<strong>字符串的个数。</strong></li>
+<li>递推公式：<ul>
+<li>if (s[i - 1] == t[j - 1])<ul>
+<li>此时<code>dp[i][j]</code>由两部分组成</li>
+<li>第一部分是<code>s[i-1]</code> 用来匹配，此时匹配的字符串个数为 <code>dp[i-1][j-1]</code></li>
+<li>第二部分是<code>s[i-1]</code> 不用来匹配，此时匹配的字符串个数为 <code>dp[i-1][j]</code></li>
+</ul>
+</li>
+<li>if (s[i - 1] != t[j - 1])<ul>
+<li>相当于<strong>s要删除元素</strong>，继续匹配</li>
+<li><code>dp[i][j] = dp[i-1][j]</code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p><strong>3）两个字符串的删除操作</strong></p>
+<p>给定两个单词 word1 和 word2，找到使得 word1 和 word2 相同所需的最小步数，每步可以<strong>删除</strong>任意一个字符串中的一个字符。<br>（与上一题，不同的子序列相比，<strong>实际上就是两个字符串都可以删除了</strong>）</p>
+<ul>
+<li><code>dp[i][j]</code>定义：<code>dp[i][j]</code>表示以下标i-1为结尾的字符串word1，以下标j-1为结尾的字符串word2，如果要相同的话，最少需要几步删除操作。</li>
+<li>递推公式：<ul>
+<li>if (word1[i - 1] == word2[j - 1]) <ul>
+<li>此时不需要进行删除操作</li>
+<li>`dp[i][j] = dp[i-1][j-1]</li>
+</ul>
+</li>
+<li>if (word1[i - 1] != word2[j - 1])<ul>
+<li>此时考虑是删除word1 还是word2  还是同时删除word1 和 word2</li>
+<li><code>dp[i][j] = min( dp[i-1][j],dp[i][j-1])+1</code></li>
+</ul>
+</li>
+</ul>
+</li>
+<li>初始化：<br>  <strong>从递推公式中，可以看出来</strong>，<code>dp[0][j]</code>和 <code>dp[i][0]</code>是一定要初始化的。<br>  <code>dp[i][0]</code>：word2为空字符串，以i-1为结尾的字符串word1要删除多少个元素，才能和word2相同呢，很明显<code>dp[i][0] = i</code>。<code>dp[0][j]</code>同理。</li>
+</ul>
+<p><strong>4）编辑距离</strong></p>
+<p>给你两个单词 word1 和 word2，请你计算出将 word1 转换成 word2 所使用的最少操作数 。</p>
+<p>你可以对一个单词进行如下三种操作：</p>
+<ul>
+<li>插入一个字符</li>
+<li>删除一个字符</li>
+<li>替换一个字符，使得该字母与word2中的相等</li>
+<li></li>
+<li><p>递推公式：</p>
+<ul>
+<li>if (word1[i - 1] == word2[j - 1]) <ul>
+<li>此时不需要进行删除操作</li>
+<li>`dp[i][j] = dp[i-1][j-1]</li>
+</ul>
+</li>
+<li>if (word1[i - 1] != word2[j - 1])<ul>
+<li>进行三种操作</li>
+<li><code>dp[i][j] = min( dp[i-1][j],dp[i][j-1],dp[i-1][j-1])+1</code></li>
+</ul>
+</li>
+</ul>
+</li>
+<li>初始化：<br>  <strong>从递推公式中，可以看出来</strong>，<code>dp[0][j]</code>和 <code>dp[i][0]</code>是一定要初始化的。<br>  <code>dp[i][0]</code>：word2为空字符串，以i-1为结尾的字符串word1要删除多少个元素，才能和word2相同呢，很明显<code>dp[i][0] = i</code>。<code>dp[0][j]</code>同理</li>
+</ul>
+<h3 id="回文"><a href="#回文" class="headerlink" title="回文"></a>回文</h3><p><strong>1）回文子串</strong><br>给定一个字符串，你的任务是计算这个字符串中有多少个回文子串。</p>
+<p>具有不同开始位置或结束位置的子串，即使是由相同的字符组成，也会被视作不同的子串。</p>
+<ul>
+<li>输入：”aaa”</li>
+<li>输出：6</li>
+<li>解释：6个回文子串: “a”, “a”, “a”, “aa”, “aa”, “aaa”</li>
+</ul>
+<p>判断一个子字符串（字符串的下表范围[i,j]）是否回文，依赖于，子字符串（下标范围[i + 1, j - 1]）） 是否是回文。<br>所以为了明确这种递归关系，我们的dp数组是要定义成<strong>一位二维dp数组</strong>。<strong>布尔类型的</strong><code>dp[i][j]</code>：表示区间范围[i,j] （<strong>注意是左闭右闭</strong>）的子串是否是回文子串。</p>
+<p>双指针算法：<br>首先确定回文串，就是找中心然后向两边扩散看是不是对称的就可以了。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span> &#123;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">countSubstrings</span><span class="params">(<span class="built_in">string</span> s)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line"><span class="keyword">int</span> result = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; s.size(); i++) &#123;</span><br><span class="line"></span><br><span class="line">result += extend(s, i, i, s.size()); <span class="comment">// 以i为中心</span></span><br><span class="line"></span><br><span class="line">result += extend(s, i, i + <span class="number">1</span>, s.size()); <span class="comment">// 以i和i+1为中心</span></span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">return</span> result;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">extend</span><span class="params">(<span class="keyword">const</span> <span class="built_in">string</span>&amp; s, <span class="keyword">int</span> i, <span class="keyword">int</span> j, <span class="keyword">int</span> n)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line"><span class="keyword">int</span> res = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">while</span> (i &gt;= <span class="number">0</span> &amp;&amp; j &lt; n &amp;&amp; s[i] == s[j]) &#123;</span><br><span class="line"></span><br><span class="line">i--;</span><br><span class="line"></span><br><span class="line">j++;</span><br><span class="line"></span><br><span class="line">res++;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">return</span> res;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p><strong>2）最长回文子序列</strong></p>
+<p><strong>回文子串是要连续的，回文子序列可不是连续的！</strong> 回文子串，回文子序列都是动态规划经典题目。</p>
+<ul>
+<li><code>dp[i][j]</code>定义：<code>dp[i][j]</code>表示以i-j，左闭右闭空间下，最长的回文子序列长度</li>
+<li>递推公式：<br>在确定递推公式的时候，首先要考虑如下两种操作，整理如下：<ul>
+<li>if (s[i] == s[j])<ul>
+<li><code>dp[i][j] = dp[i-1][j-1]+2</code></li>
+</ul>
+</li>
+<li>if (s[i] != s[j])<ul>
+<li><code>dp[i][j] = max(dp[i-1][j],dp[i][j-1])</code><br>如果s[i]与s[j]不相同，说明s[i]和s[j]的同时加入 并不能增加[i,j]区间回文子序列的长度，那么分别加入s[i]、s[j]看看哪一个可以组成最长的回文子序列。那么一定是取最大的。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>初始化 <code>dp[i][i] = 1</code></li>
+</ul>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2023/04/19/知识笔记/" rel="next" title="知识笔记">
+                <i class="fa fa-chevron-left"></i> 知识笔记
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2023/06/04/二叉树/" rel="prev" title="二叉树">
+                二叉树 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/head.jpg" alt="kuaikuai">
+            
+              <p class="site-author-name" itemprop="name">kuaikuai</p>
+              <p class="site-description motion-element" itemprop="description">super block power!</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">4</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">2</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://xmzyshypnc.github.io/" title="xmzyshypnc" target="_blank">xmzyshypnc</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://wood1314.github.io/" title="Wood" target="_blank">Wood</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://blog.zeddyu.info/" title="Zedd" target="_blank">Zedd</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://kestudy.top/" title="Ke" target="_blank">Ke</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-什么是动态规划"><span class="nav-number">1.</span> <span class="nav-text">1. 什么是动态规划</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-解题步骤"><span class="nav-number">2.</span> <span class="nav-text">2. 解题步骤</span></a></li></ol><li class="nav-item nav-level-3"><a class="nav-link" href="#背包问题"><span class="nav-number"></span> <span class="nav-text">背包问题</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1）01背包"><span class="nav-number">1.</span> <span class="nav-text">1）01背包</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#1-二维dp数组01背包"><span class="nav-number">1.1.</span> <span class="nav-text">1. 二维dp数组01背包</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2-一维dp数组（滚动数组）"><span class="nav-number">1.2.</span> <span class="nav-text">2. 一维dp数组（滚动数组）</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#3-01-背包在不同场景下的应用"><span class="nav-number">1.3.</span> <span class="nav-text">3. 01 背包在不同场景下的应用</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2）完全背包"><span class="nav-number">2.</span> <span class="nav-text">2）完全背包</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3）多重背包"><span class="nav-number">3.</span> <span class="nav-text">3）多重背包</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4）总结"><span class="nav-number">4.</span> <span class="nav-text">4）总结</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#递推公式-🌟"><span class="nav-number">4.1.</span> <span class="nav-text">递推公式 🌟</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#遍历顺序-🌟"><span class="nav-number">4.2.</span> <span class="nav-text">遍历顺序 🌟</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#打家劫舍问题"><span class="nav-number"></span> <span class="nav-text">打家劫舍问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#买卖股票的最佳时机"><span class="nav-number"></span> <span class="nav-text">买卖股票的最佳时机</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#不连续子序列"><span class="nav-number"></span> <span class="nav-text">不连续子序列</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#连续子序列"><span class="nav-number"></span> <span class="nav-text">连续子序列</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#编辑距离"><span class="nav-number"></span> <span class="nav-text">编辑距离</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#回文"><span class="nav-number"></span> <span class="nav-text">回文</span></a></li></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2023</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">kuaikuai</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动 v3.9.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 – <a class="theme-link" target="_blank" href="https://theme-next.org">NexT.Pisces</a> v6.3.0</div>
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv" title="总访客量">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+    </span>
+  
+
+  
+    <span class="site-pv" title="总访问量">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.3.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.3.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.3.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.3.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.3.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.3.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.3.0"></script>
+
+
+
+  
+
+  
+    <script id="dsq-count-scr" src="https://xmzyshypnc.disqus.com/count.js" async></script>
+  
+
+  
+    <script type="text/javascript">
+      var disqus_config = function () {
+        this.page.url = 'http://yoursite.com/2023/06/04/动态规划/';
+        this.page.identifier = '2023/06/04/动态规划/';
+        this.page.title = '动态规划';
+        };
+      function loadComments () {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://xmzyshypnc.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      }
+      
+        loadComments();
+      
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  
+  
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(function (item) {
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: true,
+        notify: true,
+        appId: 'YbpHIa6XHNsKv4wX2wGjnrK7-gzGzoHsz',
+        appKey: '1fjf9mQl90nKdRPfq1zhDyIE',
+        placeholder: '',
+        avatar:'mm',
+        meta:guest,
+        pageSize:'10' || 10,
+        visitor: true
+    });
+  </script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+<script type="text/javascript" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","model":{"scale":1,"hHeadPos":0.5,"vHeadPos":0.618,"jsonPath":"live2d-widget-model-hijiki"},"display":{"superSample":2,"width":150,"height":300,"position":"right","hOffset":0,"vOffset":-50},"mobile":{"show":true,"scale":0.5},"react":{"opacityDefault":0.7,"opacityOnHover":0.2},"log":false,"tagMode":false});</script></body>
+</html>
