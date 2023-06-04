@@ -110,15 +110,82 @@
 
   <meta name="description" content="Lab  Xv6 and Unix utilities文件描述符一个文件描述符是一个小的整数，它代表了一个内核管理的对象，进程对这个对象进行操作。进程可能通过如下方法获取文件描述符，打开文件、目录或设备，创建管道，复制一个已有的描述符（open，pipe，dup）。为简单起见，文件描述符指向的对象都被称为是“文件“。文件描述符抽象出来文件、管道和设备的共同点，使它们看起来都像是字节流。 每个进程都">
 <meta property="og:type" content="article">
-<meta property="og:title" content="zzrR0">
+<meta property="og:title" content="kuaikuai">
 <meta property="og:url" content="http://yoursite.com/2023/04/19/知识笔记/index.html">
-<meta property="og:site_name" content="zzrR0">
+<meta property="og:site_name" content="kuaikuai">
 <meta property="og:description" content="Lab  Xv6 and Unix utilities文件描述符一个文件描述符是一个小的整数，它代表了一个内核管理的对象，进程对这个对象进行操作。进程可能通过如下方法获取文件描述符，打开文件、目录或设备，创建管道，复制一个已有的描述符（open，pipe，dup）。为简单起见，文件描述符指向的对象都被称为是“文件“。文件描述符抽象出来文件、管道和设备的共同点，使它们看起来都像是字节流。 每个进程都">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2023-06-01T04:29:15.896Z">
+<meta property="og:image" content="http://yoursite.com/2023/04/19/知识笔记/截屏2023-04-19%2021.18.38.png">
+<meta property="og:image" content="http://yoursite.com/2023/04/19/知识笔记/截屏2023-04-19%2021.18.38.png">
+<meta property="og:image" content="http://yoursite.com/2023/04/19/知识笔记/截屏2023-04-20%2021.12.18.png">
+<meta property="og:image" content="http://yoursite.com/2023/04/19/知识笔记/截屏2023-04-20%2021.13.18.png">
+<meta property="og:image" content="http://yoursite.com/2023/04/19/知识笔记/截屏2023-04-22%2010.48.18.png">
+<meta property="og:image" content="http://yoursite.com/2023/04/19/知识笔记/截屏2023-04-22%2016.23.01.png">
+<meta property="og:image" content="http://yoursite.com/2023/04/19/知识笔记/Pasted%20image%2020230422104953.png">
+<meta property="og:image" content="http://yoursite.com/2023/04/19/知识笔记/截屏2023-04-22%2011.04.25.png">
+<meta property="og:image" content="http://yoursite.com/2023/04/19/知识笔记/截屏2023-04-22%2011.28.16.png">
+<meta property="og:image" content="http://yoursite.com/2023/04/19/知识笔记/Pasted%20image%2020230501105611.png">
+<meta property="og:image" content="http://yoursite.com/2023/04/19/知识笔记/截屏2023-04-23%2011.21.44.png">
+<meta property="og:image" content="http://yoursite.com/2023/04/19/知识笔记/截屏2023-04-23%2011.35.41.png">
+<meta property="og:image" content="http://yoursite.com/2023/04/19/知识笔记/截屏2023-04-24%2019.01.38.png">
+<meta property="og:image" content="http://yoursite.com/2023/04/19/知识笔记/截屏2023-05-05%2017.00.14.png">
+<meta property="og:image" content="http://yoursite.com/2023/04/19/知识笔记/截屏2023-05-08%2017.19.51.png">
+<meta property="og:image" content="http://yoursite.com/2023/04/19/知识笔记/Pasted%20image%2020230505115005.png">
+<meta property="og:image" content="http://yoursite.com/2023/04/19/知识笔记/Pasted%20image%2020230505115033.png">
+<meta property="og:image" content="http://yoursite.com/2023/04/19/知识笔记/截屏2023-05-05%2016.38.52.png">
+<meta property="og:image" content="http://yoursite.com/2023/04/19/知识笔记/截屏2023-05-05%2016.45.51.png">
+<meta property="og:image" content="http://yoursite.com/2023/04/19/知识笔记/截屏2023-05-05%2016.47.13.png">
+<meta property="og:image" content="http://yoursite.com/2023/04/19/知识笔记/截屏2023-05-05%2017.17.07.png">
+<meta property="og:image" content="http://yoursite.com/2023/04/19/知识笔记/Pasted%20image%2020230523180049.png">
+<meta property="og:image" content="http://yoursite.com/2023/04/19/知识笔记/Pasted%20image%2020230523181421.png">
+<meta property="og:image" content="http://yoursite.com/2023/04/19/知识笔记/Pasted%20image%2020230508183508.png">
+<meta property="og:image" content="http://yoursite.com/2023/04/19/知识笔记/Pasted%20image%2020230505194514.png">
+<meta property="og:image" content="http://yoursite.com/2023/04/19/知识笔记/Pasted%20image%2020230505203248.png">
+<meta property="og:image" content="http://yoursite.com/2023/04/19/知识笔记/Pasted%20image%2020230507171428.png">
+<meta property="og:image" content="http://yoursite.com/2023/04/19/知识笔记/截屏2023-05-07%2017.17.59.png">
+<meta property="og:image" content="http://yoursite.com/2023/04/19/知识笔记/Pasted%20image%2020230508113052.png">
+<meta property="og:image" content="http://yoursite.com/2023/04/19/知识笔记/截屏2023-05-08%2015.57.21.png">
+<meta property="og:image" content="http://yoursite.com/2023/04/19/知识笔记/截屏2023-05-08%2015.59.18.png">
+<meta property="og:image" content="http://yoursite.com/2023/04/19/知识笔记/截屏2023-05-08%2016.01.13.png">
+<meta property="og:image" content="http://yoursite.com/2023/04/19/知识笔记/截屏2023-05-08%2016.01.34.png">
+<meta property="og:image" content="http://yoursite.com/2023/04/19/知识笔记/截屏2023-05-08%2016.17.36.png">
+<meta property="og:image" content="http://yoursite.com/2023/04/19/知识笔记/截屏2023-05-15%2011.37.24.png">
+<meta property="og:image" content="http://yoursite.com/2023/04/19/知识笔记/截屏2023-05-15%2011.38.27.png">
+<meta property="og:image" content="http://yoursite.com/2023/04/19/知识笔记/截屏2023-05-15%2011.40.52.png">
+<meta property="og:image" content="http://yoursite.com/2023/04/19/知识笔记/截屏2023-05-15%2012.05.16.png">
+<meta property="og:image" content="http://yoursite.com/2023/04/19/知识笔记/截屏2023-05-15%2012.05.33.png">
+<meta property="og:image" content="http://yoursite.com/2023/04/19/知识笔记/截屏2023-05-15%2012.05.59.png">
+<meta property="og:image" content="http://yoursite.com/2023/04/19/知识笔记/截屏2023-05-15%2012.06.09.png">
+<meta property="og:image" content="http://yoursite.com/2023/04/19/知识笔记/截屏2023-05-15%2012.06.42.png">
+<meta property="og:image" content="http://yoursite.com/2023/04/19/知识笔记/截屏2023-05-15%2012.08.16.png">
+<meta property="og:image" content="http://yoursite.com/2023/04/19/知识笔记/截屏2023-05-15%2012.10.54.png">
+<meta property="og:image" content="http://yoursite.com/2023/04/19/知识笔记/Pasted%20image%2020230515164652.png">
+<meta property="og:image" content="http://yoursite.com/2023/04/19/知识笔记/Pasted%20image%2020230515163732.png">
+<meta property="og:image" content="http://yoursite.com/2023/04/19/知识笔记/截屏2023-05-16%2008.43.08.png">
+<meta property="og:image" content="http://yoursite.com/2023/04/19/知识笔记/截屏2023-05-16%2008.54.20.png">
+<meta property="og:image" content="http://yoursite.com/2023/04/19/知识笔记/Pasted%20image%2020230516120207.png">
+<meta property="og:image" content="http://yoursite.com/2023/04/19/知识笔记/截屏2023-05-19%2015.32.18.png">
+<meta property="og:image" content="http://yoursite.com/2023/04/19/知识笔记/截屏2023-05-19%2015.33.59.png">
+<meta property="og:image" content="http://yoursite.com/2023/04/19/知识笔记/截屏2023-05-19%2015.36.55.png">
+<meta property="og:image" content="http://yoursite.com/2023/04/19/知识笔记/截屏2023-05-19%2015.44.02.png">
+<meta property="og:image" content="http://yoursite.com/2023/04/19/知识笔记/截屏2023-05-19%2015.46.22.png">
+<meta property="og:image" content="http://yoursite.com/2023/04/19/知识笔记/截屏2023-05-18%2017.32.05.png">
+<meta property="og:image" content="http://yoursite.com/2023/04/19/知识笔记/截屏2023-05-19%2013.19.43.png">
+<meta property="og:image" content="http://yoursite.com/2023/04/19/知识笔记/截屏2023-05-19%2013.23.05.png">
+<meta property="og:image" content="http://yoursite.com/2023/04/19/知识笔记/Pasted%20image%2020230519160727.png">
+<meta property="og:image" content="http://yoursite.com/2023/04/19/知识笔记/Pasted%20image%2020230519160749.png">
+<meta property="og:image" content="http://yoursite.com/2023/04/19/知识笔记/Pasted%20image%2020230519161638.png">
+<meta property="og:image" content="http://yoursite.com/2023/04/19/知识笔记/Pasted%20image%2020230519162412.png">
+<meta property="og:image" content="http://yoursite.com/2023/04/19/知识笔记/Pasted%20image%2020230519162502.png">
+<meta property="og:image" content="http://yoursite.com/2023/04/19/知识笔记/截屏2023-05-23%2021.26.33.png">
+<meta property="og:image" content="http://yoursite.com/2023/04/19/知识笔记/Pasted%20image%2020230525155455.png">
+<meta property="og:image" content="http://yoursite.com/2023/04/19/知识笔记/Pasted%20image%2020230525172321.png">
+<meta property="og:image" content="http://yoursite.com/2023/04/19/知识笔记/Pasted%20image%2020230525172359.png">
+<meta property="og:updated_time" content="2023-06-01T04:48:28.391Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="zzrR0">
+<meta name="twitter:title" content="kuaikuai">
 <meta name="twitter:description" content="Lab  Xv6 and Unix utilities文件描述符一个文件描述符是一个小的整数，它代表了一个内核管理的对象，进程对这个对象进行操作。进程可能通过如下方法获取文件描述符，打开文件、目录或设备，创建管道，复制一个已有的描述符（open，pipe，dup）。为简单起见，文件描述符指向的对象都被称为是“文件“。文件描述符抽象出来文件、管道和设备的共同点，使它们看起来都像是字节流。 每个进程都">
+<meta name="twitter:image" content="http://yoursite.com/2023/04/19/知识笔记/截屏2023-04-19%2021.18.38.png">
 
 
 
@@ -135,7 +202,7 @@
   };
 </script>
 
-  <title> | zzrR0</title>
+  <title> | kuaikuai</title>
   
 
 
@@ -193,7 +260,7 @@
     <div class="custom-logo-site-title">
       <a href="/" class="brand" rel="start">
         <span class="logo-line-before"><i></i></span>
-        <span class="site-title">zzrR0</span>
+        <span class="site-title">kuaikuai</span>
         <span class="logo-line-after"><i></i></span>
       </a>
     </div>
@@ -307,13 +374,13 @@
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2023/04/19/知识笔记/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="zzrR0">
-      <meta itemprop="description" content="Why am i so cai.">
+      <meta itemprop="name" content="kuaikuai">
+      <meta itemprop="description" content="super block power!">
       <meta itemprop="image" content="/images/head.jpg">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="zzrR0">
+      <meta itemprop="name" content="kuaikuai">
     </span>
 
     
@@ -363,7 +430,7 @@
                 
                   <span class="post-meta-item-text">更新于</span>
                 
-                <time title="修改时间：2023-06-01 12:29:15" itemprop="dateModified" datetime="2023-06-01T12:29:15+08:00">2023-06-01</time>
+                <time title="修改时间：2023-06-01 12:48:28" itemprop="dateModified" datetime="2023-06-01T12:48:28+08:00">2023-06-01</time>
               
             
           </span>
@@ -467,7 +534,7 @@
 </li>
 </ul>
 <h3 id="管道"><a href="#管道" class="headerlink" title="管道"></a>管道</h3><p><strong>管道</strong>用于进程间的通信，它<font color="#9bbb59">其实是内核里一块小的缓冲区</font>，这个缓冲区<font color="#9bbb59">向进程提供了一对文件描述符</font>，一个用于读而另一个用于写。</p>
-<h3 id="文件系统-todo"><a href="#文件系统-todo" class="headerlink" title="文件系统 #todo"></a>文件系统 #todo</h3><p><a href="https://www.youtube.com/watch?v=oWuVGDese4k" target="_blank" rel="noopener">https://www.youtube.com/watch?v=oWuVGDese4k</a><br>![[./截屏2023-04-19 21.18.38.png]]<br>![[./截屏2023-04-19 21.18.38.png]]<br>![[./截屏2023-04-20 21.12.18.png]]<br>![[./截屏2023-04-20 21.13.18.png]]</p>
+<h3 id="文件系统-todo"><a href="#文件系统-todo" class="headerlink" title="文件系统 #todo"></a>文件系统 #todo</h3><p><a href="https://www.youtube.com/watch?v=oWuVGDese4k" target="_blank" rel="noopener">https://www.youtube.com/watch?v=oWuVGDese4k</a><br><img src="/2023/04/19/知识笔记/截屏2023-04-19 21.18.38.png" alt="not found"><br><img src="/2023/04/19/知识笔记/截屏2023-04-19 21.18.38.png" alt="not found"><br><img src="/2023/04/19/知识笔记/截屏2023-04-20 21.12.18.png" alt="not found"><br><img src="/2023/04/19/知识笔记/截屏2023-04-20 21.13.18.png" alt="not found"></p>
 <h2 id="Lab-System-Calls"><a href="#Lab-System-Calls" class="headerlink" title="Lab System Calls"></a>Lab System Calls</h2><h3 id="C-pointer"><a href="#C-pointer" class="headerlink" title="C pointer"></a>C pointer</h3><ul>
 <li>指针和数组名的区别：<strong>指针是变量</strong>，<strong>而数组名不是变量</strong>，因此<code>pointer = arrayname</code>是合法的，而<code>arrayname = pointer</code>或者<code>arrayname++;</code>是不合法的</li>
 <li>指针的运算：<br>  ++ 和 – 均 <strong>为把值加上or 减去其数据类型的字节数</strong></li>
@@ -505,7 +572,7 @@
 <h3 id="kernel-organiztion"><a href="#kernel-organiztion" class="headerlink" title="kernel organiztion"></a>kernel organiztion</h3><ul>
 <li><strong>宏内核（Monolithic Kernel）</strong>：在操作系统kernel中，<u>所有system call都在supervisor mode下运行</u>。xv6是一个宏内核。（大部分桌面操作系统是宏内核）<pre><code>- 缺点：在一个宏内核中，任何一个操作系统的bug都有可能成为漏洞。因为我们现在在内核中运行了一个巨大的操作系统，出现Bug的可能性更大了。
 - 优点：宏内核的优势在于，因为操作系统子模块（文件系统、虚拟内存、进程管理）现在都位于同一个程序中，它们可以紧密的集成在一起，这样的集成提供很好的性能。例如Linux，它就有很不错的性能。
-</code></pre>![[./截屏2023-04-22 10.48.18.png]]</li>
+</code></pre><img src="/2023/04/19/知识笔记/截屏2023-04-22 10.48.18.png" alt="not found"></li>
 <li><strong>微内核（Micro Kernel）</strong>：将需要运行在upervisor mode（内核态）下的操作系统代码压到最小，保证kernel内系统的安全性，将大部分的操作系统代码执行在user mode下。（嵌入式操作系统通常是为内核）<ul>
 <li>优点：内核中的代码数量小，意味这更少的bug</li>
 <li>缺点：<strong>微内核的（用户空间与内核空间之间的）跳转比宏内核的多</strong>。通常性能更差。</li>
@@ -515,14 +582,14 @@
 <blockquote>
 <p>微内核中的模块非常少，可能只有ipc、以及对page table的支持，以及对一些分时复用cpu的支持。</p>
 </blockquote>
-<p>![[./截屏2023-04-22 16.23.01.png]]</p>
+<p><img src="/2023/04/19/知识笔记/截屏2023-04-22 16.23.01.png" alt="not found"></p>
 <blockquote>
 <p>文件系统是一个user level进程，它为shell提供服务时，两个进程的通信需要分别2次经过内核态。</p>
 </blockquote>
-<p>xv6 kernel source code file:<br>![[./Pasted image 20230422104953.png]]</p>
+<p>xv6 kernel source code file:<br><img src="/2023/04/19/知识笔记/Pasted image 20230422104953.png" alt="not found"></p>
 <h3 id="Process"><a href="#Process" class="headerlink" title="Process"></a>Process</h3><p>操作系统隔离的单元叫进程。一个进程不能够破坏或监听另外一个进程的内存、CPU、文件描述符，也不能破坏kernel本身。</p>
 <p>为了实现进程隔离，xv6提供了一种机制让程序认为自己拥有一个独立的机器。一<strong>个进程为一个程序</strong>提供了一个<strong>私有的内存系统</strong>，或者叫address space，其他的进程不能读/写这个内存。</p>
-<p>在xv6中，使用page table （页表）来给每个进程分配自己的address space，<strong>页表再将这些address space，也就是进程自己认为的虚拟地址(<em>virtual address</em>)映射到RISC-V实际操作的物理地址</strong>(<em>physical address</em>)。<br>![[./截屏2023-04-22 11.04.25.png]]</p>
+<p>在xv6中，使用page table （页表）来给每个进程分配自己的address space，<strong>页表再将这些address space，也就是进程自己认为的虚拟地址(<em>virtual address</em>)映射到RISC-V实际操作的物理地址</strong>(<em>physical address</em>)。<br><img src="/2023/04/19/知识笔记/截屏2023-04-22 11.04.25.png" alt="not found"></p>
 <p>虚拟地址<strong>从0开始</strong>，往上依次是指令、全局变量、user栈、堆。RISC-V上的指针式64位的，xv6使用低38位，因此最大的地址是2的38次方-1 = MAXVA。</p>
 <p>进程最重要的内核状态：</p>
 <ol>
@@ -537,7 +604,7 @@
 </ul>
 <h3 id="Starting-the-first-process-启动第一个进程"><a href="#Starting-the-first-process-启动第一个进程" class="headerlink" title="Starting the first process 启动第一个进程"></a>Starting the first process 启动第一个进程</h3><ul>
 <li>RISC-V启动时，先运行一个<strong>存储于ROM中的bootloader程序</strong><code>kernel.ld</code>来加载xv6 kernel到内存中，然后在machine模式下从_entry开始运行xv6。（bootloader将xv6 kernel<strong>加载到0x80000000的物理地址中</strong>，因为前面的地址中有I/O设备。）</li>
-<li>cpu开始执行_entry.s中的代码。在_entry中设置了一个初始stack，<code>stack0</code>来让xv6执行<code>kernel/start.c</code>。<br>![[./截屏2023-04-22 11.28.16.png]]  </li>
+<li>cpu开始执行_entry.s中的代码。在_entry中设置了一个初始stack，<code>stack0</code>来让xv6执行<code>kernel/start.c</code>。<br><img src="/2023/04/19/知识笔记/截屏2023-04-22 11.28.16.png" alt="not found">  </li>
 <li>在<code>start</code>函数中，首先在machine模式下做一些配置，然后通过RISC-V提供的<code>mret</code>指令切换到supervisor mode，<strong>使program counter切换到</strong><code>kernel/main.c</code></li>
 <li>在<code>main</code>函数中，首先对一些设备和子系统进行初始化，然后调用<code>kernel/proc.c</code>中定义的<code>userinit</code>来<strong>创建第一个用户进程</strong>。</li>
 <li>在第一个用户进程中，执行了一个<code>initcode.S</code>的汇编程序，这个汇编程序调用了<code>exec</code>这个system call来执行<code>/init</code>，重新进入kernel。<code>exec</code>将当前进程的内存和寄存器替换为一个新的程序(<code>/init</code>)，当kernel执行完毕<code>exec</code>指定的程序后，回到<code>/init</code>进程。<code>/init</code>(<code>user/init.c</code>)创建了一个新的console device以文件描述符0,1,2打开，然后在console device中开启了一个shell进程，至此整个系统启动了 </li>
@@ -549,7 +616,7 @@
 <li>之后，在软件中执行相应的指令。</li>
 </ul>
 <h2 id="Lab-Page-Tables"><a href="#Lab-Page-Tables" class="headerlink" title="Lab Page Tables"></a>Lab Page Tables</h2><p>页表让每个进程都有自己独立的虚拟地址，从而实现<strong>内存隔离</strong>。</p>
-<h3 id="Paging-Hardware"><a href="#Paging-Hardware" class="headerlink" title="Paging Hardware"></a>Paging Hardware</h3><p>页表是在硬件中通过<strong>处理器</strong>和<strong>内存管理单元</strong>（Memory Management Unit）实现。<br>![[./Pasted image 20230501105611.png]]</p>
+<h3 id="Paging-Hardware"><a href="#Paging-Hardware" class="headerlink" title="Paging Hardware"></a>Paging Hardware</h3><p>页表是在硬件中通过<strong>处理器</strong>和<strong>内存管理单元</strong>（Memory Management Unit）实现。<br><img src="/2023/04/19/知识笔记/Pasted image 20230501105611.png" alt="not found"></p>
 <p>CPU中需要有一些寄存器用来存放表单在物理内存中的地址，page table保存在内存中，MMU只是会去查看page table。</p>
 <p>这里的基本想法是每个应用程序都有自己独立的表单，并且这个表单定义了应用程序的地址空间。所以当操作系统将CPU从一个应用程序切换到另一个应用程序时，同时也需要切换SATP寄存器中的内容，从而指向新的进程保存在物理内存中的地址对应表单。</p>
 <ul>
@@ -559,7 +626,7 @@
 <li>每个<strong>PTE</strong>有一个44位的<strong>physical page number(PPN)用来映射到物理地址</strong>。以及10位的flag。总共54位。所以一个PTE需要8个字节来存储。</li>
 <li>对于<strong>物理地址</strong>，由高44位以及低12位组成。其中高44位为页表中存储的PPN，低12位为页内偏移。</li>
 </ul>
-<p>虚拟内存最多是2^39，而物理内存最多是2^56，这样我们可以有多个进程都用光了他们的虚拟内存，但是物理内存还有剩余。<br>![[./截屏2023-04-23 11.21.44.png]]</p>
+<p>虚拟内存最多是2^39，而物理内存最多是2^56，这样我们可以有多个进程都用光了他们的虚拟内存，但是物理内存还有剩余。<br><img src="/2023/04/19/知识笔记/截屏2023-04-23 11.21.44.png" alt="not found"></p>
 <p>这个page table最多会有2^27个条目（虚拟内存地址中的index长度为27），这是个非常大的数字。如果每个进程都使用这么大的page table，进程需要为page table消耗大量的内存，并且很快物理内存就会耗尽。</p>
 <p>在实际中，页表并不是作为一个包含了2的27次方个PTE的大列表存储在物理内存中的，而是采用了三级树状的形式进行存储，<strong>这样可以让页表分散存储</strong>。其中，<strong>每一个页表大小就是一页。</strong>  <strong>如果地址空间中大部分地址都没有使用，你不必为每一个index准备一个条目。</strong></p>
 <ul>
@@ -567,13 +634,13 @@
 <li>第二级页表由512个页构成。？</li>
 <li>第三级页表由512 x 512个页构成。？</li>
 <li>因为每个进程虚拟地址的高27位用来确定PTE，对<strong>应到3级页表就是最高的9位确定一级页表PTE的位置，中间9位确定二级页表PTE的位置，最低9位确定三级页表PTE的位置。</strong></li>
-<li>如下图所示。第一级根页表的物理页地址存储在<code>satp</code>寄存器中，每个CPU拥有自己独立的<code>satp</code><br>![[./截屏2023-04-23 11.35.41.png]]</li>
+<li>如下图所示。第一级根页表的物理页地址存储在<code>satp</code>寄存器中，每个CPU拥有自己独立的<code>satp</code><br><img src="/2023/04/19/知识笔记/截屏2023-04-23 11.35.41.png" alt="not found"></li>
 </ul>
 <p>PTE flag可以<strong>告诉硬件这些相应的虚拟地址怎样被使用</strong>，比如<code>PTE_V</code>表明这个PTE是否存在，<code>PTE_R</code>、<code>PTE_W</code>、<code>PTE_X</code>控制<strong>这个页是否允许被读取、写入和执行</strong>，<code>PTE_U</code><strong>控制user mode是否有权访问这个页</strong>，如果<code>PTE_U</code>=0，<strong>则只有supervisor mode有权访问这个页。</strong></p>
 <h3 id="Kernel-address-space"><a href="#Kernel-address-space" class="headerlink" title="Kernel address space"></a>Kernel address space</h3><p><strong>内核地址空间</strong>，为了让内核使用物理内存和硬件资源，<strong>内核需要按照一定的规则排布内核地址空间，以能够确定哪个虚拟地址对应自己需要的硬件资源地址。</strong></p>
 <ul>
 <li>QEMU会<strong>模拟一个从0x80000000开始的RAM，一直到0x86400000</strong>。</li>
-<li>QEMU会将<strong>设备接口以控制寄存器的形式暴露给内核</strong>，这些控制寄存器在0x80000000以下。kernel对这些设备接口控制寄存器的访问是直接和这些设备而不是RAM进行交互的。<br>![[./截屏2023-04-24 19.01.38.png]]</li>
+<li>QEMU会将<strong>设备接口以控制寄存器的形式暴露给内核</strong>，这些控制寄存器在0x80000000以下。kernel对这些设备接口控制寄存器的访问是直接和这些设备而不是RAM进行交互的。<br><img src="/2023/04/19/知识笔记/截屏2023-04-24 19.01.38.png" alt="not found"></li>
 </ul>
 <p>左边和右边分别是kernel virtual address和physical address的映射关系。在虚拟地址和物理地址中，<strong>kernel都位于<code>KERNBASE=0x80000000</code>的位置，这叫做直接映射</strong>。<br>在内核未启用页表的时候，访问RAM以及经过内存映射的设备控制寄存器时，内核的虚拟地址将采用<strong>直接映射</strong>的方式进行转换，即虚拟地址与实际物理地址相同。这种直接映射，也会在初始化内核页表的过程中（kernel/vm.c的kvminit），记录到内核页表中，即使内核开始使用页表，这种直接映射的布局也被保留了下来。</p>
 <ul>
@@ -584,7 +651,7 @@
 <li>XV6使用这段free memory来存放用户<font color="#9bbb59">进程的page table</font>，text和data。</li>
 <li>但<font color="#9bbb59">从本质上来说，两边的虚拟地址空间大小是一样的。但是用户进程的虚拟地址空间使用率会更低</font>。</li>
 <li>当kernel创建了一个进程，<font color="#9bbb59">针对这个进程的page table也会从Free memory中分配出来</font>。内核会为用户进程的page table分配几个page，并填入PTE。在某个时间点，当内核运行了这个进程，内核会将进程的根page table的地址加载到SATP中。<font color="#9bbb59">从那个时间点开始，处理器会使用内核为那个进程构建的虚拟地址空间。</font></li>
-<li>（用户进程的虚拟地址空间分布，与内核地址空间一样，<font color="#9bbb59">它也是从0到MAXVA</font>。）<br>![[./截屏2023-05-05 17.00.14.png]]<br>![[./截屏2023-05-08 17.19.51.png]]</li>
+<li>（用户进程的虚拟地址空间分布，与内核地址空间一样，<font color="#9bbb59">它也是从0到MAXVA</font>。）<br><img src="/2023/04/19/知识笔记/截屏2023-05-05 17.00.14.png" alt="not found"><br><img src="/2023/04/19/知识笔记/截屏2023-05-08 17.19.51.png" alt="not found"></li>
 </ul>
 <p><strong>内核的虚拟地址空间中，也有一些不是直接映射的内核虚拟地址：</strong></p>
 <ul>
@@ -615,35 +682,35 @@
 <li>cpu开始执行_entry.s中的代码。在_entry中设置了一个初始stack，<code>stack0</code>来让xv6执行<code>kernel/start.c</code>。</li>
 <li><p>在<code>start</code>函数中，首先在machine模式下做一些配置，然后通过RISC-V提供的<code>mret</code>指令切换到supervisor mode，<strong>使program counter切换到</strong>`kernel/main.c</p>
 </li>
-<li><p>在main函数中调用<strong>kvminit函数</strong><br>（将物理地址映射到相同的虚拟地址）<br>![[./Pasted image 20230505115005.png]]</p>
+<li><p>在main函数中调用<strong>kvminit函数</strong><br>（将物理地址映射到相同的虚拟地址）<br><img src="/2023/04/19/知识笔记/Pasted image 20230505115005.png" alt="not found"></p>
 </li>
 </ul>
-<p>![[./Pasted image 20230505115033.png]]</p>
+<p><img src="/2023/04/19/知识笔记/Pasted image 20230505115033.png" alt="not found"></p>
 <ul>
 <li><strong>kvminithart函数</strong><ul>
 <li>首先设置satp寄存器。此时实际上是内核告诉mmu来使用刚刚由kvminit设置好的pagetable。</li>
-<li>这条指令的执行时刻是一个非常重要的时刻。因为<font color="#9bbb59">整个地址翻译从这条指令之后开始生效</font>，之后的每一个使用的内存地址都可能对应到与之不同的物理内存地址。因为在这条指令之前，我们使用的都是物理内存地址，这条指令之后page table开始生效，所有的内存地址都变成了另一个含义，也就是虚拟内存地址。<br>![[./截屏2023-05-05 16.38.52.png]]</li>
+<li>这条指令的执行时刻是一个非常重要的时刻。因为<font color="#9bbb59">整个地址翻译从这条指令之后开始生效</font>，之后的每一个使用的内存地址都可能对应到与之不同的物理内存地址。因为在这条指令之前，我们使用的都是物理内存地址，这条指令之后page table开始生效，所有的内存地址都变成了另一个含义，也就是虚拟内存地址。<br><img src="/2023/04/19/知识笔记/截屏2023-05-05 16.38.52.png" alt="not found"></li>
 </ul>
 </li>
 </ul>
-<p>![[./截屏2023-05-05 16.45.51.png]]</p>
+<p><img src="/2023/04/19/知识笔记/截屏2023-05-05 16.45.51.png" alt="not found"></p>
 <ul>
-<li>walk函数<br>![[./截屏2023-05-05 16.47.13.png]]</li>
+<li>walk函数<br><img src="/2023/04/19/知识笔记/截屏2023-05-05 16.47.13.png" alt="not found"></li>
 </ul>
-<p>![[./截屏2023-05-05 17.17.07.png]]</p>
+<p><img src="/2023/04/19/知识笔记/截屏2023-05-05 17.17.07.png" alt="not found"></p>
 <h2 id="TA-Calling-conventions-and-stack-frams-riscv"><a href="#TA-Calling-conventions-and-stack-frams-riscv" class="headerlink" title="TA Calling conventions and stack frams riscv"></a>TA Calling conventions and stack frams riscv</h2><h3 id="risc-v寄存器"><a href="#risc-v寄存器" class="headerlink" title="risc-v寄存器"></a>risc-v寄存器</h3><ul>
 <li><p>Caller Saved寄存器在函数调用的时候不会保存 ra  a0 - a7</p>
 </li>
 <li><p>Callee Saved寄存器在函数调用的时候会保存 s0-s11</p>
 </li>
 </ul>
-<p>![[./Pasted image 20230523180049.png]]</p>
+<p><img src="/2023/04/19/知识笔记/Pasted image 20230523180049.png" alt="not found"></p>
 <h3 id="stack"><a href="#stack" class="headerlink" title="stack"></a>stack</h3><p>栈从高地址向低地址生长，每当有函数被调用时，一个新的<font color="#9bbb59">函数调用帧</font>将被压入调用栈的顶部。在整个栈帧的调用过程中，<font color="#9bbb59">栈顶由称为esp的寄存器定位</font>，<font color="#9bbb59">栈底由ebp进行定位</font>。</p>
 <ul>
 <li>第一个进栈的是，<font color="#9bbb59">函数返回地址</font>，即函数调用后的下一条指令。</li>
 <li>然后是函数的各个<font color="#9bbb59">参数</font>，在大多数c编译器中，参数<font color="#9bbb59">由右往左入栈</font>。</li>
 <li>然后函数的<font color="#9bbb59">局部变量</font>。</li>
-<li>上一栈帧的ebp<br>![[./Pasted image 20230523181421.png]]<br><a href="https://bbs.kanxue.com/thread-257246.htm" target="_blank" rel="noopener">https://bbs.kanxue.com/thread-257246.htm</a><br>![[./Pasted image 20230508183508.png]]</li>
+<li>上一栈帧的ebp<br><img src="/2023/04/19/知识笔记/Pasted image 20230523181421.png" alt="not found"><br><a href="https://bbs.kanxue.com/thread-257246.htm" target="_blank" rel="noopener">https://bbs.kanxue.com/thread-257246.htm</a><br><img src="/2023/04/19/知识笔记/Pasted image 20230508183508.png" alt="not found"></li>
 </ul>
 <h2 id="Lab-traps"><a href="#Lab-traps" class="headerlink" title="Lab traps"></a>Lab traps</h2><h3 id="trap机制"><a href="#trap机制" class="headerlink" title="trap机制"></a>trap机制</h3><p>三种情况<font color="#9bbb59">暂停cpu对正常指令</font>的执行(<font color="#9bbb59">用户空间和内核空间的切换</font>)：</p>
 <ul>
@@ -683,9 +750,9 @@
 <li><font color="#9bbb59">使用pte_u = 0 的页</font></li>
 <li><font color="#9bbb59">不能读写任意物理地址</font>，和普通用户代码一样，需要通过page table进行转换。</li>
 </ul>
-<h3 id="trap代码执行流程"><a href="#trap代码执行流程" class="headerlink" title="trap代码执行流程"></a>trap代码执行流程</h3><p>![[./Pasted image 20230505194514.png]]</p>
+<h3 id="trap代码执行流程"><a href="#trap代码执行流程" class="headerlink" title="trap代码执行流程"></a>trap代码执行流程</h3><p><img src="/2023/04/19/知识笔记/Pasted image 20230505194514.png" alt="not found"></p>
 <h3 id="进入ecall-指令之前的状态"><a href="#进入ecall-指令之前的状态" class="headerlink" title="进入ecall 指令之前的状态"></a>进入ecall 指令之前的状态</h3><ul>
-<li>作为用户代码的Shell调用write时，实际上调用的是关联到Shell的一个库函数。你可以查看这个库函数的源代码，在usys.s。<br>![[./Pasted image 20230505203248.png]]</li>
+<li>作为用户代码的Shell调用write时，实际上调用的是关联到Shell的一个库函数。你可以查看这个库函数的源代码，在usys.s。<br><img src="/2023/04/19/知识笔记/Pasted image 20230505203248.png" alt="not found"></li>
 </ul>
 <p>上面这几行代码就是实际被调用的write函数的实现。这是个非常短的函数，它首先将SYS_write加载到a7寄存器，SYS_write是常量16。这里告诉内核，我想要运行第16个系统调用，而这个系统调用正好是write。之后这个函数中执行了ecall指令，从这里开始代码执行跳转到了内核。内核完成它的工作之后，代码执行会返回到用户空间，继续执行ecall之后的指令，也就是ret，最终返回到Shell中。所以ret从write库函数返回到了Shell中。</p>
 <h3 id="进入ecall指令之后的状态"><a href="#进入ecall指令之后的状态" class="headerlink" title="进入ecall指令之后的状态"></a>进入ecall指令之后的状态</h3><h4 id="1）刚进入ecall指令之后："><a href="#1）刚进入ecall指令之后：" class="headerlink" title="1）刚进入ecall指令之后："></a>1）刚进入ecall指令之后：</h4><ul>
@@ -715,41 +782,41 @@
 </ul>
 <h4 id="2）trampoline-S-uservec函数"><a href="#2）trampoline-S-uservec函数" class="headerlink" title="2）trampoline.S uservec函数"></a>2）trampoline.S uservec函数</h4><p> <strong>保存32个用户寄存器的内容</strong></p>
 <ul>
-<li><p>你可以看到很多槽位的名字都对应了特定的寄存器。在最开始还有5个数据，<font color="#9bbb59">这些是内核事先存放在trapframe中的数据</font>。比如第一个数据保存了kernel page table地址，这将会是trap处理代码将要加载到SATP寄存器的数值。<br>trapframe page ：（start at va 0x3ffffffe000）<br>![[./Pasted image 20230507171428.png]]</p>
+<li><p>你可以看到很多槽位的名字都对应了特定的寄存器。在最开始还有5个数据，<font color="#9bbb59">这些是内核事先存放在trapframe中的数据</font>。比如第一个数据保存了kernel page table地址，这将会是trap处理代码将要加载到SATP寄存器的数值。<br>trapframe page ：（start at va 0x3ffffffe000）<br><img src="/2023/04/19/知识笔记/Pasted image 20230507171428.png" alt="not found"></p>
 </li>
-<li><p>在进入到user space之前，内核会将trapframe page的地址保存在sscratch寄存器中，也就是0x3fffffe000这个地址。在trampoline.S代码中，第一件事情就是执行csrrw指令，这个指令交换了a0和sscratch两个寄存器的内容。<br>![[./截屏2023-05-07 17.17.59.png]]</p>
+<li><p>在进入到user space之前，内核会将trapframe page的地址保存在sscratch寄存器中，也就是0x3fffffe000这个地址。在trampoline.S代码中，第一件事情就是执行csrrw指令，这个指令交换了a0和sscratch两个寄存器的内容。<br><img src="/2023/04/19/知识笔记/截屏2023-05-07 17.17.59.png" alt="not found"></p>
 </li>
-<li>将<font color="#9bbb59">trapframe page地址保存到a0之后，使用sd命令，通过固定偏移，将寄存器中的内容保存到对应的槽位中</font>。<br>![[./Pasted image 20230508113052.png]]</li>
+<li>将<font color="#9bbb59">trapframe page地址保存到a0之后，使用sd命令，通过固定偏移，将寄存器中的内容保存到对应的槽位中</font>。<br><img src="/2023/04/19/知识笔记/Pasted image 20230508113052.png" alt="not found"></li>
 </ul>
 <p><strong>改变sp寄存器，使其指向内核栈</strong></p>
 <ul>
-<li>load kernel stack pointer（这个是kernel在进入用户空间之前就设置好的，他的值是这个进程的kernel stack的最顶端） 到sp寄存器<br>![[./截屏2023-05-08 15.57.21.png]]<br><strong>改变tp寄存器</strong></li>
-<li>向tp寄存器写入数据。因为在RISC-V中，没有一个直接的方法来确认当前运行在多核处理器的哪个核上，XV6会将CPU核的编号也就是hartid保存在tp寄存器。在内核中好几个地方都会使用了这个值，例如，内核可以通过这个值确定某个CPU核上运行了哪些进程<br>![[./截屏2023-05-08 15.59.18.png]]<br><strong>指定跳转地址</strong>（跳转到内核中的c代码）</li>
-<li>向t0寄存器写入数据，这里写入的是我们将要执行的第一个C函数的指针，也就是函数usertrap的指针。<br>![[./截屏2023-05-08 16.01.13.png]]<br><strong>切换到kernel page table</strong></li>
-<li>向t1寄存器写入数据，这里写入的是kernel page table的地址。<br>![[./截屏2023-05-08 16.01.34.png]]</li>
+<li>load kernel stack pointer（这个是kernel在进入用户空间之前就设置好的，他的值是这个进程的kernel stack的最顶端） 到sp寄存器<br><img src="/2023/04/19/知识笔记/截屏2023-05-08 15.57.21.png" alt="not found"><br><strong>改变tp寄存器</strong></li>
+<li>向tp寄存器写入数据。因为在RISC-V中，没有一个直接的方法来确认当前运行在多核处理器的哪个核上，XV6会将CPU核的编号也就是hartid保存在tp寄存器。在内核中好几个地方都会使用了这个值，例如，内核可以通过这个值确定某个CPU核上运行了哪些进程<br><img src="/2023/04/19/知识笔记/截屏2023-05-08 15.59.18.png" alt="not found"><br><strong>指定跳转地址</strong>（跳转到内核中的c代码）</li>
+<li>向t0寄存器写入数据，这里写入的是我们将要执行的第一个C函数的指针，也就是函数usertrap的指针。<br><img src="/2023/04/19/知识笔记/截屏2023-05-08 16.01.13.png" alt="not found"><br><strong>切换到kernel page table</strong></li>
+<li>向t1寄存器写入数据，这里写入的是kernel page table的地址。<br><img src="/2023/04/19/知识笔记/截屏2023-05-08 16.01.34.png" alt="not found"></li>
 </ul>
 <h4 id="3）trap-c-usertrap函数"><a href="#3）trap-c-usertrap函数" class="headerlink" title="3）trap.c usertrap函数"></a>3）trap.c usertrap函数</h4><p>usertrap某种程度上存储并恢复硬件状态，但是它<strong>也需要检查触发trap的原因</strong>，以确定相应的处理方式，有很多原因可以让程序运行到usertrap函数中来。<br>比如：系统调用、除0、使用一个未被映射的虚拟地址、设备中断</p>
 <ul>
-<li><p>第一件事更改stvec寄存器：来自用户空间和内核空间，xv6在处理trap的方法是不一样的。如果trap是从内核发起的话，程序已经在使用kernel page table，并不需要页表切换。所以在内核中执行任何操作之前，usertrap中先将<font color="#9bbb59">STVEC指向了kernelvec变量</font>，这是<font color="#9bbb59">内核空间trap处理代码</font>的位置，如果此时再发生trap，就会交给kernelvec处理。<br>![[./截屏2023-05-08 16.17.36.png]]</p>
+<li><p>第一件事更改stvec寄存器：来自用户空间和内核空间，xv6在处理trap的方法是不一样的。如果trap是从内核发起的话，程序已经在使用kernel page table，并不需要页表切换。所以在内核中执行任何操作之前，usertrap中先将<font color="#9bbb59">STVEC指向了kernelvec变量</font>，这是<font color="#9bbb59">内核空间trap处理代码</font>的位置，如果此时再发生trap，就会交给kernelvec处理。<br><img src="/2023/04/19/知识笔记/截屏2023-05-08 16.17.36.png" alt="not found"></p>
 </li>
-<li><p>保存用户程序计数器<br>![[./截屏2023-05-15 11.37.24.png]]</p>
+<li><p>保存用户程序计数器<br><img src="/2023/04/19/知识笔记/截屏2023-05-15 11.37.24.png" alt="not found"></p>
 </li>
-<li><p>根据不同触发trap的原因，RISC-V的SCAUSE寄存器会有不同的数字。<font color="#9bbb59">数字8表明，我们现在在trap代码中是因为系统调用。</font><br>![[./截屏2023-05-15 11.38.27.png]]<br>-接下来第一件事情是检查是不是有其他的进程杀掉了当前进程。<br>-在RISC-V中，存储在SEPC寄存器中的程序计数器，<font color="#9bbb59">是用户程序中触发trap的指令的地址。</font>但是当我们恢复用户程序时，我们<font color="#9bbb59">希望在下一条指令恢复</font>，也就是ecall之后的一条指令。所以对于系统调用，<font color="#9bbb59">我们对于保存的用户程序计数器加4，这样我们会在ecall的下一条指令恢复</font>，而不是重新执行ecall指令。<br>=XV6会在处理系统调用的时候使能中断，这样中断可以更快的服务，有些系统调用需要许多时间处理。中断总是会被RISC-V的trap硬件关闭，所以在这个时间点，我们需要显式的打开中断。</p>
+<li><p>根据不同触发trap的原因，RISC-V的SCAUSE寄存器会有不同的数字。<font color="#9bbb59">数字8表明，我们现在在trap代码中是因为系统调用。</font><br><img src="/2023/04/19/知识笔记/截屏2023-05-15 11.38.27.png" alt="not found"><br>-接下来第一件事情是检查是不是有其他的进程杀掉了当前进程。<br>-在RISC-V中，存储在SEPC寄存器中的程序计数器，<font color="#9bbb59">是用户程序中触发trap的指令的地址。</font>但是当我们恢复用户程序时，我们<font color="#9bbb59">希望在下一条指令恢复</font>，也就是ecall之后的一条指令。所以对于系统调用，<font color="#9bbb59">我们对于保存的用户程序计数器加4，这样我们会在ecall的下一条指令恢复</font>，而不是重新执行ecall指令。<br>=XV6会在处理系统调用的时候使能中断，这样中断可以更快的服务，有些系统调用需要许多时间处理。中断总是会被RISC-V的trap硬件关闭，所以在这个时间点，我们需要显式的打开中断。</p>
 <ul>
-<li>进入syscall函数之后，从syscall表单之后，根据系统调用的编号查找相应的系统调用函数。<br>![[./截屏2023-05-15 11.40.52.png]]</li>
+<li>进入syscall函数之后，从syscall表单之后，根据系统调用的编号查找相应的系统调用函数。<br><img src="/2023/04/19/知识笔记/截屏2023-05-15 11.40.52.png" alt="not found"></li>
 </ul>
 </li>
 </ul>
 <h4 id="4）usertrapret函数"><a href="#4）usertrapret函数" class="headerlink" title="4）usertrapret函数"></a>4）usertrapret函数</h4><p>设置在返回用户空间之前，内核需要做的工作。</p>
 <ul>
-<li>回到user space的第一步是调用<code>usertrapret()</code>，这个函数将把<code>stvec</code>指向<code>uservec</code>，从而当回到user space再出现trap的时候可以跳转到<code>uservec</code>。<br>![[./截屏2023-05-15 12.05.16.png]]</li>
-<li>同时设置<code>p-&gt;trapframe</code>的一些值为下一次trap作准备，比如设置<code>p-&gt;trapframe-&gt;kernel_sp = p-&gt;kstack + PGSIZE</code>。<br>![[./截屏2023-05-15 12.05.33.png]]</li>
-<li>清除<code>SPP</code>为从而使得调用<code>sret</code>后能够回到user mode。<br>![[./截屏2023-05-15 12.05.59.png]]</li>
-<li>设置回到user space后的program counter为<code>p-&gt;trapframe-&gt;epc</code><br>![[./截屏2023-05-15 12.06.09.png]]</li>
-<li>最后调用跳转到TRAMPOLINE页上的<code>userret</code>回到trampoline.S。<br>![[./截屏2023-05-15 12.06.42.png]]<h4 id="5）userret函数"><a href="#5）userret函数" class="headerlink" title="5）userret函数"></a>5）userret函数</h4></li>
-<li>加载user page table，sfence.vma是清空页表缓存<br>![[./截屏2023-05-15 12.08.16.png]]</li>
+<li>回到user space的第一步是调用<code>usertrapret()</code>，这个函数将把<code>stvec</code>指向<code>uservec</code>，从而当回到user space再出现trap的时候可以跳转到<code>uservec</code>。<br><img src="/2023/04/19/知识笔记/截屏2023-05-15 12.05.16.png" alt="not found"></li>
+<li>同时设置<code>p-&gt;trapframe</code>的一些值为下一次trap作准备，比如设置<code>p-&gt;trapframe-&gt;kernel_sp = p-&gt;kstack + PGSIZE</code>。<br><img src="/2023/04/19/知识笔记/截屏2023-05-15 12.05.33.png" alt="not found"></li>
+<li>清除<code>SPP</code>为从而使得调用<code>sret</code>后能够回到user mode。<br><img src="/2023/04/19/知识笔记/截屏2023-05-15 12.05.59.png" alt="not found"></li>
+<li>设置回到user space后的program counter为<code>p-&gt;trapframe-&gt;epc</code><br><img src="/2023/04/19/知识笔记/截屏2023-05-15 12.06.09.png" alt="not found"></li>
+<li>最后调用跳转到TRAMPOLINE页上的<code>userret</code>回到trampoline.S。<br><img src="/2023/04/19/知识笔记/截屏2023-05-15 12.06.42.png" alt="not found"><h4 id="5）userret函数"><a href="#5）userret函数" class="headerlink" title="5）userret函数"></a>5）userret函数</h4></li>
+<li>加载user page table，sfence.vma是清空页表缓存<br><img src="/2023/04/19/知识笔记/截屏2023-05-15 12.08.16.png" alt="not found"></li>
 <li><code>userret</code>被<code>userrapret</code>调用返回时a0寄存器中保存了TRAPFRAME，因此可以通过这个TRAPFRAME地址来恢复之前所有寄存器的值(包括a0)，最后把TRAPFRAME保存在sscratch中</li>
-<li>用<code>sret</code>回到user space<br>![[./截屏2023-05-15 12.10.54.png]]</li>
+<li>用<code>sret</code>回到user space<br><img src="/2023/04/19/知识笔记/截屏2023-05-15 12.10.54.png" alt="not found"></li>
 </ul>
 <h3 id="sret指令"><a href="#sret指令" class="headerlink" title="sret指令"></a>sret指令</h3><p>sret是我们在kernel中的最后一条指令，当我执行完这条指令：</p>
 <ul>
@@ -762,12 +829,12 @@
 <ul>
 <li><font color="#9bbb59">出错的虚拟地址</font>（STVAL）。当出现page fault的时候，XV6内核会打印出错的虚拟地址，并且这个地址会被保存在STVAL寄存器中。此时，程序运行切换到内核。引起page fault的内存地址。</li>
 <li><font color="#9bbb59">出错的原因</font>（SCAUSE）。对不同场景的page fault有不同的响应。比如因为load，store，jump指令触发的page fault。比如，13表示是因为load引起的page fault；15表示是因为store引起的page fault；12表示是因为指令执行引起的page fault。引起page fault的原因类型</li>
-<li><font color="#9bbb59">触发page fault的指令的地址</font>（SEPC）。作为trap处理代码的一部分，这个地址存放在<font color="#9bbb59">SEPC（Supervisor Exception Program Counter）寄存器</font>中，并同时会保存在<font color="#9bbb59">trapframe-&gt;epc</font>（注，详见lec06）中。引起page fault时的程序计数器值，这表明了page fault在用户空间发生的位置。<br>![[./Pasted image 20230515164652.png]]<h3 id="lazy-page-allocation"><a href="#lazy-page-allocation" class="headerlink" title="lazy page allocation"></a>lazy page allocation</h3></li>
+<li><font color="#9bbb59">触发page fault的指令的地址</font>（SEPC）。作为trap处理代码的一部分，这个地址存放在<font color="#9bbb59">SEPC（Supervisor Exception Program Counter）寄存器</font>中，并同时会保存在<font color="#9bbb59">trapframe-&gt;epc</font>（注，详见lec06）中。引起page fault时的程序计数器值，这表明了page fault在用户空间发生的位置。<br><img src="/2023/04/19/知识笔记/Pasted image 20230515164652.png" alt="not found"><h3 id="lazy-page-allocation"><a href="#lazy-page-allocation" class="headerlink" title="lazy page allocation"></a>lazy page allocation</h3></li>
 </ul>
 <h4 id="sbrk系统调用"><a href="#sbrk系统调用" class="headerlink" title="sbrk系统调用"></a>sbrk系统调用</h4><ul>
 <li><p>使得用户应用程序能扩大自己的heap。当一个应用程序启动的时候，<span style="background:#b1ffff">sbrk指向的是heap的最底端，同时也是stack的最顶端</span>。这个位置通过代表进程的数据结构中的sz字段表示，这里以_p-&gt;sz表示。</p>
 </li>
-<li><p>当调用sbrk时，它的参数是整数，代表了你想要申请的page数量（注，原视频说的是page，但是根据Linux <a href="https://man7.org/linux/man-pages/man2/sbrk.2.html" target="_blank" rel="noopener">man page</a>，<span style="background:#b1ffff">实际中sbrk的参数是字节数</span>）这意味着，当sbrk实际发生或者被调用的时候，内核会分配一些物理内存，并将这些内存映射到用户应用程序的地址空间，然后将内存内容初始化为0，再返回sbrk系统调用。<br>![[./Pasted image 20230515163732.png]]</p>
+<li><p>当调用sbrk时，它的参数是整数，代表了你想要申请的page数量（注，原视频说的是page，但是根据Linux <a href="https://man7.org/linux/man-pages/man2/sbrk.2.html" target="_blank" rel="noopener">man page</a>，<span style="background:#b1ffff">实际中sbrk的参数是字节数</span>）这意味着，当sbrk实际发生或者被调用的时候，内核会分配一些物理内存，并将这些内存映射到用户应用程序的地址空间，然后将内存内容初始化为0，再返回sbrk系统调用。<br><img src="/2023/04/19/知识笔记/Pasted image 20230515163732.png" alt="not found"></p>
 </li>
 </ul>
 <h4 id="lazy-allocation"><a href="#lazy-allocation" class="headerlink" title="lazy allocation"></a>lazy allocation</h4><ul>
@@ -779,17 +846,17 @@
 </ul>
 <h4 id="copy-on-write-fork"><a href="#copy-on-write-fork" class="headerlink" title="copy on write fork"></a>copy on write fork</h4><ul>
 <li>设置<font color="#9bbb59">子进程的PTE</font>指向父进程对应的<font color="#9bbb59">物理内存page</font>。在这里为了保证父进程和子进程之间有强隔离性，将父进程和子进程的pte标志设为只读。</li>
-<li>因为父进程和子进程都会继续运行，而父进程或者子进程都可能会执行store指令来更新一些全局变量，这时就会触发page fault，因为现在在向一个只读的PTE写数据。<br>-![[./截屏2023-05-16 08.43.08.png]]</li>
+<li>因为父进程和子进程都会继续运行，而父进程或者子进程都可能会执行store指令来更新一些全局变量，这时就会触发page fault，因为现在在向一个只读的PTE写数据。<br>-<img src="/2023/04/19/知识笔记/截屏2023-05-16 08.43.08.png" alt="not found"></li>
 <li>在得到page fault之后，我们需要拷贝相应的物理page。假设现在是子进程在执行store指令，那么我们<font color="#9bbb59">会分配一个新的物理内存page，</font>然后将page fault相关的物理内存page<font color="#9bbb59">拷贝</font>到新分配的物理内存page中，<font color="#9bbb59">并将新分配的物理内存page映射到子进程。这时，新分配的物理内存page只对子进程的地址空间可见</font>，所以我们可以将<font color="#9bbb59">相应的PTE设置成可读写</font>，并且我们可以<font color="#9bbb59">重新执行store指令</font>。</li>
 </ul>
-<p>![[./截屏2023-05-16 08.54.20.png]]</p>
+<p><img src="/2023/04/19/知识笔记/截屏2023-05-16 08.54.20.png" alt="not found"></p>
 <ul>
 <li>需要注意的是，在cow fork中，由多个用户进程或者说多个地址空间都指向了相同的物理内存page。所以，当父进程退出时，我们需要更加小心，<font color="#9bbb59">因为我们要判断是否能立即释放相应的物理page</font>。如果有子进程还在使用这些物理page，而内核又释放了这些物理page，将会出问题。</li>
 <li>我们需要对于每一个物理内存page的引用进行计数，<font color="#9bbb59">当我们释放虚拟page时，我们将物理内存page的引用数减1</font>，如果引用数等于0，那么我们就能释放物理内存page。</li>
 </ul>
 <h4 id="zero-fill-on-demand"><a href="#zero-fill-on-demand" class="headerlink" title="zero fill on demand"></a>zero fill on demand</h4><ul>
 <li>在bss段中保存了<font color="#9bbb59">未被初始化或者初始化为0的全局或静态变量</font>，这里或许有很多个page，并且这些page的值为0。</li>
-<li>在物理内存中，我只需要分配一个page，这个page的内容全是0。然后将所有虚拟地址空间的全0的page都map到这一个物理page上。<br>![[./Pasted image 20230516120207.png]]</li>
+<li>在物理内存中，我只需要分配一个page，这个page的内容全是0。然后将所有虚拟地址空间的全0的page都map到这一个物理page上。<br><img src="/2023/04/19/知识笔记/Pasted image 20230516120207.png" alt="not found"></li>
 <li>当然这里的mapping需要非常的小心，我们不能允许对于这个page执行写操作，<font color="#9bbb59">因为所有的虚拟地址空间page都期望page的内容是全0，所以这里的PTE都是只读的</font>。之后在某个时间点，应用程序尝试写BSS中的一个page时，比如说需要更改一两个变量的值，我们会得到page fault。</li>
 <li>发生page fault之后，我们创建一个新的page，将其内容设置为0，并重新建立映射关系。</li>
 </ul>
@@ -800,7 +867,7 @@
 <li>如果用户程序并没有使用所有的text区域或者data区域，那么我们一方面可以节省一些物理内存，另一方面我们可以让exec运行的更快（注，因为不需要为整个程序分配内存）</li>
 <li>如果内存耗尽，需要选择撤回page。一般选择 non-dirty page。</li>
 </ul>
-<p><strong>LRU算法</strong><br>   任何时候一个page被读或者被写了，Access bit会被设置。<br>   如果你想知道page最近是否被使用过，你需要定时比如每100毫秒或者每秒清除Access bit，如果在下一个100毫秒这个page被访问过，那你就知道这个page在上一个100毫秒中被使用了。而Access bit为0的page在上100毫秒未被使用。这样你就可以统计每个内存page使用的频度，这是一个成熟的LRU实现的基础。（注，可以通过Access bit来决定内存page 在LRU中的排名）[[lab笔记#detecting which pages have been accessed|lab有关实验]]</p>
+<p><strong>LRU算法</strong><br>   任何时候一个page被读或者被写了，Access bit会被设置。<br>   如果你想知道page最近是否被使用过，你需要定时比如每100毫秒或者每秒清除Access bit，如果在下一个100毫秒这个page被访问过，那你就知道这个page在上一个100毫秒中被使用了。而Access bit为0的page在上100毫秒未被使用。这样你就可以统计每个内存page使用的频度，这是一个成熟的LRU实现的基础。（注，可以通过Access bit来决定内存page 在LRU中的排名）[[lab笔记#detecting which pages have been accessed|lab有关实验)</p>
 <h2 id="Interrupts"><a href="#Interrupts" class="headerlink" title="Interrupts"></a>Interrupts</h2><p>设备会产生中断，xv6处理设备中断的代码位于kernel/trap.c中的<code>devintr</code>。</p>
 <p>进程的内核态中执行top half，中断时间中执行bottom half。</p>
 <ul>
@@ -822,13 +889,13 @@
 </ul>
 <p><strong>对寄存器进行编程，使得CPU处于一个能接受中断的状态</strong></p>
 <ul>
-<li>在start.c中，这里将所有的中断都设置在Supervisor mode，<font color="#9bbb59">然后设置SIE寄存器来接收External，软件和定时器中断</font>，之后初始化定时器。<br>![[./截屏2023-05-19 15.32.18.png]]</li>
-<li>在main.c中，调用consoleinit()，然后在consoleinit中调用了uartinit（配置好uart芯片使其可以被使用）。这里的流程是<font color="#9bbb59">先关闭中断</font>，之后<font color="#9bbb59">设置波特率</font>（串口线的传输速率），<font color="#9bbb59">设置字符长度为8bit，重置FIFO</font>，最后再重新打开中断。<br>![[./截屏2023-05-19 15.33.59.png]] </li>
+<li>在start.c中，这里将所有的中断都设置在Supervisor mode，<font color="#9bbb59">然后设置SIE寄存器来接收External，软件和定时器中断</font>，之后初始化定时器。<br><img src="/2023/04/19/知识笔记/截屏2023-05-19 15.32.18.png" alt="not found"></li>
+<li>在main.c中，调用consoleinit()，然后在consoleinit中调用了uartinit（配置好uart芯片使其可以被使用）。这里的流程是<font color="#9bbb59">先关闭中断</font>，之后<font color="#9bbb59">设置波特率</font>（串口线的传输速率），<font color="#9bbb59">设置字符长度为8bit，重置FIFO</font>，最后再重新打开中断。<br><img src="/2023/04/19/知识笔记/截屏2023-05-19 15.33.59.png" alt="not found"> </li>
 <li>运行完uartinit函数之后，原则上<font color="#9bbb59">UART就可以生成中断</font>了。但是因为我们还<font color="#9bbb59">没有对PLIC编程，所以中断不能被CPU感知</font>。最终，在main函数中，需要调用plicinit函数。</li>
-<li>PLIC与外设一样，也占用了一个I/O地址（0xC000_0000）。<font color="#9bbb59">代码的第一行使能了UART的中断，这里实际上就是设置PLIC会接收哪些中断</font>，进而将中断路由到CPU。类似的，代码的第二行设置PLIC接收来自IO磁盘的中断，<br>![[./截屏2023-05-19 15.36.55.png]]</li>
-<li>plicinit之后就是plicinithart函数。<font color="#9bbb59">plicinit是由0号CPU运行</font>，之后，<font color="#9bbb59">每个CPU的核都需要调用plicinithart函数</font>表明对于哪些外设中断感兴趣。所以在plicinithart函数中，每个CPU的核都表明自己对来自于UART和VIRTIO的中断感兴趣。因为我们忽略中断的优先级，所以我们将优先级设置为0。<br>![[./截屏2023-05-19 15.44.02.png]]</li>
+<li>PLIC与外设一样，也占用了一个I/O地址（0xC000_0000）。<font color="#9bbb59">代码的第一行使能了UART的中断，这里实际上就是设置PLIC会接收哪些中断</font>，进而将中断路由到CPU。类似的，代码的第二行设置PLIC接收来自IO磁盘的中断，<br><img src="/2023/04/19/知识笔记/截屏2023-05-19 15.36.55.png" alt="not found"></li>
+<li>plicinit之后就是plicinithart函数。<font color="#9bbb59">plicinit是由0号CPU运行</font>，之后，<font color="#9bbb59">每个CPU的核都需要调用plicinithart函数</font>表明对于哪些外设中断感兴趣。所以在plicinithart函数中，每个CPU的核都表明自己对来自于UART和VIRTIO的中断感兴趣。因为我们忽略中断的优先级，所以我们将优先级设置为0。<br><img src="/2023/04/19/知识笔记/截屏2023-05-19 15.44.02.png" alt="not found"></li>
 <li>我们有了<font color="#9bbb59">生成中断的外部设备</font>，<font color="#9bbb59">我们有了PLIC可以传递中断到单个的CPU</font>。但是CPU自己还没有设置好接收中断，因为我们还没有设置好SSTATUS寄存器。在main函数的最后，程序调用了scheduler函数。</li>
-<li>scheduler函数主要是运行进程。但是在实际运行进程之前，会执行intr_on函数来使得CPU能接收中断。<br>![[./截屏2023-05-19 15.46.22.png]]</li>
+<li>scheduler函数主要是运行进程。但是在实际运行进程之前，会执行intr_on函数来使得CPU能接收中断。<br><img src="/2023/04/19/知识笔记/截屏2023-05-19 15.46.22.png" alt="not found"></li>
 <li>intr_on函数只完成一件事情，就是设置SSTATUS寄存器，打开中断标志位。</li>
 </ul>
 <p>在这个时间点，中断被完全打开了。如果PLIC正好有pending的中断，那么这个CPU核会收到中断。</p>
@@ -836,24 +903,24 @@
 <ul>
 <li><code>LSR</code>寄存器：line status register，<font color="#9bbb59">用来指示输入的字节是否准备好被用户进程读取</font></li>
 <li><code>RHR</code>寄存器：receive holding register，<font color="#9bbb59">用来放置可以被用户进程读取的字节</font>。当RHR中的一个字节被读取时，UART硬件将其从内部的FIFO硬盘中删除，当FIFO中为空时，<code>LSR</code>寄存器被置0</li>
-<li><code>THR</code>寄存器：transmit holding register，当用户进程向<code>THR</code>写入一个字节时，UART将传输这个字节<br>![[./截屏2023-05-18 17.32.05.png]]</li>
+<li><code>THR</code>寄存器：transmit holding register，当用户进程向<code>THR</code>写入一个字节时，UART将传输这个字节<br><img src="/2023/04/19/知识笔记/截屏2023-05-18 17.32.05.png" alt="not found"></li>
 </ul>
 <p>console driver(kernel/console.c)是一个<font color="#9bbb59">设备驱动</font>，通过UART串口接受输入的符号。用户进程通过<code>read</code> system call来从console中一行行读取输入。下一节代码分析，主要分析，如何从<strong>shell程序</strong>输出提示符“$”<strong>到console</strong>的过程。</p>
 <h4 id="代码分析"><a href="#代码分析" class="headerlink" title="代码分析"></a>代码分析</h4><h5 id="uart驱动的top部分"><a href="#uart驱动的top部分" class="headerlink" title="uart驱动的top部分"></a>uart驱动的top部分</h5><ul>
-<li>init.c的main函数：[[#^005494 | 启动流程]]<br>这里通过mknod操作创建了<br>console设备。因为这是第一个打开的文件，所以这里的文件描述符0。之后通过dup创建stdout和stderr。这里实际上通过复制文件描述符0，得到了另外两个文件描述符1，2。最终文件描述符0，1，2都用来代表Console。<br>![[./截屏2023-05-19 13.19.43.png]]<br>Shell程序首先打开文件描述符0，1，2。之后Shell向文件描述符2打印提示符$<br>![[./截屏2023-05-19 13.23.05.png]]</li>
+<li>init.c的main函数：[[#^005494 | 启动流程)<br>这里通过mknod操作创建了<br>console设备。因为这是第一个打开的文件，所以这里的文件描述符0。之后通过dup创建stdout和stderr。这里实际上通过复制文件描述符0，得到了另外两个文件描述符1，2。最终文件描述符0，1，2都用来代表Console。<br><img src="/2023/04/19/知识笔记/截屏2023-05-19 13.19.43.png" alt="not found"><br>Shell程序首先打开文件描述符0，1，2。之后Shell向文件描述符2打印提示符$<br><img src="/2023/04/19/知识笔记/截屏2023-05-19 13.23.05.png" alt="not found"></li>
 </ul>
 <p>尽管Console背后是UART设备，但是从应用程序来看，它就像是一个普通的文件。Shell程序只是向文件描述符2写了数据，它并不知道文件描述符2对应的是什么。</p>
 <ul>
-<li>在syswrite函数中，会对文件描述符的种类进行分类处理，mknod生成的文件描述符属于设备（FD_DEVICE），而对于设备类型的文件描述符，我们会为这个特定的设备执行设备相应的write函数。<br>![[./Pasted image 20230519160727.png]]</li>
-<li>在filewrite函数中首先会判断文件描述符的类型。mknod生成的文件描述符属于设备（FD_DEVICE），而对于设备类型的文件描述符，<font color="#9bbb59">我们会为这个特定的设备执行设备相应的write函数</font>。因为我们现在的设备是Console，所以我们知道这里会调用console.c中的consolewrite函数。<br>![[./Pasted image 20230519160749.png]]</li>
-<li>这里先通过either_copyin将字符拷入，之后调用uartputc函数。<font color="#9bbb59">uartputc函数将字符写入给UART设备，所以你可以认为consolewrite是一个UART驱动的top部分。</font>uart.c文件中的uartputc函数会实际的打印字符。<br>![[./Pasted image 20230519161638.png]]</li>
-<li>在UART的内部会有一个buffer用来发送数据，buffer的大小是32个字符。同时还有一个为consumer提供的读指针和为producer提供的写指针，来构建一个环形的buffer（注，或者可以认为是环形队列）。<br>![[./Pasted image 20230519162412.png]]</li>
+<li>在syswrite函数中，会对文件描述符的种类进行分类处理，mknod生成的文件描述符属于设备（FD_DEVICE），而对于设备类型的文件描述符，我们会为这个特定的设备执行设备相应的write函数。<br><img src="/2023/04/19/知识笔记/Pasted image 20230519160727.png" alt="not found"></li>
+<li>在filewrite函数中首先会判断文件描述符的类型。mknod生成的文件描述符属于设备（FD_DEVICE），而对于设备类型的文件描述符，<font color="#9bbb59">我们会为这个特定的设备执行设备相应的write函数</font>。因为我们现在的设备是Console，所以我们知道这里会调用console.c中的consolewrite函数。<br><img src="/2023/04/19/知识笔记/Pasted image 20230519160749.png" alt="not found"></li>
+<li>这里先通过either_copyin将字符拷入，之后调用uartputc函数。<font color="#9bbb59">uartputc函数将字符写入给UART设备，所以你可以认为consolewrite是一个UART驱动的top部分。</font>uart.c文件中的uartputc函数会实际的打印字符。<br><img src="/2023/04/19/知识笔记/Pasted image 20230519161638.png" alt="not found"></li>
+<li>在UART的内部会有一个buffer用来发送数据，buffer的大小是32个字符。同时还有一个为consumer提供的读指针和为producer提供的写指针，来构建一个环形的buffer（注，或者可以认为是环形队列）。<br><img src="/2023/04/19/知识笔记/Pasted image 20230519162412.png" alt="not found"></li>
 </ul>
 <blockquote>
 <p>在我们的例子中，<font color="#9bbb59">Shell是producer</font>，所以需要调用uartputc函数。在函数中第一件事情是判断环形buffer是否已经满了。如果读写指针相同，那么buffer是空的，如果写指针加1等于读指针，那么buffer满了。当buffer是满的时候，向其写入数据是没有意义的，所以这里会sleep一段时间，将CPU出让给其他进程。当然，对于我们来说，buffer必然不是满的，因为提示符“$”是我们送出的第一个字符。所以代码会走到else，字符会被送到buffer中，更新写指针，之后再调用uartstart函数。</p>
 </blockquote>
 <ul>
-<li>uartstart就是<font color="#9bbb59">通知设备执行操作</font>。首先是检查当前设备是否空闲，如果空闲的话，<font color="#9bbb59">我们会从buffer中读出数据，然后将数据写入到THR（Transmission Holding Register）发送寄存器</font>。这里相当于告诉设备，我这里有一个字节需要你来发送。一旦数据送到了设备，系统调用会返回，用户应用程序Shell就可以继续执行。这里从内核返回到用户空间的机制与lec06的trap机制是一样的。[[#trap机制]]<br>![[./Pasted image 20230519162502.png]]</li>
+<li>uartstart就是<font color="#9bbb59">通知设备执行操作</font>。首先是检查当前设备是否空闲，如果空闲的话，<font color="#9bbb59">我们会从buffer中读出数据，然后将数据写入到THR（Transmission Holding Register）发送寄存器</font>。这里相当于告诉设备，我这里有一个字节需要你来发送。一旦数据送到了设备，系统调用会返回，用户应用程序Shell就可以继续执行。这里从内核返回到用户空间的机制与lec06的trap机制是一样的。[[#trap机制)<br><img src="/2023/04/19/知识笔记/Pasted image 20230519162502.png" alt="not found"></li>
 <li>与此同时，UART设备会将数据送出。在某个时间点，cpu会收到中断</li>
 </ul>
 <h5 id="uart驱动的bottom部分"><a href="#uart驱动的bottom部分" class="headerlink" title="uart驱动的bottom部分"></a>uart驱动的bottom部分</h5><h2 id="Multiprocessors-and-locking"><a href="#Multiprocessors-and-locking" class="headerlink" title="Multiprocessors and locking"></a>Multiprocessors and locking</h2><p><strong>为什么需要锁：</strong><br>    并行的访问数据结构时，需要使用锁来控制并确保共享的数据是正确的。从性能方面来说，我们想要通过并行来提高性能，但是锁的使用会使线程串行执行，反过来又会限制性能。</p>
@@ -909,7 +976,7 @@
 <p>xv6 支持线程共享内存：</p>
 <ul>
 <li>对于每个用户进程都有一个内核线程来执行用户进程的系统调用。所有的<font color="#9bbb59">内核线程</font>都共享了内核内存。</li>
-<li>每一个用户进程都有独立的内存地址空间[[#Kernel address space| 详见]]，并且包含了一个线程，但是<font color="#9bbb59">用户线程</font>之间没有共享内存。</li>
+<li>每一个用户进程都有独立的内存地址空间[[#Kernel address space| 详见)，并且包含了一个线程，但是<font color="#9bbb59">用户线程</font>之间没有共享内存。</li>
 </ul>
 <p>在linux中：允许在一个用户进程中<font color="#9bbb59">包含多个线程</font>，进程中的<font color="#9bbb59">多个线程共享进程的地址空间。</font></p>
 <h3 id="线程调度"><a href="#线程调度" class="headerlink" title="线程调度"></a>线程调度</h3><p>停止一个线程的运行并启动另一个线程的过程通常被称为线程调度。XV6为每个CPU核都创建了一个线程调度器（Scheduler）。</p>
@@ -936,7 +1003,7 @@
 <li>通过检查<code>mycpu()-&gt;noff</code>来检查是否还获取着除了<code>p-&gt;lock</code>之外的其他锁，否则当切换到其他进程之后<font color="#9bbb59">其他进程可能会</font><code>acquire</code>这个锁，而<font color="#9bbb59">原先的进程由于没有在运行，因此一直无法释放掉这个锁，造成死锁</font>。</li>
 <li><p>swtch函数会将<span style="background:#b1ffff">当前的内核线程的寄存器</span>保存到p-&gt;context中。swtch函数的另一个参数c-&gt;context，c表示当前CPU的结构体。CPU结构体中的context保存了<span style="background:#d2cbff">当前CPU核的调度器线程</span>的寄存器。所以swtch函数在<span style="background:#d2cbff">保存完</span>当前内核线程的内核寄存器之后，就会<span style="background:#d2cbff">恢复</span>当前CPU核的调度器线程的寄存器，并<span style="background:#d2cbff">继续执行当前CPU核的调度器线程。</span></p>
 </li>
-<li><p><code>swtch</code>只保存callee saved寄存器，<font color="#9bbb59">caller saved寄存器在栈中被调用的代码保存</font>。<br>![[./截屏2023-05-23 21.26.33.png]]</p>
+<li><p><code>swtch</code>只保存callee saved寄存器，<font color="#9bbb59">caller saved寄存器在栈中被调用的代码保存</font>。<br><img src="/2023/04/19/知识笔记/截屏2023-05-23 21.26.33.png" alt="not found"></p>
 </li>
 </ul>
 <h4 id="scheduling"><a href="#scheduling" class="headerlink" title="scheduling"></a>scheduling</h4><p>调度器(scheduler)是每个CPU中都会运行的一个<span style="background:#d2cbff">特殊的线程</span>，这个线程中不断运行<code>scheduler</code>函数，来选取下一个需要运行的进程。</p>
@@ -952,7 +1019,7 @@
 <li>size字段，表明文件数据有多少字节</li>
 <li>direct block</li>
 <li>indirect block number，对应磁盘上的一个block，这个block包含了256个block number，这256个block number包含了文件的数据。</li>
-<li>以上的结构，完全足够用来实现read/write系统调用，可以找到对应的disk block。<br>![[./Pasted image 20230525155455.png]]<blockquote>
+<li>以上的结构，完全足够用来实现read/write系统调用，可以找到对应的disk block。<br><img src="/2023/04/19/知识笔记/Pasted image 20230525155455.png" alt="not found"><blockquote>
 <p>可以通过构建双重indirect block number来增加最大文件长度。</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">dinode</span> &#123;</span></span><br><span class="line">  short type;           <span class="comment">// File type</span></span><br><span class="line">  short major;          <span class="comment">// Major device number (T_DEVICE only)</span></span><br><span class="line">  short minor;          <span class="comment">// Minor device number (T_DEVICE only)</span></span><br><span class="line">  short nlink;          <span class="comment">// Number of links to inode in file system</span></span><br><span class="line">  uint size;            <span class="comment">// Size of file (bytes)</span></span><br><span class="line">  uint addrs[NDIRECT+<span class="number">1</span>];   <span class="comment">// Data block addresses</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
 </blockquote>
@@ -964,7 +1031,7 @@
 <li>前2个字节包含了<font color="#9bbb59">目录中文件或者子目录</font>的<font color="#9bbb59">inode编号</font>。</li>
 <li>接下来的14个字节包含了<font color="#9bbb59">文件或者子目录名</font>。</li>
 </ul>
-<p><strong>文件系统分层：</strong><br>![[./Pasted image 20230525172321.png]]</p>
+<p><strong>文件系统分层：</strong><br><img src="/2023/04/19/知识笔记/Pasted image 20230525172321.png" alt="not found"></p>
 <ul>
 <li>磁盘，提高持久化存储。</li>
 <li>buffer cache 或者说是block cache。避免频繁的读写磁盘，将磁盘的数据保存在内存中。</li>
@@ -979,7 +1046,7 @@
 <li>block是操作系统或者文件系统视角的数据。它由文件系统定义，在xv6中为1024字节（1kb）。通常说一个block对应了多个sector。多个inode(64 byte)会打包存在一个block中。</li>
 </ul>
 <p><strong>block结构：</strong></p>
-<p>从文件系统角度来看，可以把磁盘看作是一个巨大的block数组。而文件系统的工作就是将所有的数据结构以一种能够在重启之后，重新构建文件系统的方式，存放在磁盘上。<br>![[./Pasted image 20230525172359.png]]</p>
+<p>从文件系统角度来看，可以把磁盘看作是一个巨大的block数组。而文件系统的工作就是将所有的数据结构以一种能够在重启之后，重新构建文件系统的方式，存放在磁盘上。<br><img src="/2023/04/19/知识笔记/Pasted image 20230525172359.png" alt="not found"></p>
 <ul>
 <li>boot block。block0要么没有用，要么被用作boot sector来启动操作系统。</li>
 <li>super block。block1通常被称为super block，它描述了文件系统。它可能<font color="#9bbb59">包含磁盘上有多少个block共同构成了文件系统</font>这样的信息。我们之后会看到XV6在里面会存更多的信息，你可以通过block1构造出大部分的文件系统信息。</li>
@@ -1097,10 +1164,10 @@
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
-              <img class="site-author-image" itemprop="image" src="/images/head.jpg" alt="zzrR0">
+              <img class="site-author-image" itemprop="image" src="/images/head.jpg" alt="kuaikuai">
             
-              <p class="site-author-name" itemprop="name">zzrR0</p>
-              <p class="site-description motion-element" itemprop="description">Why am i so cai.</p>
+              <p class="site-author-name" itemprop="name">kuaikuai</p>
+              <p class="site-description motion-element" itemprop="description">super block power!</p>
           </div>
 
           
@@ -1213,7 +1280,7 @@
   <span class="with-love" id="animate">
     <i class="fa fa-user"></i>
   </span>
-  <span class="author" itemprop="copyrightHolder">zzrR0</span>
+  <span class="author" itemprop="copyrightHolder">kuaikuai</span>
 
   
 
